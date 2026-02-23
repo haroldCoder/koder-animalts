@@ -86,6 +86,10 @@ export class LoginService {
             }
         });
 
-        return new ResponseDto("Login exitoso", 200, sessionToken);
+        return {
+            message: "Login exitoso",
+            statusCode: 200,
+            data: sessionToken
+        };
     }
 }

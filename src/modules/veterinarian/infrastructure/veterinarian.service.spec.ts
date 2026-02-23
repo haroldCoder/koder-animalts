@@ -3,7 +3,7 @@ import { VeterinarianService } from '@veterinarian/infrastructure/veterinarian.s
 import { PrismaService } from '@/common/infrastructure/db/prisma.service';
 import { CreateVeterinarianDto } from '@veterinarian/infrastructure/dto';
 import { PhoneNotFoundException, UserIdNotFoundException } from '@/common/domain/exceptions';
-import { ClinicIdNotFoundException } from '@veterinarian/domain/exceptions';
+import { ClinicIdNotFoundException, VeterinarianIdNotFoundException, VeterinarianIdNotExistException } from '@veterinarian/domain/exceptions';
 
 describe('VeterinarianService', () => {
     let service: VeterinarianService;
@@ -12,6 +12,7 @@ describe('VeterinarianService', () => {
     const mockPrismaService = {
         veterinarian: {
             create: jest.fn(),
+            findUnique: jest.fn(),
         },
     };
 
@@ -69,6 +70,50 @@ describe('VeterinarianService', () => {
         it('should throw ClinicIdNotFoundException if clinicId is missing', async () => {
             const dtoWithoutClinicId = { ...createVeterinarianDto, clinicId: '' } as CreateVeterinarianDto;
             await expect(service.createVeterinarian(dtoWithoutClinicId)).rejects.toThrow(ClinicIdNotFoundException);
+        });
+    });
+
+    describe('findClinicOfVeterinarian', () => {
+        const veterinarianId = 'vet-123';
+
+        it('should return veterinarian details with user and clinic info', async () => {
+            const mockVeterinarian = {
+                id: veterinarianId,
+                specialty: 'Cardiology',
+                phone: '1234567890',
+                user: { id: 'user-123', name: 'John Doe' },
+                clinic: { id: 'clinic-123', name: 'Animal Clinic' },
+            };
+            mockPrismaService.veterinarian.findUnique.mockResolvedValue(mockVeterinarian);
+
+            const result = await service.findClinicOfVeterinarian(veterinarianId);
+
+            expect(prisma.veterinarian.findUnique).toHaveBeenCalledWith({
+                where: { id: veterinarianId },
+                include: {
+                    user: { select: { id: true, name: true } },
+                    clinic: { select: { id: true, name: true } },
+                },
+            });
+            expect(result).toEqual({
+                message: 'Veterinarian found successfully',
+                statusCode: 200,
+                data: {
+                    user: mockVeterinarian.user,
+                    clinic: mockVeterinarian.clinic,
+                    specialty: mockVeterinarian.specialty,
+                    phone: mockVeterinarian.phone,
+                },
+            });
+        });
+
+        it('should throw VeterinarianIdNotFoundException if id is missing', async () => {
+            await expect(service.findClinicOfVeterinarian('')).rejects.toThrow(VeterinarianIdNotFoundException);
+        });
+
+        it('should throw VeterinarianIdNotExistException if veterinarian is not found', async () => {
+            mockPrismaService.veterinarian.findUnique.mockResolvedValue(null);
+            await expect(service.findClinicOfVeterinarian(veterinarianId)).rejects.toThrow(VeterinarianIdNotExistException);
         });
     });
 });

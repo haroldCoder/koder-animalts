@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, Param, Get } from "@nestjs/common";
 import { VeterinarianService } from "@veterinarian/infrastructure/veterinarian.service";
 import { CreateVeterinarianDto } from "@veterinarian/infrastructure/dto";
 
@@ -9,5 +9,10 @@ export class VeterinarianController {
     @Post("create")
     async createVeterinarian(@Body() veterinarian: CreateVeterinarianDto) {
         return this.veterinarianService.createVeterinarian(veterinarian);
+    }
+
+    @Get("find-clinic/:veterinarianId")
+    async findClinicOfVeterinarian(@Param("veterinarianId") veterinarianId: string) {
+        return this.veterinarianService.findClinicOfVeterinarian(veterinarianId);
     }
 }

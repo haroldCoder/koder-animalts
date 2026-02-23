@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OwnerService } from './owner.service';
 import { PrismaService } from '@/common/infrastructure/db/prisma.service';
 import { CreateOwnerDto } from '@owner/infrastructure/dto';
-import { AdressNotFoundException } from '@owner/domain/exceptions';
+import { AdressNotFoundException } from '@/common/domain/exceptions';
 import { PhoneNotFoundException, UserIdNotFoundException } from '@/common/domain/exceptions';
 
 describe('OwnerService', () => {
