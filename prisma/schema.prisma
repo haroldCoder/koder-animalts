@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
+  id            String   @id @default(uuid())
+  email         String   @unique
   name          String?
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
@@ -79,13 +79,8 @@ model VeterinaryClinic {
 
 model Owner {
   id        String   @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String?  @unique
   phone     String?
   address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id])
@@ -120,12 +115,8 @@ model Pet {
 
 model Veterinarian {
   id        String   @id @default(uuid())
-  name      String
-  specialty String?
-  email     String?  @unique
   phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  specialty String?
 
   userId String? @unique
   user   User?   @relation(fields: [userId], references: [id])
@@ -158,12 +149,12 @@ model MedicalRecord {
 }
 
 model Vaccination {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   vaccineName      String
-  dateAdministered DateTime @default(now())
+  dateAdministered DateTime  @default(now())
   nextDueDate      DateTime?
   lotNumber        String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
 
   medicalRecordId String
   medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
