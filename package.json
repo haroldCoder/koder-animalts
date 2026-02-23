@@ -72,7 +72,8 @@
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@auth/(.*)$": "<rootDir>/src/modules/auth/$1",
       "^@owner/(.*)$": "<rootDir>/src/modules/owner/$1",
-      "^@veterinarian/(.*)$": "<rootDir>/src/modules/veterinarian/$1"
+      "^@veterinarian/(.*)$": "<rootDir>/src/modules/veterinarian/$1",
+      "^@veterinary-clinics/(.*)$": "<rootDir>/src/modules/veterinary-clinics/$1"
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

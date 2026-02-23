@@ -33,6 +33,9 @@
       ],
       "@veterinarian/*": [
         "./src/modules/veterinarian/*"
+      ],
+      "@veterinary-clinics/*": [
+        "./src/modules/veterinary-clinics/*"
       ]
     }
   }
