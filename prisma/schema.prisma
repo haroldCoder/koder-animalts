@@ -82,8 +82,8 @@ model Owner {
   phone     String?
   address   String?
 
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id])
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
   pets Pet[]
 }
@@ -118,8 +118,8 @@ model Veterinarian {
   phone     String?
   specialty String?
 
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id])
+  userId String @unique
+  user   User @relation(fields: [userId], references: [id])
 
   clinicId String
   clinic   VeterinaryClinic @relation(fields: [clinicId], references: [id])

@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
-import { CreateVeterinarianDto } from "@veterinarian/infrastructure/dto";
+import { CreateVeterinarianDto, ResponseFindClinicDto } from "@veterinarian/infrastructure/dto";
 import { ResponseDto } from "@/common/dto/response.dto";
 import { PhoneNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
-import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
+import { ClinicIdNotFoundException, VeterinarianIdNotFoundException, VeterinarianIdNotExistException } from "@veterinarian/domain/exceptions";
 
 @Injectable()
 export class VeterinarianService {
@@ -22,6 +22,35 @@ export class VeterinarianService {
             message: "Veterinarian created successfully",
             statusCode: 201,
             data: veterinarianCreated.id,
+        };
+    }
+
+    async findClinicOfVeterinarian(veterinarianId: string): Promise<ResponseDto<ResponseFindClinicDto>> {
+        if (!veterinarianId) throw new VeterinarianIdNotFoundException();
+
+        const veterinarian = await this.prisma.veterinarian.findUnique({
+            where: { id: veterinarianId },
+            include: {
+                user: {
+                    select: { id: true, name: true },
+                },
+                clinic: {
+                    select: { id: true, name: true },
+                }
+            }
+        });
+
+        if (!veterinarian) throw new VeterinarianIdNotExistException();
+
+        return {
+            message: "Veterinarian found successfully",
+            statusCode: 200,
+            data: {
+                user: veterinarian.user,
+                clinic: veterinarian.clinic,
+                specialty: veterinarian.specialty,
+                phone: veterinarian.phone,
+            },
         };
     }
 }
