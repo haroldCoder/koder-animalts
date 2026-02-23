@@ -1,0 +1,1 @@
+export * from './clinic-id-not-found.exception';

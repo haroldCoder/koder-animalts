@@ -24,6 +24,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.19.2",
+    "class-validator": "^0.14.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -69,7 +70,9 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
-      "^@auth/(.*)$": "<rootDir>/src/modules/auth/$1"
+      "^@auth/(.*)$": "<rootDir>/src/modules/auth/$1",
+      "^@owner/(.*)$": "<rootDir>/src/modules/owner/$1",
+      "^@veterinarian/(.*)$": "<rootDir>/src/modules/veterinarian/$1"
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

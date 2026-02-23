@@ -8,6 +8,12 @@
             ],
             "@auth/*": [
                 "src/modules/auth/*"
+            ],
+            "@owner/*": [
+                "src/modules/owner/*"
+            ],
+            "@veterinarian/*": [
+                "src/modules/veterinarian/*"
             ]
         }
     }
