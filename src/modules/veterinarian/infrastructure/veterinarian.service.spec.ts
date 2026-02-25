@@ -3,7 +3,8 @@ import { VeterinarianService } from '@veterinarian/infrastructure/veterinarian.s
 import { PrismaService } from '@/common/infrastructure/db/prisma.service';
 import { CreateVeterinarianDto } from '@veterinarian/infrastructure/dto';
 import { PhoneNotFoundException, UserIdNotFoundException } from '@/common/domain/exceptions';
-import { ClinicIdNotFoundException, VeterinarianIdNotFoundException, VeterinarianIdNotExistException } from '@veterinarian/domain/exceptions';
+import { ClinicIdNotFoundException } from '@veterinarian/domain/exceptions';
+import { VeterinarianIdNotExistException, VeterinarianIdNotFoundException } from '@/common/domain/exceptions';
 
 describe('VeterinarianService', () => {
     let service: VeterinarianService;

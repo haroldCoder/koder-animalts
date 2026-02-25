@@ -81,7 +81,8 @@
       "^@veterinarian/(.*)$": "<rootDir>/src/modules/veterinarian/$1",
       "^@veterinary-clinics/(.*)$": "<rootDir>/src/modules/veterinary-clinics/$1",
       "^@pet/(.*)$": "<rootDir>/src/modules/pet/$1",
-      "^@document/(.*)$": "<rootDir>/src/modules/document/$1"
+      "^@document/(.*)$": "<rootDir>/src/modules/document/$1",
+      "^@medical-record/(.*)$": "<rootDir>/src/modules/medical-record/$1"
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

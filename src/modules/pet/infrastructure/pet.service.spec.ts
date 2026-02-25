@@ -2,7 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PetService } from '@pet/infrastructure/pet.service';
 import { PrismaService } from '@/common/infrastructure/db/prisma.service';
 import { RegisterPetDto, UpdatePetDto } from '@pet/infrastructure/dto';
-import { PetClinicIdNotFoundException, PetIdNotFoundException, PetMainImageNotFoundException, PetNameNotFoundException, PetOwnerIdNotFoundException, PetSpeciesNotFoundException } from '@pet/domain/exceptions';
+import { PetClinicIdNotFoundException, PetMainImageNotFoundException, PetNameNotFoundException, PetOwnerIdNotFoundException, PetSpeciesNotFoundException } from '@pet/domain/exceptions';
+import { PetIdNotFoundException } from '@/common/domain/exceptions';
 import { GenderPet } from '@pet/domain/enums';
 
 describe('PetService', () => {

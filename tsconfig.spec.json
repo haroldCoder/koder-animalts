@@ -23,6 +23,9 @@
             ],
             "@document/*": [
                 "src/modules/document/*"
+            ],
+            "@medical-record/*": [
+                "src/modules/medical-record/*"
             ]
         }
     }

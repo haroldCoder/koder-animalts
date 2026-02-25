@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MedicalRecordType {
+  CONSULTATION
+  VACCINATION
+  SURGERY
+  EMERGENCY
+  LAB_RESULTS
+  HOSPITALIZATION
+}
+
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
@@ -134,6 +143,7 @@ model Veterinarian {
 model MedicalRecord {
   id             String   @id @default(uuid())
   visitDate      DateTime @default(now())
+  type           MedicalRecordType @default(CONSULTATION)
   reasonForVisit String
   diagnosis      String?
   treatment      String?
