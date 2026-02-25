@@ -101,6 +101,9 @@ model Pet {
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  mainImage String
+  iaImage   String?
+  images    String[]  @default([])
 
   ownerId String
   owner   Owner  @relation(fields: [ownerId], references: [id])

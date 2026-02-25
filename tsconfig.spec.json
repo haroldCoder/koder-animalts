@@ -17,6 +17,12 @@
             ],
             "@veterinary-clinics/*": [
                 "src/modules/veterinary-clinics/*"
+            ],
+            "@pet/*": [
+                "src/modules/pet/*"
+            ],
+            "@document/*": [
+                "src/modules/document/*"
             ]
         }
     }
