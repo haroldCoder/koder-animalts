@@ -6,6 +6,7 @@ import { PhoneNotFoundException, UserIdNotFoundException } from "@/common/domain
 import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
 import { VeterinarianEntity } from "@veterinarian/domain/entities";
 import { VeterinarianIdNotExistException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
+import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities";
 
 @Injectable()
 export class VeterinarianService {
@@ -90,5 +91,20 @@ export class VeterinarianService {
             user: { ...veterinarian.user, name: veterinarian.user.name || "" },
             clinic: { ...veterinarian.clinic }
         };
+    }
+
+    async getVeterinaryClinicByVeterinarianId(veterinarianId: string): Promise<VeterinaryClinicEntity> {
+        const veterinarian = await this.prisma.veterinarian.findUnique({
+            where: { id: veterinarianId },
+            include: {
+                clinic: true
+            },
+        });
+
+        if (!veterinarian) {
+            throw new VeterinarianIdNotExistException();
+        }
+
+        return veterinarian.clinic;
     }
 }

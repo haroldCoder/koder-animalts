@@ -3,7 +3,7 @@ import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { RegisterVeterinaryClinicDto } from "@veterinary-clinics/infrastructure/dto";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities";
-import { NameClinicNotFoundException, EmailOrPhoneNotFoundException } from "@veterinary-clinics/domain/exceptions";
+import { NameClinicNotFoundException, EmailOrPhoneNotFoundException, VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
 import { AdressNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
