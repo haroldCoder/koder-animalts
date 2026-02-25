@@ -39,6 +39,9 @@
       ],
       "@pet/*": [
         "./src/modules/pet/*"
+      ],
+      "@document/*": [
+        "./src/modules/document/*"
       ]
     }
   }
