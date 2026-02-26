@@ -12,8 +12,8 @@ import { RegisterDocumentDto } from "@document/infrastructure/dto";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
 import { MedicalRecordEntity } from "@medical-record/domain/entities";
 import { sleep } from "@/common/infrastructure/utils/sleep.util";
-import { VeterinarianEntity } from "@veterinarian/domain/entities";
 import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities";
+import { VaccinationService } from "@vaccination/infrastructure/vaccination.service";
 
 @Injectable()
 export class MedicalRecordService {
@@ -22,6 +22,7 @@ export class MedicalRecordService {
         private readonly petService: PetService,
         private readonly veterinarianService: VeterinarianService,
         private readonly documentService: DocumentService,
+        private readonly vaccinationService: VaccinationService,
     ) { }
 
     async createMedicalRecord(medicalRecord: RegisterMedicalRecordDto): Promise<ResponseDto<string>> {
@@ -76,6 +77,9 @@ export class MedicalRecordService {
 
             const medicalRecord = await this.prisma.medicalRecord.findUnique({
                 where: { id: medicalRecordId },
+                include: {
+                    vaccinations: true,
+                },
             });
 
             if (!medicalRecord) {

@@ -1,4 +1,5 @@
 import { MedicalRecordType } from "@medical-record/domain/enums";
+import { VaccinationEntity } from "@vaccination/domain/entities";
 
 export interface MedicalRecordEntity {
     id: string;
@@ -12,4 +13,5 @@ export interface MedicalRecordEntity {
     updatedAt: Date;
     petId: string;
     veterinarianId: string;
+    vaccinations?: VaccinationEntity[];
 }

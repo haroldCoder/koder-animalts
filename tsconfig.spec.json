@@ -26,6 +26,9 @@
             ],
             "@medical-record/*": [
                 "src/modules/medical-record/*"
+            ],
+            "@vaccination/*": [
+                "src/modules/vaccination/*"
             ]
         }
     }

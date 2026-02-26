@@ -4,9 +4,10 @@ import { MedicalRecordController } from './infrastructure/medical-record.control
 import { PetService } from '@pet/infrastructure/pet.service';
 import { VeterinarianService } from '@veterinarian/infrastructure/veterinarian.service';
 import { DocumentService } from '@document/infrastructure';
+import { VaccinationService } from '@vaccination/infrastructure/vaccination.service';
 
 @Module({
-    providers: [MedicalRecordService, PetService, VeterinarianService, DocumentService],
+    providers: [MedicalRecordService, PetService, VeterinarianService, DocumentService, VaccinationService],
     controllers: [MedicalRecordController],
 })
 export class MedicalRecordModule { }
