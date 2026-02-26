@@ -1,0 +1,1 @@
+export * from "./register-medical-record.dto";

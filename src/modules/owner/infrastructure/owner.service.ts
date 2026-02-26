@@ -2,7 +2,7 @@ import { PrismaService } from "@/common/infrastructure/db";
 import { Injectable } from "@nestjs/common";
 import { CreateOwnerDto } from "@owner/infrastructure/dto";
 import { AdressNotFoundException } from "@/common/domain/exceptions";
-import { ResponseDto } from "@/common/dto/response.dto";
+import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { PhoneNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
 
 

@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { RegisterDocumentDto, UpdateDocumentDto } from "@document/infrastructure/dto";
 import { DocumentFileUrlNotFoundException, DocumentIdNotFoundException, DocumentTitleNotFoundException } from "@document/domain/exceptions";
-import { ResponseDto } from "@/common/dto/response.dto";
+import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { DocumentEntity } from "@document/domain/entities";
 
 @Injectable()

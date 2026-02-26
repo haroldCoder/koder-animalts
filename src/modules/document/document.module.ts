@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DocumentService } from "@document/infrastructure/document.service";
-import { DocumentController } from "@document/infrastructure/document.controller";
+import { DocumentService, DocumentController } from "@document/infrastructure";
 
 @Module({
     controllers: [DocumentController],

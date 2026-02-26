@@ -1,0 +1,1 @@
+export * from './medical-record-type.enum';

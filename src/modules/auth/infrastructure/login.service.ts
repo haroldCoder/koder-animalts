@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { randomUUID } from "crypto";
 import { AuthenticateParamsDto } from "@auth/infrastructure/dto";
-import { ResponseDto } from "@/common/dto/response.dto";
+import { ResponseDto } from "@/common/domain/dto/response.dto";
 
 @Injectable()
 export class LoginService {

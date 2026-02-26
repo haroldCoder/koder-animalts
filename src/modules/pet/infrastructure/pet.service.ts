@@ -1,10 +1,11 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { RegisterPetDto, UpdatePetDto } from "@pet/infrastructure/dto";
 import { PrismaService } from "@/common/infrastructure/db";
-import { PetClinicIdNotFoundException, PetIdNotFoundException, PetMainImageNotFoundException, PetNameNotFoundException, PetOwnerIdNotFoundException, PetSpeciesNotFoundException } from "@pet/domain/exceptions";
-import { ResponseDto } from "@/common/dto/response.dto";
+import { PetClinicIdNotFoundException, PetMainImageNotFoundException, PetNameNotFoundException, PetOwnerIdNotFoundException, PetSpeciesNotFoundException } from "@pet/domain/exceptions";
+import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { PetEntity } from "@pet/domain/entities";
 import { GenderPet } from "@pet/domain/enums";
+import { PetIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PetService {
