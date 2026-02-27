@@ -1,11 +1,32 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
-import { PetController, PetService } from "@pet/infrastructure";
+import { PetController } from "@pet/presentation";
+import {
+    RegisterPetUseCase,
+    UpdatePetUseCase,
+    DeletePetUseCase,
+    GetPetByIdUseCase
+} from "@pet/application/use-cases";
+import { PrismaPetService } from "@pet/infrastructure/persistence";
 
 @Module({
     imports: [PrismaModule],
     controllers: [PetController],
-    providers: [PetService],
-    exports: [PetService]
+    providers: [
+        RegisterPetUseCase,
+        UpdatePetUseCase,
+        DeletePetUseCase,
+        GetPetByIdUseCase,
+        {
+            provide: "IPetRepository",
+            useClass: PrismaPetService
+        }
+    ],
+    exports: [
+        RegisterPetUseCase,
+        UpdatePetUseCase,
+        DeletePetUseCase,
+        GetPetByIdUseCase
+    ]
 })
 export class PetModule { }

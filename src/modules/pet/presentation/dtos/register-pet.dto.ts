@@ -1,34 +1,35 @@
 import { GenderPet } from "@pet/domain/enums";
 import { IsBoolean, IsDate, IsEnum, IsNumber, IsString } from "class-validator";
-import { Transform } from "class-transformer";
 
-export class RegisterPetRequestDto {
+export class RegisterPetDto {
     @IsString()
     name: string;
     @IsString()
     species: string;
     @IsString()
     breed?: string;
-    @Transform(({ value }) => new Date(value))
     @IsDate()
     birthDate?: Date;
     @IsEnum(GenderPet)
-    gender?: GenderPet;
+    gender: GenderPet;
     @IsNumber()
-    @Transform(({ value }) => Number(value))
     weight?: number;
     @IsString()
     color?: string;
     @IsString()
     microchip?: string;
-    @Transform(({ value }) => value === 'true')
     @IsBoolean()
     isActive: boolean;
-    @Transform(({ value }) => new Date(value))
     @IsDate()
     createdAt: Date;
-    @Transform(({ value }) => new Date(value))
+    @IsDate()
     updatedAt: Date;
+    @IsString()
+    mainImage: string;
+    @IsString()
+    iaImage?: string;
+    @IsString()
+    images?: string[];
     @IsString()
     ownerId: string;
     @IsString()
