@@ -1,5 +1,6 @@
 import { MedicalRecordType } from "@medical-record/domain/enums";
-import { VaccinationEntity } from "@vaccination/domain/entities";
+import { VaccinationModel } from "@vaccination/domain/models";
+
 
 export interface MedicalRecordEntity {
     id: string;
@@ -13,5 +14,6 @@ export interface MedicalRecordEntity {
     updatedAt: Date;
     petId: string;
     veterinarianId: string;
-    vaccinations?: VaccinationEntity[];
+    vaccinations?: VaccinationModel[];
+
 }

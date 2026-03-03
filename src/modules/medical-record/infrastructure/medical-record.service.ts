@@ -5,24 +5,23 @@ import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { PetIdNotFoundException, ServerErrorException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import { MedicalRecordNotFoundException, MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import { MedicalRecordType } from "@medical-record/domain/enums";
-import { PetService } from "@pet/infrastructure";
-import { VeterinarianService } from "@veterinarian/infrastructure";
-import { DocumentService } from "@document/infrastructure";
+import { PrismaPetService } from "@pet/infrastructure/persistence";
+import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence";
+import { DocumentService } from "@document/infrastructure/document.service";
 import { RegisterDocumentDto } from "@document/infrastructure/dto";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
 import { MedicalRecordEntity } from "@medical-record/domain/entities";
 import { sleep } from "@/common/infrastructure/utils/sleep.util";
-import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities";
-import { VaccinationService } from "@vaccination/infrastructure/vaccination.service";
+import { PrismaVaccinationService } from "@vaccination/infrastructure/persistence";
 
 @Injectable()
 export class MedicalRecordService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly petService: PetService,
-        private readonly veterinarianService: VeterinarianService,
+        private readonly petService: PrismaPetService,
+        private readonly veterinarianService: PrismaVeterinarianService,
         private readonly documentService: DocumentService,
-        private readonly vaccinationService: VaccinationService,
+        private readonly vaccinationService: PrismaVaccinationService,
     ) { }
 
     async createMedicalRecord(medicalRecord: RegisterMedicalRecordDto): Promise<ResponseDto<string>> {
@@ -49,9 +48,9 @@ export class MedicalRecordService {
                 throw new MedicalRecordVisitDateNotFoundException()
             }
 
-            await this.petService.getPetById(petId);
+            await this.petService.findById(petId);
 
-            await this.veterinarianService.getVeterinarianById(veterinarianId);
+            await this.veterinarianService.findByIdWithDetails(veterinarianId);
 
             await this.prisma.medicalRecord.create({
                 data: { ...medicalRecord, type: medicalRecord.type as MedicalRecordType },
@@ -120,10 +119,10 @@ export class MedicalRecordService {
                 throw new MedicalRecordNotFoundException()
             }
 
-            let veterinaryClinic: VeterinaryClinicEntity | null = null;
+            let veterinaryClinic: { id: string, name: string } | null = null;
 
             if (medicalRecord?.data?.veterinarianId) {
-                veterinaryClinic = await this.veterinarianService.getVeterinaryClinicByVeterinarianId(medicalRecord?.data?.veterinarianId!);
+                veterinaryClinic = await this.veterinarianService.findClinicByVeterinarianId(medicalRecord?.data?.veterinarianId!);
             }
 
             for (const document of documents) {

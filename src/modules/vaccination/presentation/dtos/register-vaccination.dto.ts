@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class RegisterVaccinationDto {
     @IsNotEmpty()
