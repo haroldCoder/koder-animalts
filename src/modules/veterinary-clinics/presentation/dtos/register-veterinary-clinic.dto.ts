@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class RegisterVeterinaryClinicDto {
     @IsString()
@@ -7,9 +7,11 @@ export class RegisterVeterinaryClinicDto {
     @IsString()
     address: string;
 
+    @IsOptional()
     @IsString()
-    phone: string;
+    phone?: string;
 
+    @IsOptional()
     @IsString()
-    email: string;
+    email?: string;
 }
