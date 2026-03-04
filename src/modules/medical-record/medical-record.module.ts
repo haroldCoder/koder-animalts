@@ -12,8 +12,9 @@ import {
     CreateMedicalRecordUseCase,
     GetMedicalRecordByIdUseCase,
     UploadDocumentToMedicalRecordUseCase
-} from './application/use-cases';
+} from '@medical-record/application/use-cases';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure/persistence';
+import { PrismaDocumentService } from '@document/infrastructure';
 
 @Module({
     imports: [

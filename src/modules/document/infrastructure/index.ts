@@ -1,2 +1,1 @@
-export * from './document.service';
-export * from './document.controller';
+export * from './persistance';

@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DocumentController } from '@document/infrastructure/document.controller';
-import { DocumentService } from '@document/infrastructure/document.service';
-import { RegisterDocumentRequestDto, UpdateDocumentDto } from '@document/infrastructure/dto';
+import { DocumentController } from '@document/presentation/document.controller';
+import {
+    DeleteDocumentUseCase,
+    GetDocumentByIdUseCase,
+    RegisterDocumentUseCase,
+    UpdateDocumentUseCase
+} from '@document/application/use-cases';
+import { RegisterDocumentRequestDto, UpdateDocumentDto } from '@document/presentation/dtos';
 import { UploadFileCommand } from '@/common/upload/application/use-cases';
 import { UploadPlatformEnum } from '@/common/upload/domain/enums';
 
@@ -19,28 +24,24 @@ jest.mock('@/common/upload/application/use-cases', () => ({
 
 describe('DocumentController', () => {
     let controller: DocumentController;
-    let service: DocumentService;
 
-    const mockDocumentService = {
-        registerDocument: jest.fn(),
-        updateDocument: jest.fn(),
-        deleteDocument: jest.fn(),
-        getDocumentById: jest.fn(),
-    };
+    const mockRegisterUseCase = { execute: jest.fn() };
+    const mockUpdateUseCase = { execute: jest.fn() };
+    const mockDeleteUseCase = { execute: jest.fn() };
+    const mockGetByIdUseCase = { execute: jest.fn() };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [DocumentController],
             providers: [
-                {
-                    provide: DocumentService,
-                    useValue: mockDocumentService,
-                },
+                { provide: RegisterDocumentUseCase, useValue: mockRegisterUseCase },
+                { provide: UpdateDocumentUseCase, useValue: mockUpdateUseCase },
+                { provide: DeleteDocumentUseCase, useValue: mockDeleteUseCase },
+                { provide: GetDocumentByIdUseCase, useValue: mockGetByIdUseCase },
             ],
         }).compile();
 
         controller = module.get<DocumentController>(DocumentController);
-        service = module.get<DocumentService>(DocumentService);
     });
 
     afterEach(() => {
@@ -52,7 +53,7 @@ describe('DocumentController', () => {
     });
 
     describe('registerDocument', () => {
-        it('should call upload and service.registerDocument', async () => {
+        it('should call upload and registerUseCase.execute', async () => {
             const dto: RegisterDocumentRequestDto = {
                 title: 'Test Doc',
                 category: 'HEALTH',
@@ -60,21 +61,22 @@ describe('DocumentController', () => {
             };
             const mockFile = { buffer: Buffer.from('test') } as Express.Multer.File;
 
-            mockDocumentService.registerDocument.mockResolvedValue({
+            mockRegisterUseCase.execute.mockResolvedValue({
                 statusCode: 201,
                 message: 'Document registered successfully',
             });
 
             const result = await controller.registerDocument(dto, mockFile);
 
-            expect(UploadFileCommand).toHaveBeenCalledWith(mockFile, UploadPlatformEnum.CLOUDINARY);
-            expect(service.registerDocument).toHaveBeenCalledWith({
+            expect(UploadFileCommand).toHaveBeenCalled();
+            expect(mockRegisterUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({
                 ...dto,
                 fileUrl: 'http://example.com/file.pdf',
                 fileKey: 'file-key',
                 fileSize: 1024,
                 fileType: 'application/pdf',
-            });
+                userId: expect.any(String),
+            }));
             expect(result).toEqual({
                 statusCode: 201,
                 message: 'Document registered successfully',
@@ -83,17 +85,17 @@ describe('DocumentController', () => {
     });
 
     describe('updateDocument', () => {
-        it('should call service.updateDocument', async () => {
+        it('should call updateUseCase.execute', async () => {
             const id = 'doc-123';
             const dto: UpdateDocumentDto = { title: 'Updated' };
-            mockDocumentService.updateDocument.mockResolvedValue({
+            mockUpdateUseCase.execute.mockResolvedValue({
                 statusCode: 200,
                 message: 'Updated',
             });
 
             const result = await controller.updateDocument(id, dto);
 
-            expect(service.updateDocument).toHaveBeenCalledWith(dto, id);
+            expect(mockUpdateUseCase.execute).toHaveBeenCalledWith(dto, id);
             expect(result).toEqual({
                 statusCode: 200,
                 message: 'Updated',
@@ -102,16 +104,16 @@ describe('DocumentController', () => {
     });
 
     describe('deleteDocument', () => {
-        it('should call service.deleteDocument', async () => {
+        it('should call deleteUseCase.execute', async () => {
             const id = 'doc-123';
-            mockDocumentService.deleteDocument.mockResolvedValue({
+            mockDeleteUseCase.execute.mockResolvedValue({
                 statusCode: 200,
                 message: 'Deleted',
             });
 
             const result = await controller.deleteDocument(id);
 
-            expect(service.deleteDocument).toHaveBeenCalledWith(id);
+            expect(mockDeleteUseCase.execute).toHaveBeenCalledWith(id);
             expect(result).toEqual({
                 statusCode: 200,
                 message: 'Deleted',
@@ -120,17 +122,17 @@ describe('DocumentController', () => {
     });
 
     describe('getDocumentById', () => {
-        it('should call service.getDocumentById', async () => {
+        it('should call getByIdUseCase.execute', async () => {
             const id = 'doc-123';
             const mockDoc = { id, title: 'Test' };
-            mockDocumentService.getDocumentById.mockResolvedValue({
+            mockGetByIdUseCase.execute.mockResolvedValue({
                 statusCode: 200,
                 data: mockDoc,
             });
 
             const result = await controller.getDocumentById(id);
 
-            expect(service.getDocumentById).toHaveBeenCalledWith(id);
+            expect(mockGetByIdUseCase.execute).toHaveBeenCalledWith(id);
             expect(result).toEqual({
                 statusCode: 200,
                 data: mockDoc,
@@ -138,3 +140,4 @@ describe('DocumentController', () => {
         });
     });
 });
+

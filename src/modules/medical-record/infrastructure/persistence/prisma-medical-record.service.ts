@@ -7,7 +7,7 @@ import { PetIdNotFoundException, VeterinarianIdNotFoundException } from "@/commo
 import { MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { IPetRepository } from "@pet/domain/ports";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
-import { DocumentService } from "@document/infrastructure";
+import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { sleep } from "@/common/infrastructure/utils";
 import { RegisterDocumentModel } from "@/common/domain/models";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
@@ -21,8 +21,10 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         private readonly petRepository: IPetRepository,
         @Inject("IVeterinarianRepository")
         private readonly veterinarianRepository: IVeterinarianRepository,
-        private readonly documentService: DocumentService,
+        @Inject("IDocumentRepository")
+        private readonly documentRepository: IDocumentRepository,
     ) { }
+
 
     async create(data: RegisterMedicalRecordModel): Promise<void> {
         const { petId, veterinarianId, type, reasonForVisit, visitDate } = data;
@@ -76,7 +78,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         }
 
         for (const document of documents) {
-            await this.documentService.registerDocument({
+            await this.documentRepository.registerDocument({
                 ...document,
                 medicalRecordId,
                 petId: medicalRecord.petId,
