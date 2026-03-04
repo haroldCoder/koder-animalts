@@ -14,12 +14,6 @@ export class CreateOwnerUseCase {
 
     async execute(params: CreateOwnerModel): Promise<ResponseDto<string>> {
         try {
-            const { address, phone, userId } = params;
-
-            if (!address) throw new AdressNotFoundException();
-            if (!phone) throw new PhoneNotFoundException();
-            if (!userId) throw new UserIdNotFoundException();
-
             const ownerCreated = await this.ownerRepository.create(params);
 
             return {
