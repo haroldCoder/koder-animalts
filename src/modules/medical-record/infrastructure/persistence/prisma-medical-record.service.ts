@@ -4,13 +4,14 @@ import { MedicalRecordRepository } from "@medical-record/domain/ports";
 import { MedicalRecordModel, RegisterMedicalRecordModel } from "@medical-record/domain/models";
 import { MedicalRecordType } from "@medical-record/domain/enums";
 import { PetIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
-import { MedicalRecordNotFoundException, MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
+import { MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { IPetRepository } from "@pet/domain/ports";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import { DocumentService } from "@document/infrastructure";
 import { sleep } from "@/common/infrastructure/utils";
 import { RegisterDocumentModel } from "@/common/domain/models";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
+import { MedicalRecordIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PrismaMedicalRecordService implements MedicalRecordRepository {
@@ -67,7 +68,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         if (!documents) throw new DocumentIdNotFoundException();
 
         const medicalRecord = await this.findById(medicalRecordId);
-        if (!medicalRecord) throw new MedicalRecordNotFoundException();
+        if (!medicalRecord) throw new MedicalRecordIdNotFoundException();
 
         let veterinaryClinic: { id: string, name: string } | null = null;
         if (medicalRecord.veterinarianId) {

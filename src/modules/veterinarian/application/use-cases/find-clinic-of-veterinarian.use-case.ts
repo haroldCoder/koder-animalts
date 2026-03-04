@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import { ResponseDto } from "@/common/domain/dto";
-import { VeterinarianIdNotFoundException, VeterinarianIdNotExistException } from "@/common/domain/exceptions";
+import { VeterinarianIdNotFoundException, VeterinarianIdNotExistException, ServerErrorException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class FindClinicOfVeterinarianUseCase {
@@ -11,20 +11,27 @@ export class FindClinicOfVeterinarianUseCase {
     ) { }
 
     async execute(veterinarianId: string): Promise<ResponseDto<any>> {
-        if (!veterinarianId) throw new VeterinarianIdNotFoundException();
+        try {
+            const data = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
 
-        const data = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
-        if (!data) throw new VeterinarianIdNotExistException();
+            return {
+                statusCode: 200,
+                data: {
+                    user: data?.user,
+                    clinic: data?.clinic,
+                    specialty: data?.specialty,
+                    phone: data?.phone,
+                },
+            };
+        }
+        catch (error) {
+            if (
+                error instanceof VeterinarianIdNotFoundException ||
+                error instanceof VeterinarianIdNotExistException
+            ) throw error;
+            throw new ServerErrorException("Failed to find veterinarian");
+        }
 
-        return {
-            message: "Veterinarian found successfully",
-            statusCode: 200,
-            data: {
-                user: data.user,
-                clinic: data.clinic,
-                specialty: data.specialty,
-                phone: data.phone,
-            },
-        };
+
     }
 }

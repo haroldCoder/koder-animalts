@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
-import { VeterinarianController } from "@veterinarian/presentation/veterinarian.controller";
+import { VeterinarianController } from "@veterinarian/presentation";
 import {
     CreateVeterinarianUseCase,
     FindClinicOfVeterinarianUseCase,
     GetVeterinarianByIdUseCase,
     FindVeterinarianByUserIdUseCase
 } from "@veterinarian/application/use-cases";
-import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence/prisma-veterinarian.service";
+import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
 
 @Module({
     imports: [PrismaModule],

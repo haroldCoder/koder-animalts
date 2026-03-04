@@ -6,7 +6,7 @@ import {
     NameClinicNotFoundException,
     EmailOrPhoneNotFoundException,
 } from "@veterinary-clinics/domain/exceptions";
-import { AdressNotFoundException } from "@/common/domain/exceptions";
+import { AdressNotFoundException, ServerErrorException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class CreateVeterinaryClinicUseCase {
@@ -16,18 +16,22 @@ export class CreateVeterinaryClinicUseCase {
     ) { }
 
     async execute(params: CreateVeterinaryClinicModel): Promise<ResponseDto<string>> {
-        const { name, address, phone, email } = params;
+        try {
+            const id = await this.clinicRepository.create(params);
 
-        if (!name) throw new NameClinicNotFoundException();
-        if (!address) throw new AdressNotFoundException();
-        if (!phone && !email) throw new EmailOrPhoneNotFoundException();
-
-        const id = await this.clinicRepository.create(params);
-
-        return {
-            statusCode: HttpStatus.CREATED,
-            message: "Veterinary clinic registered successfully",
-            data: id,
-        };
+            return {
+                statusCode: HttpStatus.CREATED,
+                message: "Veterinary clinic registered successfully",
+                data: id,
+            };
+        }
+        catch (error) {
+            if (
+                error instanceof NameClinicNotFoundException ||
+                error instanceof AdressNotFoundException ||
+                error instanceof EmailOrPhoneNotFoundException
+            ) throw error;
+            throw new ServerErrorException("Failed to create veterinary clinic");
+        }
     }
 }

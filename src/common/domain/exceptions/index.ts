@@ -6,5 +6,6 @@ export * from './pet-id-not-exist.exception';
 export * from './server-error.exception';
 export * from './veterinarian-id-not-found.exception';
 export * from './veterinarian-id-not-exist.exception';
+export * from './medical-record-id-not-found.exception';
 
 

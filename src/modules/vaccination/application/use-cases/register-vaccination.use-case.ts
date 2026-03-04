@@ -5,6 +5,8 @@ import { ResponseDto } from "@/common/domain/dto";
 import {
     VaccinationNameNotFoundException,
 } from "@vaccination/domain/exceptions";
+import { ServerErrorException } from "@/common/domain/exceptions";
+import { MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 
 @Injectable()
 export class RegisterVaccinationUseCase {
@@ -14,20 +16,24 @@ export class RegisterVaccinationUseCase {
     ) { }
 
     async execute(params: CreateVaccinationModel): Promise<ResponseDto<string>> {
-        const { vaccineName, medicalRecordId } = params;
+        try {
+            const id = await this.vaccinationRepository.create({
+                ...params,
+                dateAdministered: params.dateAdministered ?? new Date(),
+            });
 
-        if (!vaccineName) throw new VaccinationNameNotFoundException();
-        if (!medicalRecordId) throw new VaccinationNameNotFoundException();
-
-        const id = await this.vaccinationRepository.create({
-            ...params,
-            dateAdministered: params.dateAdministered ?? new Date(),
-        });
-
-        return {
-            statusCode: HttpStatus.CREATED,
-            message: "Vaccination registered successfully",
-            data: id,
-        };
+            return {
+                statusCode: HttpStatus.CREATED,
+                message: "Vaccination registered successfully",
+                data: id,
+            };
+        }
+        catch (error) {
+            if (
+                error instanceof VaccinationNameNotFoundException ||
+                error instanceof MedicalRecordVisitDateNotFoundException
+            ) throw error;
+            throw new ServerErrorException("Failed to register vaccination");
+        }
     }
 }

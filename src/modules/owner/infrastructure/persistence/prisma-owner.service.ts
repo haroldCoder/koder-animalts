@@ -3,13 +3,20 @@ import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { IOwnerRepository } from "@owner/domain/ports";
 import { CreateOwnerModel, OwnerModel } from "@owner/domain/models";
 import { OwnerAlreadyExistException } from "@owner/domain/exceptions";
+import { AdressNotFoundException, PhoneNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PrismaOwnerService implements IOwnerRepository {
     constructor(private readonly prisma: PrismaService) { }
 
     async create(owner: CreateOwnerModel): Promise<string> {
-        const ownerExist = await this.findByUserId(owner.userId);
+        const { address, phone, userId } = owner;
+
+        if (!address) throw new AdressNotFoundException();
+        if (!phone) throw new PhoneNotFoundException();
+        if (!userId) throw new UserIdNotFoundException();
+
+        const ownerExist = await this.findByUserId(userId);
         if (ownerExist) throw new OwnerAlreadyExistException();
 
         const { id } = await this.prisma.owner.create({
@@ -19,8 +26,14 @@ export class PrismaOwnerService implements IOwnerRepository {
     }
 
     async findByUserId(userId: string): Promise<OwnerModel | null> {
-        return this.prisma.owner.findUnique({
+        if (!userId) throw new UserIdNotFoundException();
+
+        const owner = await this.prisma.owner.findUnique({
             where: { userId }
         });
+
+        if (!owner) throw new UserIdNotFoundException();
+
+        return owner;
     }
 }

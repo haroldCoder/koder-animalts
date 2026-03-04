@@ -1,10 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { ServerErrorException } from "@/common/domain/exceptions";
-import { MedicalRecordNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
+import { MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import { RegisterDocumentModel } from "@/common/domain/models";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
 import type { MedicalRecordRepository } from "@medical-record/domain/ports";
+import { MedicalRecordIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class UploadDocumentToMedicalRecordUseCase {
@@ -23,7 +24,7 @@ export class UploadDocumentToMedicalRecordUseCase {
             };
         } catch (error) {
             if (
-                error instanceof MedicalRecordNotFoundException ||
+                error instanceof MedicalRecordIdNotFoundException ||
                 error instanceof MedicalRecordVisitDateNotFoundException ||
                 error instanceof DocumentIdNotFoundException
             ) throw error;
