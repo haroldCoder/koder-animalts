@@ -88,8 +88,8 @@ model VeterinaryClinic {
 
 model Owner {
   id        String   @id @default(uuid())
-  phone     String?
-  address   String?
+  phone     String
+  address   String
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
@@ -127,7 +127,7 @@ model Pet {
 
 model Veterinarian {
   id        String   @id @default(uuid())
-  phone     String?
+  phone     String
   specialty String?
 
   userId String @unique

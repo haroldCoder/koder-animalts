@@ -1,0 +1,1 @@
+export * from "./prisma-medical-record.service"

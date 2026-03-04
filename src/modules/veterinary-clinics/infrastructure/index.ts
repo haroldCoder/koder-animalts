@@ -1,2 +1,1 @@
-export * from './veterinary-clinics.service';
-export * from './veterinary-clinics.controller';
+export * from './persistence';

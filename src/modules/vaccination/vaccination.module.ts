@@ -1,12 +1,30 @@
 import { Module } from '@nestjs/common';
-import { VaccinationService } from './infrastructure/vaccination.service';
-import { VaccinationController } from './infrastructure/vaccination.controller';
 import { PrismaModule } from '@/common/infrastructure/prisma.module';
+import { VaccinationController } from '@vaccination/presentation';
+import {
+    RegisterVaccinationUseCase,
+    GetUpcomingVaccinationsByPetUseCase,
+    GetNextVaccinationReminderUseCase,
+} from '@vaccination/application/use-cases';
+import { PrismaVaccinationService } from '@vaccination/infrastructure/persistence';
 
 @Module({
     imports: [PrismaModule],
-    providers: [VaccinationService],
     controllers: [VaccinationController],
-    exports: [VaccinationService],
+    providers: [
+        RegisterVaccinationUseCase,
+        GetUpcomingVaccinationsByPetUseCase,
+        GetNextVaccinationReminderUseCase,
+        {
+            provide: "IVaccinationRepository",
+            useClass: PrismaVaccinationService,
+        },
+    ],
+    exports: [
+        RegisterVaccinationUseCase,
+        GetUpcomingVaccinationsByPetUseCase,
+        GetNextVaccinationReminderUseCase,
+    ],
 })
 export class VaccinationModule { }
+
