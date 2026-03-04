@@ -1,15 +1,16 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
-import { RegisterDocumentDto, UpdateDocumentDto } from "@document/infrastructure/dto";
+import { UpdateDocumentDto } from "@document/infrastructure/dto";
 import { DocumentFileUrlNotFoundException, DocumentIdNotFoundException, DocumentTitleNotFoundException } from "@document/domain/exceptions";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { DocumentEntity } from "@document/domain/entities";
+import { RegisterDocumentModel } from "@/common/domain/models";
 
 @Injectable()
 export class DocumentService {
     constructor(private readonly prisma: PrismaService) { }
 
-    async registerDocument(document: RegisterDocumentDto): Promise<ResponseDto<string>> {
+    async registerDocument(document: RegisterDocumentModel): Promise<ResponseDto<string>> {
         const { title, fileUrl } = document;
 
         if (!title) {

@@ -1,4 +1,4 @@
-export class RegisterDocumentDto {
+export class RegisterDocumentModel {
     title: string;
     fileUrl: string;
     fileKey?: string;

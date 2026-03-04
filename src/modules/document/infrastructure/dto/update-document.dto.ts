@@ -1,4 +1,4 @@
 import { PartialType } from "@nestjs/mapped-types";
-import { RegisterDocumentDto } from "./register-document.dto";
+import { RegisterDocumentModel } from "@/common/domain/models";
 
-export class UpdateDocumentDto extends PartialType(RegisterDocumentDto) { }
+export class UpdateDocumentDto extends PartialType(RegisterDocumentModel) { }
