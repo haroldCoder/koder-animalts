@@ -48,6 +48,9 @@
       ],
       "@vaccination/*": [
         "./src/modules/vaccination/*"
+      ],
+      "@user/*": [
+        "./src/modules/user/*"
       ]
     }
   }
