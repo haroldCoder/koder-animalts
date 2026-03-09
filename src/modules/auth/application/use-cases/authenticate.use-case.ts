@@ -66,7 +66,7 @@ export class AuthenticateUseCase {
         return {
             message: "Login exitoso",
             statusCode: 200,
-            data: sessionToken
+            data: user.id
         };
     }
 }
