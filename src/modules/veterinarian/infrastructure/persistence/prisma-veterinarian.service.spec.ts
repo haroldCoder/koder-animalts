@@ -53,18 +53,21 @@ describe("PrismaVeterinarianService", () => {
             await expect(service.create(vetData)).rejects.toThrow(VeterinarianAlreadyExistsException);
         });
 
-        it("should throw VeterinarianIdNotExistException if findByUserId fails internally (reverting behavior? wait)", async () => {
-            // According to the original service implementation, findByUserId throws if null.
+        it("should create veterinarian if not exists", async () => {
             const vetData = {
                 specialty: "Surgery",
                 phone: "987654321",
                 userId: "user-123",
                 clinicId: "clinic-123",
             };
+            const mockVet = { id: "vet-123", ...vetData };
 
             mockPrismaService.veterinarian.findUnique.mockResolvedValueOnce(null);
+            mockPrismaService.veterinarian.create.mockResolvedValueOnce(mockVet);
 
-            await expect(service.create(vetData)).rejects.toThrow(VeterinarianIdNotExistException);
+            const result = await service.create(vetData);
+
+            expect(result).toBe("vet-123");
         });
     });
 
@@ -104,11 +107,13 @@ describe("PrismaVeterinarianService", () => {
     });
 
     describe("findByUserId", () => {
-        it("should throw VeterinarianIdNotExistException if veterinarian not found", async () => {
+        it("should return null if veterinarian not found", async () => {
             const userId = "non-existent";
             mockPrismaService.veterinarian.findUnique.mockResolvedValue(null);
 
-            await expect(service.findByUserId(userId)).rejects.toThrow(VeterinarianIdNotExistException);
+            const result = await service.findByUserId(userId);
+
+            expect(result).toBeNull();
         });
 
         it("should return veterinarian with specialty default if found", async () => {

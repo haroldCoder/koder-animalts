@@ -10,8 +10,10 @@ export class PrismaOwnerService implements IOwnerRepository {
     constructor(private readonly prisma: PrismaService) { }
 
     async create(owner: CreateOwnerModel): Promise<string> {
-        const { address, phone, userId } = owner;
 
+
+        const { address, phone, userId } = owner;
+        console.log(!userId);
         if (!address) throw new AdressNotFoundException();
         if (!phone) throw new PhoneNotFoundException();
         if (!userId) throw new UserIdNotFoundException();
@@ -32,7 +34,7 @@ export class PrismaOwnerService implements IOwnerRepository {
             where: { userId }
         });
 
-        if (!owner) throw new UserIdNotFoundException();
+        if (!owner) null;
 
         return owner;
     }

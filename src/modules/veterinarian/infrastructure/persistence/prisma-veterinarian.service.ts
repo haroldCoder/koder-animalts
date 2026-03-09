@@ -54,7 +54,7 @@ export class PrismaVeterinarianService implements IVeterinarianRepository {
             where: { userId }
         });
 
-        if (!veterinarian) throw new VeterinarianIdNotExistException();
+        if (!veterinarian) return null;
 
         return {
             ...veterinarian,

@@ -14,6 +14,8 @@ export class FindClinicOfVeterinarianUseCase {
         try {
             const data = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
 
+            if (!data) throw new VeterinarianIdNotFoundException();
+
             return {
                 statusCode: 200,
                 data: {

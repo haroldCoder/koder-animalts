@@ -11,13 +11,15 @@ export class FindOwnerByUserIdUseCase {
         private readonly ownerRepository: IOwnerRepository
     ) { }
 
-    async execute(userId: string): Promise<ResponseDto<OwnerModel | null>> {
+    async execute(userId: string): Promise<ResponseDto<OwnerModel>> {
         try {
             const owner = await this.ownerRepository.findByUserId(userId);
 
+            if (!owner) throw new UserIdNotFoundException();
+
             return {
                 statusCode: 200,
-                data: owner || null,
+                data: owner,
             };
         } catch (error) {
             if (
