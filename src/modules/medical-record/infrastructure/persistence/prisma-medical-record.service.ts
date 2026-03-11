@@ -87,4 +87,46 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             await sleep(500);
         }
     }
+
+    async findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordModel[] | null> {
+        if (!veterinarianId) throw new VeterinarianIdNotFoundException();
+
+        const medicalRecords = await this.prisma.medicalRecord.findMany({
+            where: { veterinarianId },
+            include: {
+                vaccinations: true,
+            },
+        });
+
+        if (!medicalRecords) return null;
+
+        return medicalRecords.map((medicalRecord) => ({
+            ...medicalRecord,
+            type: medicalRecord.type as MedicalRecordType,
+            diagnosis: medicalRecord.diagnosis || "",
+            treatment: medicalRecord.treatment || "",
+            notes: medicalRecord.notes || "",
+        }));
+    }
+
+    async findByPetId(petId: string): Promise<MedicalRecordModel[] | null> {
+        if (!petId) throw new PetIdNotFoundException();
+
+        const medicalRecords = await this.prisma.medicalRecord.findMany({
+            where: { petId },
+            include: {
+                vaccinations: true,
+            },
+        });
+
+        if (!medicalRecords) return null;
+
+        return medicalRecords.map((medicalRecord) => ({
+            ...medicalRecord,
+            type: medicalRecord.type as MedicalRecordType,
+            diagnosis: medicalRecord.diagnosis || "",
+            treatment: medicalRecord.treatment || "",
+            notes: medicalRecord.notes || "",
+        }));
+    }
 }

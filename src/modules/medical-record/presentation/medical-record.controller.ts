@@ -4,14 +4,15 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { RegisterDocumentDto } from "@/common/domain/dto";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
-import { CreateMedicalRecordUseCase, UploadDocumentToMedicalRecordUseCase } from "@medical-record/application/use-cases";
-import { GetMedicalRecordByIdUseCase } from "@medical-record/application/use-cases";
+import { CreateMedicalRecordUseCase, UploadDocumentToMedicalRecordUseCase, GetMedicalRecordByIdUseCase, GetMedicalRecordByVeterinarianIdUseCase, GetMedicalRecordByPetIdUseCase } from "@medical-record/application/use-cases";
 
 @Controller('medical-record')
 export class MedicalRecordController {
     constructor(private readonly createMedicalRecordUseCase: CreateMedicalRecordUseCase,
         private readonly getMedicalRecordByIdUseCase: GetMedicalRecordByIdUseCase,
-        private readonly uploadDocumentOfMedicalRecordUseCase: UploadDocumentToMedicalRecordUseCase) { }
+        private readonly uploadDocumentOfMedicalRecordUseCase: UploadDocumentToMedicalRecordUseCase,
+        private readonly getMedicalRecordByVeterinarianIdUseCase: GetMedicalRecordByVeterinarianIdUseCase,
+        private readonly getMedicalRecordByPetIdUseCase: GetMedicalRecordByPetIdUseCase) { }
 
     @Post("register")
     async createMedicalRecord(@Body() medicalRecord: RegisterMedicalRecordDto) {
@@ -41,5 +42,15 @@ export class MedicalRecordController {
         }
 
         return this.uploadDocumentOfMedicalRecordUseCase.execute(id, documents);
+    }
+
+    @Get("veterinarian/:id")
+    async getMedicalRecordByVeterinarianId(@Param("id") id: string) {
+        return this.getMedicalRecordByVeterinarianIdUseCase.execute(id);
+    }
+
+    @Get("pet/:id")
+    async getMedicalRecordByPetId(@Param("id") id: string) {
+        return this.getMedicalRecordByPetIdUseCase.execute(id);
     }
 }

@@ -11,6 +11,8 @@ import { PrismaPetService } from '@pet/infrastructure/persistence';
 import {
     CreateMedicalRecordUseCase,
     GetMedicalRecordByIdUseCase,
+    GetMedicalRecordByPetIdUseCase,
+    GetMedicalRecordByVeterinarianIdUseCase,
     UploadDocumentToMedicalRecordUseCase
 } from '@medical-record/application/use-cases';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure/persistence';
@@ -28,6 +30,8 @@ import { PrismaDocumentService } from '@document/infrastructure';
         CreateMedicalRecordUseCase,
         GetMedicalRecordByIdUseCase,
         UploadDocumentToMedicalRecordUseCase,
+        GetMedicalRecordByVeterinarianIdUseCase,
+        GetMedicalRecordByPetIdUseCase,
         {
             provide: "MedicalRecordRepository",
             useClass: PrismaMedicalRecordService
@@ -45,7 +49,9 @@ import { PrismaDocumentService } from '@document/infrastructure';
     exports: [
         CreateMedicalRecordUseCase,
         GetMedicalRecordByIdUseCase,
-        UploadDocumentToMedicalRecordUseCase
+        UploadDocumentToMedicalRecordUseCase,
+        GetMedicalRecordByVeterinarianIdUseCase,
+        GetMedicalRecordByPetIdUseCase
     ]
 })
 export class MedicalRecordModule { }
