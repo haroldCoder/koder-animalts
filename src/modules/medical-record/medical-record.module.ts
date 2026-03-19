@@ -16,7 +16,6 @@ import {
     UploadDocumentToMedicalRecordUseCase
 } from '@medical-record/application/use-cases';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure/persistence';
-import { PrismaDocumentService } from '@document/infrastructure';
 
 @Module({
     imports: [
@@ -32,6 +31,7 @@ import { PrismaDocumentService } from '@document/infrastructure';
         UploadDocumentToMedicalRecordUseCase,
         GetMedicalRecordByVeterinarianIdUseCase,
         GetMedicalRecordByPetIdUseCase,
+        PrismaVeterinarianService,
         {
             provide: "MedicalRecordRepository",
             useClass: PrismaMedicalRecordService

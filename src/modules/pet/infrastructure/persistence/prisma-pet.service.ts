@@ -3,10 +3,16 @@ import { PrismaService } from "@/common/infrastructure/db";
 import { IPetRepository } from "@pet/domain/ports";
 import { CreatePetModel, PetModel, UpdatePetModel } from "@pet/domain/models";
 import { GenderPet } from "@pet/domain/enums";
+import { UserIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
+import { PetOwnerIdNotFoundException } from "@pet/domain/exceptions";
+import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
 
 @Injectable()
 export class PrismaPetService implements IPetRepository {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly veterinarianService: PrismaVeterinarianService
+    ) { }
 
     async create(data: CreatePetModel): Promise<string> {
         const { id } = await this.prisma.pet.create({ data });
@@ -35,5 +41,31 @@ export class PrismaPetService implements IPetRepository {
         if (!pet) return null;
 
         return { ...pet, gender: pet.gender as GenderPet };
+    }
+
+    async findByVeterinarianId(veterinarianId: string): Promise<PetModel[] | null> {
+        if (!veterinarianId) throw new VeterinarianIdNotFoundException();
+        const veterinarian = await this.veterinarianService.findByIdWithDetails(veterinarianId);
+
+        if (!veterinarian) throw new VeterinarianIdNotFoundException();
+
+        const pets = await this.prisma.pet.findMany({
+            where: { clinic: { id: veterinarian.clinicId } }
+        });
+
+        if (!pets) return null;
+
+        return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet }));
+    }
+
+    async findByOwnerId(ownerId: string): Promise<PetModel[] | null> {
+        if (!ownerId) throw new PetOwnerIdNotFoundException;
+        const pets = await this.prisma.pet.findMany({
+            where: { owner: { id: ownerId } }
+        });
+
+        if (!pets) return null;
+
+        return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet }));
     }
 }
