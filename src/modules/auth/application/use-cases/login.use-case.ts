@@ -57,7 +57,7 @@ export class LoginUseCase {
         return {
             message: "Login exitoso",
             statusCode: 200,
-            data: sessionToken,
+            data: user.id,
         };
     }
 }

@@ -57,7 +57,7 @@ export class SignUpUseCase {
         return {
             message: "Registro exitoso",
             statusCode: 201,
-            data: sessionToken,
+            data: user.id,
         };
     }
 }
