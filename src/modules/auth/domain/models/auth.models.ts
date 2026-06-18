@@ -25,6 +25,7 @@ export class AccountModel {
     accountId: string;
     accessToken?: string | null;
     refreshToken?: string | null;
+    password?: string | null;
 }
 
 export class SessionModel {

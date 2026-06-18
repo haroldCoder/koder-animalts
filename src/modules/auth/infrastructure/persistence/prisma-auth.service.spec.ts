@@ -10,6 +10,7 @@ describe("PrismaAuthService", () => {
     const mockPrismaService = {
         user: {
             upsert: jest.fn(),
+            findUnique: jest.fn(),
         },
         account: {
             findFirst: jest.fn(),
@@ -74,6 +75,22 @@ describe("PrismaAuthService", () => {
                 update: { name: null, image: null },
                 create: { email, name: null, image: null },
             });
+        });
+    });
+
+    describe("findUserByEmail", () => {
+        it("should call prisma.user.findUnique with correct data", async () => {
+            const email = "test@example.com";
+            const mockUser = { id: "1", email, name: "Test User", image: null };
+
+            mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+
+            const result = await service.findUserByEmail(email);
+
+            expect(prisma.user.findUnique).toHaveBeenCalledWith({
+                where: { email },
+            });
+            expect(result).toEqual(mockUser);
         });
     });
 

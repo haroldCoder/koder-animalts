@@ -23,6 +23,12 @@ export class PrismaAuthService implements IAuthRepository {
         });
     }
 
+    async findUserByEmail(email: string): Promise<UserModel | null> {
+        return this.prisma.user.findUnique({
+            where: { email }
+        });
+    }
+
     async findAccount(providerId: string, accountId: string, userId: string): Promise<AccountModel | null> {
         return this.prisma.account.findFirst({
             where: {

@@ -3,4 +3,5 @@ export const structureUpload = {
     documents: "documents",
     pets: "pets",
     medicalRecords: "medical-records",
+    users: "users",
 }

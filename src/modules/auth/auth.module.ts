@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
 import { AuthController } from "@auth/presentation";
-import { AuthenticateUseCase } from "@auth/application/use-cases";
+import { AuthenticateUseCase, LoginUseCase, SignUpUseCase } from "@auth/application/use-cases";
 import { PrismaAuthService } from "@auth/infrastructure/persistence";
 
 @Module({
@@ -9,11 +9,13 @@ import { PrismaAuthService } from "@auth/infrastructure/persistence";
     controllers: [AuthController],
     providers: [
         AuthenticateUseCase,
+        LoginUseCase,
+        SignUpUseCase,
         {
             provide: "IAuthRepository",
             useClass: PrismaAuthService
         }
     ],
-    exports: [AuthenticateUseCase]
+    exports: [AuthenticateUseCase, LoginUseCase, SignUpUseCase]
 })
 export class AuthModule { }
