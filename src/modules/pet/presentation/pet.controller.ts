@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase } from "@pet/application/use-cases";
+import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase } from "@pet/application/use-cases";
 import { RegisterPetDto, UpdatePetDto } from "@pet/presentation/dtos";
 
 @Controller('pet')
@@ -11,6 +11,7 @@ export class PetController {
         private readonly getPetByIdUseCase: GetPetByIdUseCase,
         private readonly getPetByVeterinarianIdUseCase: GetPetByVeterinarianIdUseCase,
         private readonly getPetByOwnerIdUseCase: GetPetByOwnerIdUseCase,
+        private readonly getPetByOwnerUserIdUseCase: GetPetByUserOwnerUseCase,
     ) { }
 
     @Post("register")
@@ -41,5 +42,10 @@ export class PetController {
     @Get("owner/:ownerId")
     async getPetByOwnerId(@Param("ownerId") ownerId: string) {
         return this.getPetByOwnerIdUseCase.execute(ownerId);
+    }
+
+    @Get("owner/userId/:id")
+    async getPetByOwnerUserId(@Param("id") id: string) {
+        return this.getPetByOwnerUserIdUseCase.execute(id);
     }
 }

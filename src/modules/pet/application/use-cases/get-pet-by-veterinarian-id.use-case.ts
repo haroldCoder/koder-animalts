@@ -1,9 +1,14 @@
-import { IPetRepository } from "@pet/domain/ports";
+import { Inject, Injectable } from "@nestjs/common";
+import type { IPetRepository } from "@pet/domain/ports";
 import { PetModel } from "@pet/domain/models";
 import { ServerErrorException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 
+@Injectable()
 export class GetPetByVeterinarianIdUseCase {
-    constructor(private readonly petRepository: IPetRepository) { }
+    constructor(
+        @Inject("IPetRepository")
+        private readonly petRepository: IPetRepository,
+    ) { }
 
     async execute(veterinarianId: string): Promise<PetModel[] | null> {
         try {

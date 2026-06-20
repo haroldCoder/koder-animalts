@@ -7,4 +7,5 @@ export interface IPetRepository {
     findById(id: string): Promise<PetModel | null>;
     findByVeterinarianId(veterinarianId: string): Promise<PetModel[] | null>;
     findByOwnerId(ownerId: string): Promise<PetModel[] | null>;
+    findByOwnerUserId(userId: string): Promise<PetModel[] | null>;
 }
