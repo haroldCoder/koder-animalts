@@ -154,7 +154,24 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
             include: {
                 vaccinations: true,
-                pet: { select: { name: true, mainImage: true } },
+                pet: {
+                    select: {
+                        name: true,
+                        mainImage: true,
+                        ...(user.veterinarian && {
+                            owner: {
+                                select: {
+                                    user: {
+                                        select:
+                                        {
+                                            name: true,
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                },
                 veterinarian: {
                     select: {
                         user: { select: { name: true } },
