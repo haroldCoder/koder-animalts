@@ -8,7 +8,8 @@ import {
     GetPetByIdUseCase,
     GetPetByVeterinarianIdUseCase,
     GetPetByOwnerIdUseCase,
-    GetPetByUserOwnerUseCase
+    GetPetByUserOwnerUseCase,
+    GetPetByVeterinarianUserIdUseCase
 } from "@pet/application/use-cases";
 import { PrismaPetService } from "@pet/infrastructure/persistence";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence";
@@ -24,6 +25,7 @@ import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persiste
         GetPetByVeterinarianIdUseCase,
         GetPetByOwnerIdUseCase,
         GetPetByUserOwnerUseCase,
+        GetPetByVeterinarianUserIdUseCase,
         PrismaVeterinarianService,
         {
             provide: "IPetRepository",
@@ -37,7 +39,8 @@ import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persiste
         GetPetByIdUseCase,
         GetPetByVeterinarianIdUseCase,
         GetPetByOwnerIdUseCase,
-        GetPetByUserOwnerUseCase
+        GetPetByUserOwnerUseCase,
+        GetPetByVeterinarianUserIdUseCase
     ]
 })
 export class PetModule { }

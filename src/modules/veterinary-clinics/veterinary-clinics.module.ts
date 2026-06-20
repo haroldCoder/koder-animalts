@@ -4,6 +4,7 @@ import { VeterinaryClinicsController } from "@veterinary-clinics/presentation";
 import {
     CreateVeterinaryClinicUseCase,
     FindAllVeterinaryClinicsUseCase,
+    GetVeterinaryClinicSummaryUseCase,
 } from "@veterinary-clinics/application/use-cases";
 import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructure/persistence";
 
@@ -13,6 +14,7 @@ import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructur
     providers: [
         CreateVeterinaryClinicUseCase,
         FindAllVeterinaryClinicsUseCase,
+        GetVeterinaryClinicSummaryUseCase,
         {
             provide: "IVeterinaryClinicRepository",
             useClass: PrismaVeterinaryClinicService,
@@ -21,6 +23,7 @@ import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructur
     exports: [
         CreateVeterinaryClinicUseCase,
         FindAllVeterinaryClinicsUseCase,
+        GetVeterinaryClinicSummaryUseCase,
     ],
 })
 export class VeterinaryClinicsModule { }
