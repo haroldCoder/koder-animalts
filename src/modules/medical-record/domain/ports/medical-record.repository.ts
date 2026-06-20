@@ -7,4 +7,5 @@ export interface MedicalRecordRepository {
     uploadDocumentToMedicalRecord(medicalRecordId: string, documents: RegisterDocumentModel[]): Promise<void>;
     findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordModel[] | null>;
     findByPetId(petId: string): Promise<MedicalRecordModel[] | null>;
+    findByUserId(userId: string): Promise<MedicalRecordModel[]>;
 }

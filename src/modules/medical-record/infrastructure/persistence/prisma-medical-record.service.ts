@@ -3,7 +3,7 @@ import { PrismaService } from "@/common/infrastructure/db";
 import { MedicalRecordRepository } from "@medical-record/domain/ports";
 import { MedicalRecordModel, RegisterMedicalRecordModel } from "@medical-record/domain/models";
 import { MedicalRecordType } from "@medical-record/domain/enums";
-import { PetIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
+import { PetIdNotFoundException, UserIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import { MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { IPetRepository } from "@pet/domain/ports";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
@@ -120,6 +120,52 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         });
 
         if (!medicalRecords) return null;
+
+        return medicalRecords.map((medicalRecord) => ({
+            ...medicalRecord,
+            type: medicalRecord.type as MedicalRecordType,
+            diagnosis: medicalRecord.diagnosis || "",
+            treatment: medicalRecord.treatment || "",
+            notes: medicalRecord.notes || "",
+        }));
+    }
+
+    async findByUserId(userId: string): Promise<MedicalRecordModel[]> {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { owner: true, veterinarian: true },
+        });
+
+        if (!user) throw new UserIdNotFoundException();
+
+        let petFilter: { ownerId?: string; clinicId?: string } = {};
+
+        if (user.owner) {
+            petFilter = { ownerId: user.owner.id };
+        } else if (user.veterinarian) {
+            petFilter = { clinicId: user.veterinarian.clinicId };
+        } else {
+            return [];
+        }
+
+        const medicalRecords = await this.prisma.medicalRecord.findMany({
+            where: {
+                pet: petFilter,
+            },
+            include: {
+                vaccinations: true,
+                pet: { select: { name: true } },
+                veterinarian: {
+                    select: {
+                        user: { select: { name: true } },
+                        clinic: { select: { name: true } },
+                    },
+                },
+            },
+            orderBy: {
+                visitDate: "desc",
+            },
+        });
 
         return medicalRecords.map((medicalRecord) => ({
             ...medicalRecord,
