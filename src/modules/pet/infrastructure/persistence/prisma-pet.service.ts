@@ -80,4 +80,20 @@ export class PrismaPetService implements IPetRepository {
 
         return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet }));
     }
+
+    async findByVeterinarianUserId(userId: string, petName?: string, ownerName?: string): Promise<PetModel[] | null> {
+        if (!userId) throw new UserIdNotFoundException();
+
+        const pets = await this.prisma.pet.findMany({
+            where: { 
+                clinic: { veterinarians: { some: { userId } } },
+                name: petName ? { contains: petName, mode: 'insensitive' } : undefined,
+                owner: ownerName ? { user: { name: { contains: ownerName, mode: 'insensitive' } } } : undefined
+            }
+        });
+
+        if (!pets) return null;
+
+        return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet }));
+    }
 }
