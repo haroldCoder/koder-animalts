@@ -20,7 +20,7 @@ export class CreateVeterinaryClinicModel {
 export class UpdateVeterinaryClinicModel extends PartialType(CreateVeterinaryClinicModel) { }
 
 export class VeterinaryClinicSummaryModel {
-    total_pets: number;
-    total_users: number;
-    clinic_name: string;
+    totalPets: number;
+    totalUsers: number;
+    clinicName: string;
 }

@@ -54,9 +54,9 @@ export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepositor
         const uniqueOwners = new Set(clinic.pets.map(p => p.ownerId));
 
         return {
-            total_pets: clinic._count.pets,
-            total_users: uniqueOwners.size,
-            clinic_name: clinic.name
+            totalPets: clinic._count.pets,
+            totalUsers: uniqueOwners.size,
+            clinicName: clinic.name
         };
     }
 }

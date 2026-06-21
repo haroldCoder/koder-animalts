@@ -1,8 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IVeterinaryClinicRepository } from "@veterinary-clinics/domain/ports";
 import { VeterinaryClinicSummaryModel } from "@veterinary-clinics/domain/models";
 import { ServerErrorException, UserIdNotFoundException } from "@/common/domain/exceptions";
 import { VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
+import { ResponseDto } from "@/common/domain/dto";
 
 @Injectable()
 export class GetVeterinaryClinicSummaryUseCase {
@@ -11,9 +12,14 @@ export class GetVeterinaryClinicSummaryUseCase {
         private readonly veterinaryClinicRepository: IVeterinaryClinicRepository,
     ) { }
 
-    async execute(userId: string): Promise<VeterinaryClinicSummaryModel> {
+    async execute(userId: string): Promise<ResponseDto<VeterinaryClinicSummaryModel>> {
         try {
-            return await this.veterinaryClinicRepository.getSummaryByVeterinarianUserId(userId);
+            const summary = await this.veterinaryClinicRepository.getSummaryByVeterinarianUserId(userId);
+            return {
+                statusCode: HttpStatus.OK,
+                message: "Veterinary clinic summary",
+                data: summary
+            };
         } catch (error) {
             if (error instanceof VeterinaryClinicNotFoundException || error instanceof UserIdNotFoundException) {
                 throw error;
