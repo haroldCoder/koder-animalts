@@ -84,8 +84,11 @@ export class PrismaPetService implements IPetRepository {
     async findByVeterinarianUserId(userId: string, petName?: string, ownerName?: string): Promise<PetModel[] | null> {
         if (!userId) throw new UserIdNotFoundException();
 
+        if (petName === 'undefined' || petName === '') petName = undefined;
+        if (ownerName === 'undefined' || ownerName === '') ownerName = undefined;
+
         const pets = await this.prisma.pet.findMany({
-            where: { 
+            where: {
                 clinic: { veterinarians: { some: { userId } } },
                 name: petName ? { contains: petName, mode: 'insensitive' } : undefined,
                 owner: ownerName ? { user: { name: { contains: ownerName, mode: 'insensitive' } } } : undefined
