@@ -73,12 +73,15 @@ export class PrismaPetService implements IPetRepository {
         if (!userId) throw new UserIdNotFoundException();
 
         const pets = await this.prisma.pet.findMany({
-            where: { owner: { user: { id: userId } } }
+            where: { owner: { user: { id: userId } } },
+            include: {
+                clinic: { select: { name: true } }
+            }
         });
 
         if (!pets) return null;
 
-        return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet }));
+        return pets.map(pet => ({ ...pet, gender: pet.gender as GenderPet, clinicName: pet.clinic.name }));
     }
 
     async findByVeterinarianUserId(userId: string, petName?: string, ownerName?: string): Promise<PetModel[] | null> {
@@ -92,7 +95,7 @@ export class PrismaPetService implements IPetRepository {
                 clinic: { veterinarians: { some: { userId } } },
                 name: petName ? { contains: petName, mode: 'insensitive' } : undefined,
                 owner: ownerName ? { user: { name: { contains: ownerName, mode: 'insensitive' } } } : undefined
-            }
+            },
         });
 
         if (!pets) return null;

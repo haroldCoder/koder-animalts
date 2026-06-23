@@ -12,6 +12,7 @@ export class PetModel {
     mainImage: string;
     ownerId: string;
     clinicId: string;
+    clinicName?: string;
     createdAt: Date;
     updatedAt: Date;
 }
