@@ -10,6 +10,8 @@ export class PetModel {
     birthDate: Date | null;
     weight: number | null;
     mainImage: string;
+    iaImage?: string | null;
+    images?: string[] | null;
     ownerId: string;
     clinicId: string;
     clinicName?: string;
@@ -25,7 +27,8 @@ export class CreatePetModel {
     birthDate?: Date | null;
     weight?: number | null;
     mainImage: string;
-    ownerId: string;
+    iaImage?: string;
+    images?: string[];
     clinicId: string;
 }
 

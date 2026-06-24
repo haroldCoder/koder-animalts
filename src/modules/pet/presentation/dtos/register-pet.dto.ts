@@ -1,5 +1,5 @@
 import { GenderPet } from "@pet/domain/enums";
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class RegisterPetDto {
     @IsString()
@@ -7,31 +7,32 @@ export class RegisterPetDto {
     @IsString()
     species: string;
     @IsString()
+    @IsOptional()
     breed?: string;
     @IsDate()
+    @IsOptional()
     birthDate?: Date;
     @IsEnum(GenderPet)
     gender: GenderPet;
     @IsNumber()
+    @IsOptional()
     weight?: number;
     @IsString()
+    @IsOptional()
     color?: string;
     @IsString()
+    @IsOptional()
     microchip?: string;
     @IsBoolean()
     isActive: boolean;
     @IsDate()
-    createdAt: Date;
+    @IsOptional()
+    createdAt?: Date;
     @IsDate()
-    updatedAt: Date;
+    @IsOptional()
+    updatedAt?: Date;
     @IsString()
-    mainImage: string;
-    @IsString()
-    iaImage?: string;
-    @IsString()
-    images?: string[];
-    @IsString()
-    ownerId: string;
+    userId: string;
     @IsString()
     clinicId: string;
 }

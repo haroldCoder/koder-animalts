@@ -14,8 +14,17 @@ export class PrismaPetService implements IPetRepository {
         private readonly veterinarianService: PrismaVeterinarianService
     ) { }
 
-    async create(data: CreatePetModel): Promise<string> {
-        const { id } = await this.prisma.pet.create({ data });
+    async create(data: CreatePetModel, userId: string): Promise<string> {
+
+        const ownerData = await this.prisma.owner.findFirst({
+            where: { userId }
+        });
+
+        const ownerId = ownerData?.id;
+
+        if (!ownerId) throw new PetOwnerIdNotFoundException();
+
+        const { id } = await this.prisma.pet.create({ data: { ...data, ownerId } });
         return id;
     }
 
