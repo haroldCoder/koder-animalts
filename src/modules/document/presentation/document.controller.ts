@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { RegisterDocumentRequestDto, UpdateDocumentDto } from "@document/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
     DeleteDocumentUseCase,
+    FindDocumentsByUserIdUseCase,
     GetDocumentByIdUseCase,
     RegisterDocumentUseCase,
     UpdateDocumentUseCase
@@ -17,6 +18,7 @@ export class DocumentController {
         private readonly updateDocumentUseCase: UpdateDocumentUseCase,
         private readonly deleteDocumentUseCase: DeleteDocumentUseCase,
         private readonly getDocumentByIdUseCase: GetDocumentByIdUseCase,
+        private readonly findDocumentsByUserIdUseCase: FindDocumentsByUserIdUseCase,
     ) { }
 
     @Post("register")
@@ -46,6 +48,22 @@ export class DocumentController {
     @Get(":id")
     async getDocumentById(@Param("id") id: string) {
         return this.getDocumentByIdUseCase.execute(id);
+    }
+
+    @Get("user/:userId")
+    async findDocumentsByUserId(
+        @Param("userId") userId: string,
+        @Query("startDate") startDate?: string,
+        @Query("endDate") endDate?: string,
+        @Query("veterinarianName") veterinarianName?: string,
+        @Query("documentName") documentName?: string,
+    ) {
+        return this.findDocumentsByUserIdUseCase.execute(userId, {
+            startDate,
+            endDate,
+            veterinarianName,
+            documentName,
+        });
     }
 }
 

@@ -28,3 +28,11 @@ export interface RegisterDocumentModel {
 }
 
 export interface UpdateDocumentModel extends Partial<RegisterDocumentModel> { }
+
+export interface FindDocumentsCriteria {
+    startDate?: Date;
+    endDate?: Date;
+    veterinarianName?: string;
+    documentName?: string;
+}
+
