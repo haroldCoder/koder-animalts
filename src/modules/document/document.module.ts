@@ -5,7 +5,8 @@ import {
     DeleteDocumentUseCase,
     GetDocumentByIdUseCase,
     RegisterDocumentUseCase,
-    UpdateDocumentUseCase
+    UpdateDocumentUseCase,
+    FindDocumentsByUserIdUseCase
 } from "@document/application/use-cases";
 
 @Module({
@@ -19,6 +20,7 @@ import {
         UpdateDocumentUseCase,
         DeleteDocumentUseCase,
         GetDocumentByIdUseCase,
+        FindDocumentsByUserIdUseCase,
     ],
     exports: [
         "IDocumentRepository",
@@ -26,6 +28,7 @@ import {
         UpdateDocumentUseCase,
         DeleteDocumentUseCase,
         GetDocumentByIdUseCase,
+        FindDocumentsByUserIdUseCase,
     ]
 })
 export class DocumentModule { }

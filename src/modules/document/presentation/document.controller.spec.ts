@@ -4,7 +4,8 @@ import {
     DeleteDocumentUseCase,
     GetDocumentByIdUseCase,
     RegisterDocumentUseCase,
-    UpdateDocumentUseCase
+    UpdateDocumentUseCase,
+    FindDocumentsByUserIdUseCase
 } from '@document/application/use-cases';
 import { RegisterDocumentRequestDto, UpdateDocumentDto } from '@document/presentation/dtos';
 import { UploadFileCommand } from '@/common/upload/application/use-cases';
@@ -29,6 +30,7 @@ describe('DocumentController', () => {
     const mockUpdateUseCase = { execute: jest.fn() };
     const mockDeleteUseCase = { execute: jest.fn() };
     const mockGetByIdUseCase = { execute: jest.fn() };
+    const mockFindDocumentsByUserIdUseCase = { execute: jest.fn() };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -38,6 +40,7 @@ describe('DocumentController', () => {
                 { provide: UpdateDocumentUseCase, useValue: mockUpdateUseCase },
                 { provide: DeleteDocumentUseCase, useValue: mockDeleteUseCase },
                 { provide: GetDocumentByIdUseCase, useValue: mockGetByIdUseCase },
+                { provide: FindDocumentsByUserIdUseCase, useValue: mockFindDocumentsByUserIdUseCase },
             ],
         }).compile();
 
@@ -75,7 +78,6 @@ describe('DocumentController', () => {
                 fileKey: 'file-key',
                 fileSize: 1024,
                 fileType: 'application/pdf',
-                userId: expect.any(String),
             }));
             expect(result).toEqual({
                 statusCode: 201,
@@ -139,5 +141,35 @@ describe('DocumentController', () => {
             });
         });
     });
+
+    describe('findDocumentsByUserId', () => {
+        it('should call findDocumentsByUserIdUseCase.execute', async () => {
+            const userId = 'user-123';
+            const queries = {
+                startDate: '2026-01-01',
+                endDate: '2026-12-31',
+                veterinarianName: 'John Doe',
+                documentName: 'Report',
+            };
+            const mockResult = {
+                statusCode: 200,
+                message: 'Documents retrieved successfully',
+                data: [],
+            };
+            mockFindDocumentsByUserIdUseCase.execute.mockResolvedValue(mockResult);
+
+            const result = await controller.findDocumentsByUserId(
+                userId,
+                queries.startDate,
+                queries.endDate,
+                queries.veterinarianName,
+                queries.documentName,
+            );
+
+            expect(mockFindDocumentsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, queries);
+            expect(result).toEqual(mockResult);
+        });
+    });
 });
+
 

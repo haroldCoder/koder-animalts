@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { DocumentFileUrlNotFoundException, DocumentIdNotFoundException, DocumentTitleNotFoundException } from "@document/domain/exceptions";
-import { DocumentModel, RegisterDocumentModel, UpdateDocumentModel } from "@document/domain/models";
+import { DocumentModel, RegisterDocumentModel, UpdateDocumentModel, FindDocumentsCriteria } from "@document/domain/models";
 import { IDocumentRepository } from "@document/domain/ports/document.repository";
 
 @Injectable()
@@ -66,4 +66,57 @@ export class PrismaDocumentService implements IDocumentRepository {
 
         return document;
     }
+
+    async findDocumentsByUserId(userId: string, criteria: FindDocumentsCriteria): Promise<DocumentModel[]> {
+        const { startDate, endDate, veterinarianName, documentName } = criteria;
+
+        const whereClause: any = {
+            medicalRecord: {
+                OR: [
+                    {
+                        pet: {
+                            owner: {
+                                userId: userId,
+                            },
+                        },
+                    },
+                    {
+                        veterinarian: {
+                            userId: userId,
+                        },
+                    },
+                ],
+            },
+        };
+
+        if (startDate || endDate) {
+            const dateFilter: any = {};
+            if (startDate) dateFilter.gte = startDate;
+            if (endDate) dateFilter.lte = endDate;
+            whereClause.createdAt = dateFilter;
+        }
+
+        if (documentName) {
+            whereClause.title = {
+                contains: documentName,
+                mode: 'insensitive',
+            };
+        }
+
+        if (veterinarianName) {
+            whereClause.medicalRecord.veterinarian = {
+                user: {
+                    name: {
+                        contains: veterinarianName,
+                        mode: 'insensitive',
+                    },
+                },
+            };
+        }
+
+        return this.prisma.document.findMany({
+            where: whereClause,
+        });
+    }
 }
+
