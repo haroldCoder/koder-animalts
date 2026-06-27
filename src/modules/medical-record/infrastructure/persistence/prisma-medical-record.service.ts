@@ -238,6 +238,11 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
             include: {
                 vaccinations: true,
+                documents: {
+                    select: {
+                        id: true,
+                    }
+                },
                 pet: {
                     select: {
                         id: true,
@@ -270,18 +275,6 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
         });
 
-        const documentIds = medicalRecords.map((medicalRecord) => medicalRecord.id);
-        const documents = await this.prisma.document.findMany({
-            where: {
-                medicalRecordId: {
-                    in: documentIds,
-                },
-            },
-            select: {
-                id: true,
-            }
-        });
-
         return medicalRecords.map((medicalRecord) => ({
             ...medicalRecord,
             type: medicalRecord.type as MedicalRecordType,
@@ -290,7 +283,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             notes: medicalRecord.notes || "",
             ownerId: medicalRecord.pet.owner.id || "",
             clinicId: medicalRecord.veterinarian?.clinic?.id || "",
-            documentIds: documents.map((document) => document.id),
+            documentIds: medicalRecord.documents.map((document) => document.id),
         }));
     }
 }
