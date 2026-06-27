@@ -51,6 +51,32 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             where: { id },
             include: {
                 vaccinations: true,
+                pet: {
+                    select: {
+                        id: true,
+                        name: true,
+                        mainImage: true,
+                        owner: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select:
+                                    {
+                                        id: true,
+                                        name: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                veterinarian: {
+                    select: {
+                        id: true,
+                        user: { select: { name: true } },
+                        clinic: { select: { id: true, name: true } },
+                    },
+                },
             },
         });
 
@@ -62,6 +88,8 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             diagnosis: medicalRecord.diagnosis || "",
             treatment: medicalRecord.treatment || "",
             notes: medicalRecord.notes || "",
+            ownerId: medicalRecord.pet.owner?.id || "",
+            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
         };
     }
 
@@ -95,6 +123,32 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             where: { veterinarianId },
             include: {
                 vaccinations: true,
+                pet: {
+                    select: {
+                        id: true,
+                        name: true,
+                        mainImage: true,
+                        owner: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select:
+                                    {
+                                        id: true,
+                                        name: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                veterinarian: {
+                    select: {
+                        id: true,
+                        user: { select: { name: true } },
+                        clinic: { select: { id: true, name: true } },
+                    },
+                },
             },
         });
 
@@ -106,6 +160,8 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             diagnosis: medicalRecord.diagnosis || "",
             treatment: medicalRecord.treatment || "",
             notes: medicalRecord.notes || "",
+            ownerId: medicalRecord.pet.owner?.id || "",
+            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
         }));
     }
 
@@ -116,6 +172,32 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             where: { petId },
             include: {
                 vaccinations: true,
+                pet: {
+                    select: {
+                        id: true,
+                        name: true,
+                        mainImage: true,
+                        owner: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select:
+                                    {
+                                        id: true,
+                                        name: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                veterinarian: {
+                    select: {
+                        id: true,
+                        user: { select: { name: true } },
+                        clinic: { select: { id: true, name: true } },
+                    },
+                },
             },
         });
 
@@ -127,6 +209,8 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             diagnosis: medicalRecord.diagnosis || "",
             treatment: medicalRecord.treatment || "",
             notes: medicalRecord.notes || "",
+            ownerId: medicalRecord.pet.owner.id || "",
+            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
         }));
     }
 
@@ -156,26 +240,28 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
                 vaccinations: true,
                 pet: {
                     select: {
+                        id: true,
                         name: true,
                         mainImage: true,
-                        ...(user.veterinarian && {
-                            owner: {
-                                select: {
-                                    user: {
-                                        select:
-                                        {
-                                            name: true,
-                                        }
+                        owner: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select:
+                                    {
+                                        id: true,
+                                        name: true,
                                     }
                                 }
                             }
-                        })
+                        }
                     }
                 },
                 veterinarian: {
                     select: {
+                        id: true,
                         user: { select: { name: true } },
-                        clinic: { select: { name: true } },
+                        clinic: { select: { id: true, name: true } },
                     },
                 },
             },
@@ -184,12 +270,27 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
         });
 
+        const documentIds = medicalRecords.map((medicalRecord) => medicalRecord.id);
+        const documents = await this.prisma.document.findMany({
+            where: {
+                medicalRecordId: {
+                    in: documentIds,
+                },
+            },
+            select: {
+                id: true,
+            }
+        });
+
         return medicalRecords.map((medicalRecord) => ({
             ...medicalRecord,
             type: medicalRecord.type as MedicalRecordType,
             diagnosis: medicalRecord.diagnosis || "",
             treatment: medicalRecord.treatment || "",
             notes: medicalRecord.notes || "",
+            ownerId: medicalRecord.pet.owner.id || "",
+            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
+            documentIds: documents.map((document) => document.id),
         }));
     }
 }

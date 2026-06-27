@@ -6,13 +6,15 @@ export interface MedicalRecordModel {
     visitDate: Date;
     type: MedicalRecordType;
     reasonForVisit: string;
-    diagnosis: string;
-    treatment: string;
-    notes: string;
+    diagnosis: string | null;
+    treatment: string | null;
+    notes: string | null;
     createdAt: Date;
-    updatedAt: Date;
     petId: string;
     veterinarianId: string;
+    ownerId: string;
+    clinicId: string;
+    documentIds?: string[];
     vaccinations?: VaccinationModel[];
 }
 
