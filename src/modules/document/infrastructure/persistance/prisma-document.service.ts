@@ -116,6 +116,26 @@ export class PrismaDocumentService implements IDocumentRepository {
 
         return this.prisma.document.findMany({
             where: whereClause,
+            include: {
+                medicalRecord: {
+                    select: {
+                        pet: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        veterinarian: {
+                            select: {
+                                user: {
+                                    select: {
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 }
