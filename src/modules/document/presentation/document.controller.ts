@@ -57,12 +57,14 @@ export class DocumentController {
         @Query("endDate") endDate?: string,
         @Query("veterinarianName") veterinarianName?: string,
         @Query("documentName") documentName?: string,
+        @Query("medicalRecordId") medicalRecordId?: string,
     ) {
         return this.findDocumentsByUserIdUseCase.execute(userId, {
-            startDate,
-            endDate,
-            veterinarianName,
-            documentName,
+            startDate: startDate ? new Date(startDate) : undefined,
+            endDate: endDate ? new Date(endDate) : undefined,
+            veterinarianName: veterinarianName,
+            documentName: documentName,
+            medicalRecordId,
         });
     }
 }

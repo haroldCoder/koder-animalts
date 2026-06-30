@@ -1,5 +1,5 @@
 import { ResponseDto } from "@/common/domain/dto";
-import { DocumentModel } from "@document/domain/models";
+import { DocumentModel, FindDocumentsCriteria } from "@document/domain/models";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 
@@ -12,21 +12,17 @@ export class FindDocumentsByUserIdUseCase {
 
     async execute(
         userId: string,
-        queries: {
-            startDate?: string;
-            endDate?: string;
-            veterinarianName?: string;
-            documentName?: string;
-        }
+        queries: FindDocumentsCriteria
     ): Promise<ResponseDto<DocumentModel[]>> {
-        const { startDate, endDate, veterinarianName, documentName } = queries;
+        const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = queries;
 
-        const hasStartDate = !!startDate?.trim();
-        const hasEndDate = !!endDate?.trim();
-        const hasVetName = !!veterinarianName?.trim();
-        const hasDocName = !!documentName?.trim();
+        const hasStartDate = !!startDate;
+        const hasEndDate = !!endDate;
+        const hasVetName = !!veterinarianName;
+        const hasDocName = !!documentName;
+        const hasMedicalRecordId = !!medicalRecordId;
 
-        if (!userId || (!hasStartDate && !hasEndDate && !hasVetName && !hasDocName)) {
+        if (!userId || (!hasStartDate && !hasEndDate && !hasVetName && !hasDocName && !hasMedicalRecordId)) {
             return {
                 statusCode: HttpStatus.OK,
                 message: "Documents retrieved successfully",
@@ -69,8 +65,9 @@ export class FindDocumentsByUserIdUseCase {
             const documents = await this.documentRepository.findDocumentsByUserId(userId, {
                 startDate: start,
                 endDate: end,
-                veterinarianName: hasVetName ? veterinarianName?.trim() : undefined,
-                documentName: hasDocName ? documentName?.trim() : undefined,
+                veterinarianName: hasVetName ? veterinarianName : undefined,
+                documentName: hasDocName ? documentName : undefined,
+                medicalRecordId: hasMedicalRecordId ? medicalRecordId?.trim() : undefined,
             });
 
             return {

@@ -34,5 +34,6 @@ export interface FindDocumentsCriteria {
     endDate?: Date;
     veterinarianName?: string;
     documentName?: string;
+    medicalRecordId?: string;
 }
 

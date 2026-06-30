@@ -30,8 +30,8 @@ describe("FindDocumentsByUserIdUseCase", () => {
 
     it("should return empty array if userId is missing", async () => {
         const result = await useCase.execute("", {
-            startDate: "2026-01-01",
-            endDate: "2026-12-31",
+            startDate: new Date("2026-01-01"),
+            endDate: new Date("2026-12-31"),
             veterinarianName: "John Doe",
             documentName: "Report",
         });
@@ -99,7 +99,7 @@ describe("FindDocumentsByUserIdUseCase", () => {
 
     it("should return empty array if only invalid date is passed", async () => {
         const result = await useCase.execute("user-123", {
-            startDate: "not-a-date",
+            startDate: new Date("not-a-date"),
         });
 
         expect(mockDocumentRepository.findDocumentsByUserId).not.toHaveBeenCalled();
@@ -117,8 +117,8 @@ describe("FindDocumentsByUserIdUseCase", () => {
         mockDocumentRepository.findDocumentsByUserId.mockResolvedValue(mockDocs);
 
         const queries = {
-            startDate: "2026-01-01",
-            endDate: "2026-12-31",
+            startDate: new Date("2026-01-01"),
+            endDate: new Date("2026-12-31"),
             veterinarianName: "John Doe",
             documentName: "Report",
         };

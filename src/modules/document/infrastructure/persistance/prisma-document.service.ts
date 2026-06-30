@@ -68,11 +68,12 @@ export class PrismaDocumentService implements IDocumentRepository {
     }
 
     async findDocumentsByUserId(userId: string, criteria: FindDocumentsCriteria): Promise<DocumentModel[]> {
-        const { startDate, endDate, veterinarianName, documentName } = criteria;
+        const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = criteria;
 
         const whereClause: any = {
             medicalRecord: {
                 OR: [
+                    { id: medicalRecordId },
                     {
                         pet: {
                             owner: {
