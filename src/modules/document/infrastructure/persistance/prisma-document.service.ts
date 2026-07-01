@@ -71,9 +71,8 @@ export class PrismaDocumentService implements IDocumentRepository {
         const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = criteria;
 
         const whereClause: any = {
-            medicalRecord: {
+            medicalRecord: medicalRecordId ? { id: medicalRecordId } : {
                 OR: [
-                    { id: medicalRecordId },
                     {
                         pet: {
                             owner: {
