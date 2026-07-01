@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class RegisterMedicalRecordDto {
     @IsNotEmpty()
@@ -8,7 +8,7 @@ export class RegisterMedicalRecordDto {
 
     @IsNotEmpty()
     @IsString()
-    veterinarianId: string;
+    userId: string;
 
     @IsNotEmpty()
     @IsString()
@@ -23,20 +23,25 @@ export class RegisterMedicalRecordDto {
     @Transform(({ value }) => new Date(value))
     visitDate: Date;
 
+    @IsOptional()
     @IsString()
-    notes: string;
+    notes?: string;
 
+    @IsOptional()
     @IsString()
-    diagnosis: string;
+    diagnosis?: string;
 
+    @IsOptional()
     @IsString()
-    treatment: string;
+    treatment?: string;
 
+    @IsOptional()
     @IsDate()
     @Transform(({ value }) => new Date(value))
-    createdAt: Date;
+    createdAt?: Date;
 
+    @IsOptional()
     @IsDate()
     @Transform(({ value }) => new Date(value))
-    updatedAt: Date;
+    updatedAt?: Date;
 }

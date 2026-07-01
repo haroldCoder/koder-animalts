@@ -99,10 +99,12 @@ export class PrismaPetService implements IPetRepository {
         const pets = await this.prisma.pet.findMany({
             where: {
                 clinic: { veterinarians: { some: { userId } } },
-                OR: [
-                    { name: petName ? { contains: petName, mode: 'insensitive' } : undefined },
-                    { owner: ownerName ? { user: { name: { contains: ownerName, mode: 'insensitive' } } } : undefined }
-                ]
+                ...(petName || ownerName) && {
+                    OR: [
+                        { name: { contains: petName, mode: 'insensitive' } },
+                        { owner: { user: { name: { contains: ownerName, mode: 'insensitive' } } } }
+                    ]
+                }
             },
         });
 

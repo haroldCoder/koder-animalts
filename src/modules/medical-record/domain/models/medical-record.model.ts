@@ -6,9 +6,9 @@ export interface MedicalRecordModel {
     visitDate: Date;
     type: MedicalRecordType;
     reasonForVisit: string;
-    diagnosis: string | null;
-    treatment: string | null;
-    notes: string | null;
+    diagnosis?: string;
+    treatment?: string;
+    notes?: string;
     createdAt: Date;
     petId: string;
     veterinarianId: string;
@@ -22,9 +22,9 @@ export interface RegisterMedicalRecordModel {
     visitDate: Date;
     type: MedicalRecordType;
     reasonForVisit: string;
-    diagnosis: string;
-    treatment: string;
-    notes: string;
+    diagnosis?: string;
+    treatment?: string;
+    notes?: string;
     petId: string;
-    veterinarianId: string;
+    userId: string;
 }

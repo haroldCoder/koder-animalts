@@ -27,10 +27,10 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
 
 
     async create(data: RegisterMedicalRecordModel): Promise<void> {
-        const { petId, veterinarianId, type, reasonForVisit, visitDate } = data;
+        const { petId, userId, type, reasonForVisit, visitDate } = data;
 
         if (!petId) throw new PetIdNotFoundException();
-        if (!veterinarianId) throw new VeterinarianIdNotFoundException();
+        if (!userId) throw new UserIdNotFoundException();
         if (!type) throw new MedicalRecordTypeNotFoundException();
         if (!reasonForVisit) throw new MedicalRecordReasonForVisitNotFoundException();
         if (!visitDate) throw new MedicalRecordVisitDateNotFoundException();
@@ -38,11 +38,20 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         const pet = await this.petRepository.findById(petId);
         if (!pet) throw new PetIdNotFoundException();
 
-        const veterinarian = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
+        const veterinarian = await this.veterinarianRepository.findByUserId(userId);
         if (!veterinarian) throw new VeterinarianIdNotFoundException();
 
         await this.prisma.medicalRecord.create({
-            data
+            data: {
+                petId,
+                type,
+                reasonForVisit,
+                visitDate,
+                diagnosis: data.diagnosis || "",
+                treatment: data.treatment || "",
+                notes: data.notes || "",
+                veterinarianId: veterinarian.id
+            }
         });
     }
 
