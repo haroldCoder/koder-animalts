@@ -223,7 +223,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         }));
     }
 
-    async findByUserId(userId: string): Promise<MedicalRecordModel[]> {
+    async findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordModel[]> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: { owner: true, veterinarian: true },
@@ -244,6 +244,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         const medicalRecords = await this.prisma.medicalRecord.findMany({
             where: {
                 pet: petFilter,
+                ...(medicalRecordId ? { id: medicalRecordId } : {}),
             },
             include: {
                 vaccinations: true,

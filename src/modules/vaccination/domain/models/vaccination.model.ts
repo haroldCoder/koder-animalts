@@ -8,6 +8,7 @@ export class VaccinationModel {
     lotNumber: string | null;
     medicalRecordId: string;
     createdAt: Date;
+    petName?: string;
 }
 
 export class CreateVaccinationModel {
@@ -19,3 +20,10 @@ export class CreateVaccinationModel {
 }
 
 export class UpdateVaccinationModel extends PartialType(CreateVaccinationModel) { }
+
+export interface FindVaccinationsCriteria {
+    page?: number;
+    limit?: number;
+    medicalRecordId?: string;
+}
+

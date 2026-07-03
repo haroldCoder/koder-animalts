@@ -10,8 +10,8 @@ export class GetMedicalRecordByUserIdUseCase {
         private readonly medicalRecordRepository: MedicalRecordRepository,
     ) { }
 
-    async execute(userId: string): Promise<ResponseDto<MedicalRecordModel[]>> {
-        const medicalRecords = await this.medicalRecordRepository.findByUserId(userId);
+    async execute(userId: string, medicalRecordId?: string): Promise<ResponseDto<MedicalRecordModel[]>> {
+        const medicalRecords = await this.medicalRecordRepository.findByUserId(userId, medicalRecordId);
 
         return {
             data: medicalRecords,

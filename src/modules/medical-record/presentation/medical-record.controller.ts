@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { RegisterMedicalRecordDto } from "@medical-record/presentation/dtos";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { RegisterDocumentDto } from "@/common/domain/dto";
@@ -56,7 +56,7 @@ export class MedicalRecordController {
     }
 
     @Get("pet/userId/:id")
-    async getMedicalRecordByUserId(@Param("id") id: string) {
-        return this.getMedicalRecordByUserIdUseCase.execute(id);
+    async getMedicalRecordByUserId(@Param("id") id: string, @Query("medicalRecordId") medicalRecordId?: string) {
+        return this.getMedicalRecordByUserIdUseCase.execute(id, medicalRecordId);
     }
 }
