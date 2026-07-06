@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaPetService } from "./prisma-pet.service";
 import { GenderPet } from "@pet/domain/enums";
+import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
 
 describe("PrismaPetService", () => {
     let service: PrismaPetService;
@@ -14,6 +15,9 @@ describe("PrismaPetService", () => {
             delete: jest.fn(),
             findUnique: jest.fn(),
         },
+        owner: {
+            findFirst: jest.fn(),
+        },
     };
 
     beforeEach(async () => {
@@ -24,6 +28,12 @@ describe("PrismaPetService", () => {
                     provide: PrismaService,
                     useValue: mockPrismaService,
                 },
+                {
+                    provide: PrismaVeterinarianService,
+                    useValue: {
+                        findByIdWithDetails: jest.fn(),
+                    },
+                }
             ],
         }).compile();
 
@@ -51,9 +61,10 @@ describe("PrismaPetService", () => {
             };
             const mockPet = { id: "pet-123", ...petData };
 
+            mockPrismaService.owner.findFirst.mockResolvedValue({ id: "owner-123" });
             mockPrismaService.pet.create.mockResolvedValue(mockPet);
 
-            const result = await service.create(petData as any);
+            const result = await service.create(petData as any, "user-123");
 
             expect(prisma.pet.create).toHaveBeenCalledWith({
                 data: petData,

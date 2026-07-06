@@ -35,7 +35,7 @@ export class SignUpUseCase {
         if (password) {
             const hashedPassword = hashPassword(password);
             await this.authRepository.createAccount({
-                userId: user.id,
+                userId: user.getId(),
                 providerId: "credentials",
                 accountId: email,
                 password: hashedPassword,
@@ -47,7 +47,7 @@ export class SignUpUseCase {
         const sessionExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days default
 
         await this.authRepository.createSession({
-            userId: user.id,
+            userId: user.getId(),
             token: sessionToken,
             expiresAt: sessionExpiresAt,
             ipAddress,
@@ -57,7 +57,7 @@ export class SignUpUseCase {
         return {
             message: "Registro exitoso",
             statusCode: 201,
-            data: user.id,
+            data: user.getId(),
         };
     }
 }

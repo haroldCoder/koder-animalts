@@ -27,14 +27,14 @@ export class LoginUseCase {
         }
 
         // 2. Find Credentials Account
-        const account = await this.authRepository.findAccount("credentials", email, user.id);
-        if (!account || !account.password) {
+        const account = await this.authRepository.findAccount("credentials", email, user.getId());
+        if (!account || !account.getPassword()) {
             throw new InvalidCredentialsException();
         }
 
         // 3. Verify Password
         if (password) {
-            const isPasswordValid = verifyPassword(password, account.password);
+            const isPasswordValid = verifyPassword(password, account.getPassword()!);
             if (!isPasswordValid) {
                 throw new InvalidCredentialsException();
             }
@@ -47,7 +47,7 @@ export class LoginUseCase {
         const sessionExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days default
 
         await this.authRepository.createSession({
-            userId: user.id,
+            userId: user.getId(),
             token: sessionToken,
             expiresAt: sessionExpiresAt,
             ipAddress,
@@ -57,7 +57,7 @@ export class LoginUseCase {
         return {
             message: "Login exitoso",
             statusCode: 200,
-            data: user.id,
+            data: user.getId(),
         };
     }
 }

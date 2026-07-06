@@ -181,9 +181,29 @@ describe('PrismaDocumentService', () => {
                             {
                                 veterinarian: {
                                     userId: userId,
-                                },
+                                }
                             },
                         ],
+                    },
+                },
+                include: {
+                    medicalRecord: {
+                        select: {
+                            pet: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                            veterinarian: {
+                                select: {
+                                    user: {
+                                        select: {
+                                            name: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             });

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import type { IAuthRepository } from "@auth/domain/ports";
-import type { AuthenticateModel } from "@auth/domain/models";
+import type { AuthenticateEntity } from "@auth/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { AuthAccountIdRequiredException, AuthEmailRequiredException, AuthProviderIdRequiredException } from "@auth/domain/exceptions";
 
@@ -12,7 +12,7 @@ export class AuthenticateUseCase {
         private readonly authRepository: IAuthRepository
     ) { }
 
-    async execute(params: AuthenticateModel): Promise<ResponseDto<string>> {
+    async execute(params: AuthenticateEntity): Promise<ResponseDto<string>> {
         const {
             email,
             name,
@@ -34,18 +34,19 @@ export class AuthenticateUseCase {
         const user = await this.authRepository.upsertUser(email, name, image);
 
         // 2. Upsert Account
-        let account = await this.authRepository.findAccount(providerId, accountId, user.id);
+        let account = await this.authRepository.findAccount(providerId, accountId, user.getId());
 
         if (!account) {
             account = await this.authRepository.createAccount({
-                userId: user.id,
+
+                userId: user.getId(),
                 providerId,
                 accountId,
                 accessToken,
                 refreshToken,
             });
         } else {
-            account = await this.authRepository.updateAccount(account.id, {
+            account = await this.authRepository.updateAccount(account.getId(), {
                 accessToken,
                 refreshToken,
             });
@@ -56,7 +57,7 @@ export class AuthenticateUseCase {
         const sessionExpiresAt = expiresAt ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days default
 
         await this.authRepository.createSession({
-            userId: user.id,
+            userId: user.getId(),
             token: sessionToken,
             expiresAt: sessionExpiresAt,
             ipAddress,
@@ -66,7 +67,7 @@ export class AuthenticateUseCase {
         return {
             message: "Login exitoso",
             statusCode: 200,
-            data: user.id
+            data: user.getId()
         };
     }
 }

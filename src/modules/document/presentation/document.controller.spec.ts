@@ -166,7 +166,13 @@ describe('DocumentController', () => {
                 queries.documentName,
             );
 
-            expect(mockFindDocumentsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, queries);
+            expect(mockFindDocumentsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, {
+                startDate: new Date(queries.startDate),
+                endDate: new Date(queries.endDate),
+                veterinarianName: queries.veterinarianName,
+                documentName: queries.documentName,
+                medicalRecordId: undefined,
+            });
             expect(result).toEqual(mockResult);
         });
     });
