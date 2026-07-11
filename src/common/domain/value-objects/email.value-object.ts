@@ -1,4 +1,4 @@
-import { AuthEmailRequiredException, InvalidEmailFormatException } from "@auth/domain/exceptions";
+import { EmailRequiredException, InvalidEmailFormatException } from "../exceptions";
 
 export class Email {
     private readonly value: string;
@@ -9,7 +9,7 @@ export class Email {
 
     public static create(value: string): Email {
         if (!value || value.trim() === "") {
-            throw new AuthEmailRequiredException();
+            throw new EmailRequiredException();
         }
         const trimmed = value.trim().toLowerCase();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
