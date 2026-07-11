@@ -1,41 +1,57 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { IOwnerRepository } from "@owner/domain/ports";
-import { CreateOwnerModel, OwnerModel } from "@owner/domain/models";
+import { OwnerEntity } from "@owner/domain/entities";
 import { OwnerAlreadyExistException } from "@owner/domain/exceptions";
-import { AdressNotFoundException, PhoneNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PrismaOwnerService implements IOwnerRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(owner: CreateOwnerModel): Promise<string> {
+    private mapToDomain(owner: {
+        id: string;
+        address: string;
+        phone: string;
+        userId: string;
+        createdAt?: Date;
+        updatedAt?: Date;
+    }): OwnerEntity {
+        return OwnerEntity.create({
+            id: owner.id,
+            address: owner.address,
+            phone: owner.phone,
+            userId: owner.userId,
+            createdAt: owner.createdAt,
+            updatedAt: owner.updatedAt,
+        });
+    }
 
+    async create(owner: OwnerEntity): Promise<string> {
+        const existing = await this.prisma.owner.findUnique({
+            where: { userId: owner.getUserId() }
+        });
 
-        const { address, phone, userId } = owner;
-        console.log(!userId);
-        if (!address) throw new AdressNotFoundException();
-        if (!phone) throw new PhoneNotFoundException();
-        if (!userId) throw new UserIdNotFoundException();
-
-        const ownerExist = await this.findByUserId(userId);
-        if (ownerExist) throw new OwnerAlreadyExistException();
+        if (existing) throw new OwnerAlreadyExistException();
 
         const { id } = await this.prisma.owner.create({
-            data: owner
+            data: {
+                id: owner.getId(),
+                address: owner.getAddress(),
+                phone: owner.getPhone(),
+                userId: owner.getUserId(),
+            }
         });
+
         return id;
     }
 
-    async findByUserId(userId: string): Promise<OwnerModel | null> {
-        if (!userId) throw new UserIdNotFoundException();
-
+    async findByUserId(userId: string): Promise<OwnerEntity | null> {
         const owner = await this.prisma.owner.findUnique({
             where: { userId }
         });
 
-        if (!owner) null;
+        if (!owner) return null;
 
-        return owner;
+        return this.mapToDomain(owner);
     }
 }

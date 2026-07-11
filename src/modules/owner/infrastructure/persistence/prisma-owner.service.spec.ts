@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaOwnerService } from "./prisma-owner.service";
+import { OwnerEntity } from "@owner/domain/entities";
 import { OwnerAlreadyExistException } from "@owner/domain/exceptions";
 
 describe("PrismaOwnerService", () => {
@@ -38,60 +39,69 @@ describe("PrismaOwnerService", () => {
     });
 
     describe("create", () => {
-        it("should call prisma.owner.create with correct data after checking existence", async () => {
-            const ownerData = {
-                address: "Street 123",
-                phone: "123456789",
-                userId: "user-123",
-            };
-            const mockOwner = { id: "owner-123", ...ownerData };
+        const ownerEntity = OwnerEntity.create({
+            id: "owner-123",
+            address: "Street 123",
+            phone: "123456789",
+            userId: "user-123",
+        });
 
+        it("should create owner and return id when user does not already exist", async () => {
             mockPrismaService.owner.findUnique.mockResolvedValueOnce(null);
-            mockPrismaService.owner.create.mockResolvedValueOnce(mockOwner);
+            mockPrismaService.owner.create.mockResolvedValueOnce({ id: "owner-123" });
 
-            const result = await service.create(ownerData);
+            const result = await service.create(ownerEntity);
 
             expect(prisma.owner.findUnique).toHaveBeenCalledWith({
-                where: { userId: ownerData.userId },
+                where: { userId: ownerEntity.getUserId() },
             });
             expect(prisma.owner.create).toHaveBeenCalledWith({
-                data: ownerData,
+                data: {
+                    id: ownerEntity.getId(),
+                    address: ownerEntity.getAddress(),
+                    phone: ownerEntity.getPhone(),
+                    userId: ownerEntity.getUserId(),
+                },
             });
-            expect(result).toEqual(mockOwner.id);
+            expect(result).toBe("owner-123");
         });
 
         it("should throw OwnerAlreadyExistException if owner already exists", async () => {
-            const ownerData = {
-                address: "Street 123",
-                phone: "123456789",
-                userId: "user-123",
-            };
             mockPrismaService.owner.findUnique.mockResolvedValueOnce({ id: "existing" });
 
-            await expect(service.create(ownerData)).rejects.toThrow(OwnerAlreadyExistException);
+            await expect(service.create(ownerEntity)).rejects.toThrow(OwnerAlreadyExistException);
+            expect(prisma.owner.create).not.toHaveBeenCalled();
         });
     });
 
     describe("findByUserId", () => {
-        it("should call prisma.owner.findUnique with correct data", async () => {
-            const userId = "user-123";
-            const mockOwner = { id: "owner-123", userId, address: "Street 123", phone: "123456789" };
+        it("should return an OwnerEntity when owner is found", async () => {
+            const mockDbOwner = {
+                id: "owner-123",
+                userId: "user-123",
+                address: "Street 123",
+                phone: "123456789",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
 
-            mockPrismaService.owner.findUnique.mockResolvedValue(mockOwner);
+            mockPrismaService.owner.findUnique.mockResolvedValue(mockDbOwner);
 
-            const result = await service.findByUserId(userId);
+            const result = await service.findByUserId("user-123");
 
             expect(prisma.owner.findUnique).toHaveBeenCalledWith({
-                where: { userId },
+                where: { userId: "user-123" },
             });
-            expect(result).toEqual(mockOwner);
+            expect(result).toBeInstanceOf(OwnerEntity);
+            expect(result?.getId()).toBe("owner-123");
+            expect(result?.getAddress()).toBe("Street 123");
+            expect(result?.getPhone()).toBe("123456789");
         });
 
         it("should return null if owner not found", async () => {
-            const userId = "non-existent";
             mockPrismaService.owner.findUnique.mockResolvedValue(null);
 
-            const result = await service.findByUserId(userId);
+            const result = await service.findByUserId("non-existent");
 
             expect(result).toBeNull();
         });

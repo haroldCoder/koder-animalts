@@ -1,8 +1,8 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IOwnerRepository } from "@owner/domain/ports";
-import { ServerErrorException, UserIdNotFoundException } from "@/common/domain/exceptions";
+import { OwnerEntity } from "@owner/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
-import { OwnerModel } from "@owner/domain/models";
+import { ServerErrorException, UserIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class FindOwnerByUserIdUseCase {
@@ -11,21 +11,19 @@ export class FindOwnerByUserIdUseCase {
         private readonly ownerRepository: IOwnerRepository
     ) { }
 
-    async execute(userId: string): Promise<ResponseDto<OwnerModel>> {
+    async execute(userId: string): Promise<ResponseDto<OwnerEntity>> {
         try {
             const owner = await this.ownerRepository.findByUserId(userId);
 
             if (!owner) throw new UserIdNotFoundException();
 
             return {
-                statusCode: 200,
+                statusCode: HttpStatus.OK,
                 data: owner,
             };
         } catch (error) {
-            if (
-                error instanceof UserIdNotFoundException
-            ) throw error;
-            throw new ServerErrorException("find owner by user id failed" + error);
+            if (error instanceof UserIdNotFoundException) throw error;
+            throw new ServerErrorException("find owner by user id failed: " + error);
         }
     }
 }

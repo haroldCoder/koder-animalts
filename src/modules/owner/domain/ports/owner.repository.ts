@@ -1,6 +1,6 @@
-import { OwnerModel, CreateOwnerModel } from "@owner/domain/models";
+import { OwnerEntity } from "@owner/domain/entities";
 
 export interface IOwnerRepository {
-    create(owner: CreateOwnerModel): Promise<string>;
-    findByUserId(userId: string): Promise<OwnerModel | null>;
+    create(owner: OwnerEntity): Promise<string>;
+    findByUserId(userId: string): Promise<OwnerEntity | null>;
 }
