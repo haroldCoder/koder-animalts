@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IPetRepository } from "@pet/domain/ports";
-import { PetModel } from "@pet/domain/models";
+import { PetEntity } from "@pet/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { PetIdNotFoundException } from "@/common/domain/exceptions";
 
@@ -11,7 +11,7 @@ export class GetPetByIdUseCase {
         private readonly petRepository: IPetRepository
     ) { }
 
-    async execute(id: string): Promise<ResponseDto<PetModel>> {
+    async execute(id: string): Promise<ResponseDto<PetEntity>> {
         if (!id) throw new PetIdNotFoundException();
 
         const pet = await this.petRepository.findById(id);

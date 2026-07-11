@@ -1,5 +1,5 @@
 import type { IPetRepository } from "@pet/domain/ports";
-import { PetModel } from "@pet/domain/models";
+import { PetEntity } from "@pet/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 
@@ -7,7 +7,7 @@ import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 export class GetPetByUserOwnerUseCase {
     constructor(@Inject("IPetRepository") private readonly petRepository: IPetRepository) { }
 
-    async execute(userId: string): Promise<ResponseDto<PetModel[] | null>> {
+    async execute(userId: string): Promise<ResponseDto<PetEntity[] | null>> {
         const response = await this.petRepository.findByOwnerUserId(userId);
 
         return {

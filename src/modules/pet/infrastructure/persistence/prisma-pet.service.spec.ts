@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaPetService } from "./prisma-pet.service";
 import { GenderPet } from "@pet/domain/enums";
+import { PetEntity } from "@pet/domain/entities";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
 
 describe("PrismaPetService", () => {
@@ -49,25 +50,66 @@ describe("PrismaPetService", () => {
         expect(service).toBeDefined();
     });
 
+    describe("findOwnerIdByUserId", () => {
+        it("should return owner id if found", async () => {
+            mockPrismaService.owner.findFirst.mockResolvedValue({ id: "owner-123" });
+            const result = await service.findOwnerIdByUserId("user-123");
+            expect(result).toBe("owner-123");
+            expect(prisma.owner.findFirst).toHaveBeenCalledWith({
+                where: { userId: "user-123" }
+            });
+        });
+
+        it("should return null if not found", async () => {
+            mockPrismaService.owner.findFirst.mockResolvedValue(null);
+            const result = await service.findOwnerIdByUserId("user-123");
+            expect(result).toBeNull();
+        });
+    });
+
     describe("create", () => {
         it("should call prisma.pet.create and return id", async () => {
-            const petData = {
+            const pet = PetEntity.create({
+                id: "pet-123",
                 name: "Buddy",
                 species: "Dog",
                 gender: GenderPet.MALE,
                 mainImage: "image.jpg",
                 ownerId: "owner-123",
                 clinicId: "clinic-123",
+            });
+            const mockPet = {
+                id: pet.getId(),
+                name: pet.getName(),
+                species: pet.getSpecies(),
+                gender: pet.getGender(),
+                mainImage: pet.getMainImage(),
+                ownerId: pet.getOwnerId(),
+                clinicId: pet.getClinicId(),
             };
-            const mockPet = { id: "pet-123", ...petData };
 
-            mockPrismaService.owner.findFirst.mockResolvedValue({ id: "owner-123" });
             mockPrismaService.pet.create.mockResolvedValue(mockPet);
 
-            const result = await service.create(petData as any, "user-123");
+            const result = await service.create(pet);
 
             expect(prisma.pet.create).toHaveBeenCalledWith({
-                data: petData,
+                data: {
+                    id: pet.getId(),
+                    name: pet.getName(),
+                    species: pet.getSpecies(),
+                    breed: pet.getBreed(),
+                    gender: pet.getGender(),
+                    birthDate: pet.getBirthDate(),
+                    weight: pet.getWeight(),
+                    color: pet.getColor(),
+                    microchip: pet.getMicrochip(),
+                    isActive: pet.getIsActive(),
+                    mainImage: pet.getMainImage(),
+                    iaImage: pet.getIaImage(),
+                    images: pet.getImages(),
+                    ownerId: pet.getOwnerId(),
+                    clinicId: pet.getClinicId(),
+                },
             });
             expect(result).toBe(mockPet.id);
         });
@@ -75,19 +117,40 @@ describe("PrismaPetService", () => {
 
     describe("update", () => {
         it("should call prisma.pet.update and return updated id", async () => {
-            const id = "pet-123";
-            const updateData = { name: "Max" };
-            const mockPet = { id, name: "Max" };
+            const pet = PetEntity.create({
+                id: "pet-123",
+                name: "Max",
+                species: "Dog",
+                gender: GenderPet.MALE,
+                mainImage: "image.jpg",
+                ownerId: "owner-123",
+                clinicId: "clinic-123",
+            });
+            const mockPet = { id: pet.getId(), name: "Max" };
 
             mockPrismaService.pet.update.mockResolvedValue(mockPet);
 
-            const result = await service.update(id, updateData);
+            const result = await service.update(pet);
 
             expect(prisma.pet.update).toHaveBeenCalledWith({
-                where: { id },
-                data: updateData,
+                where: { id: pet.getId() },
+                data: {
+                    name: pet.getName(),
+                    species: pet.getSpecies(),
+                    breed: pet.getBreed(),
+                    gender: pet.getGender(),
+                    birthDate: pet.getBirthDate(),
+                    weight: pet.getWeight(),
+                    color: pet.getColor(),
+                    microchip: pet.getMicrochip(),
+                    isActive: pet.getIsActive(),
+                    mainImage: pet.getMainImage(),
+                    iaImage: pet.getIaImage(),
+                    images: pet.getImages(),
+                    clinicId: pet.getClinicId(),
+                },
             });
-            expect(result).toBe(id);
+            expect(result).toBe(pet.getId());
         });
     });
 
@@ -105,19 +168,26 @@ describe("PrismaPetService", () => {
     });
 
     describe("findById", () => {
-        it("should call prisma.pet.findUnique and return pet model with gender cast", async () => {
+        it("should call prisma.pet.findUnique and return pet entity", async () => {
             const id = "pet-123";
             const mockPet = {
                 id,
                 name: "Buddy",
                 species: "Dog",
-                gender: "MALE", // String from DB
+                gender: "MALE",
                 mainImage: "image.jpg",
                 ownerId: "owner-123",
                 clinicId: "clinic-123",
                 breed: null,
                 birthDate: null,
                 weight: null,
+                color: null,
+                microchip: null,
+                isActive: true,
+                iaImage: null,
+                images: [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
             };
 
             mockPrismaService.pet.findUnique.mockResolvedValue(mockPet);
@@ -127,10 +197,10 @@ describe("PrismaPetService", () => {
             expect(prisma.pet.findUnique).toHaveBeenCalledWith({
                 where: { id },
             });
-            expect(result).toEqual({
-                ...mockPet,
-                gender: GenderPet.MALE,
-            });
+            expect(result).toBeInstanceOf(PetEntity);
+            expect(result?.getId()).toBe(id);
+            expect(result?.getName()).toBe("Buddy");
+            expect(result?.getGender()).toBe(GenderPet.MALE);
         });
 
         it("should return null if pet not found", async () => {

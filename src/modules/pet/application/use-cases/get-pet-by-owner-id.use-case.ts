@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { IPetRepository } from "@pet/domain/ports";
-import { PetModel } from "@pet/domain/models";
+import { PetEntity } from "@pet/domain/entities";
 import { PetOwnerIdNotFoundException } from "@pet/domain/exceptions";
 import { ServerErrorException } from "@/common/domain/exceptions";
 
@@ -11,7 +11,7 @@ export class GetPetByOwnerIdUseCase {
         private readonly petRepository: IPetRepository,
     ) { }
 
-    async execute(ownerId: string): Promise<PetModel[] | null> {
+    async execute(ownerId: string): Promise<PetEntity[] | null> {
         try {
             return this.petRepository.findByOwnerId(ownerId);
         } catch (error) {
