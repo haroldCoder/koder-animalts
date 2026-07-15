@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { MedicalRecordController } from '@medical-record/presentation/medical-record.controller';
 import { PrismaMedicalRecordService } from '@medical-record/infrastructure';
 import { PetModule } from '@pet/pet.module';
@@ -45,6 +46,10 @@ import { PrismaVeterinarianService } from '@veterinarian/infrastructure/persiste
         {
             provide: "IVeterinarianRepository",
             useClass: PrismaVeterinarianService
+        },
+        {
+            provide: "IIdGenerator",
+            useValue: randomUUID
         }
     ],
     controllers: [MedicalRecordController],

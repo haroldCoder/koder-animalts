@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { MedicalRecordModel } from "@medical-record/domain/models";
+import { MedicalRecordEntity } from "@medical-record/domain/entities";
 import type { MedicalRecordRepository } from "@medical-record/domain/ports";
 import { PetIdNotFoundException, ServerErrorException } from "@/common/domain/exceptions";
 
@@ -10,7 +10,7 @@ export class GetMedicalRecordByPetIdUseCase {
         private readonly medicalRecordRepository: MedicalRecordRepository
     ) { }
 
-    async execute(petId: string): Promise<MedicalRecordModel[] | null> {
+    async execute(petId: string): Promise<MedicalRecordEntity[] | null> {
         try {
             if (!petId) throw new PetIdNotFoundException();
 

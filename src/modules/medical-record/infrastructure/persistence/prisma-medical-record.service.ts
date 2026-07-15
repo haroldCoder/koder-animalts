@@ -1,61 +1,63 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { MedicalRecordRepository } from "@medical-record/domain/ports";
-import { MedicalRecordModel, RegisterMedicalRecordModel } from "@medical-record/domain/models";
+import { MedicalRecordEntity } from "@medical-record/domain/entities";
 import { MedicalRecordType } from "@medical-record/domain/enums";
-import { PetIdNotFoundException, UserIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
-import { MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
-import type { IPetRepository } from "@pet/domain/ports";
+
+import { MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { sleep } from "@/common/infrastructure/utils";
 import { RegisterDocumentModel } from "@/common/domain/models";
+import { MedicalRecordIdNotFoundException, PetIdNotFoundException, VeterinarianIdNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
-import { MedicalRecordIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PrismaMedicalRecordService implements MedicalRecordRepository {
     constructor(
         private readonly prisma: PrismaService,
-        @Inject("IPetRepository")
-        private readonly petRepository: IPetRepository,
         @Inject("IVeterinarianRepository")
         private readonly veterinarianRepository: IVeterinarianRepository,
         @Inject("IDocumentRepository")
         private readonly documentRepository: IDocumentRepository,
     ) { }
 
+    private mapToDomain(medicalRecord: any): MedicalRecordEntity {
+        return MedicalRecordEntity.create({
+            id: medicalRecord.id,
+            visitDate: medicalRecord.visitDate,
+            type: medicalRecord.type as MedicalRecordType,
+            reasonForVisit: medicalRecord.reasonForVisit,
+            diagnosis: medicalRecord.diagnosis || "",
+            treatment: medicalRecord.treatment || "",
+            notes: medicalRecord.notes || "",
+            createdAt: medicalRecord.createdAt,
+            petId: medicalRecord.petId,
+            veterinarianId: medicalRecord.veterinarianId,
+            ownerId: medicalRecord.pet?.owner?.id || "",
+            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
+            documentIds: medicalRecord.documents?.map((doc: any) => doc.id) ?? [],
+            vaccinations: medicalRecord.vaccinations ?? [],
+        });
+    }
 
-    async create(data: RegisterMedicalRecordModel): Promise<void> {
-        const { petId, userId, type, reasonForVisit, visitDate } = data;
-
-        if (!petId) throw new PetIdNotFoundException();
-        if (!userId) throw new UserIdNotFoundException();
-        if (!type) throw new MedicalRecordTypeNotFoundException();
-        if (!reasonForVisit) throw new MedicalRecordReasonForVisitNotFoundException();
-        if (!visitDate) throw new MedicalRecordVisitDateNotFoundException();
-
-        const pet = await this.petRepository.findById(petId);
-        if (!pet) throw new PetIdNotFoundException();
-
-        const veterinarian = await this.veterinarianRepository.findByUserId(userId);
-        if (!veterinarian) throw new VeterinarianIdNotFoundException();
-
+    async create(medicalRecord: MedicalRecordEntity): Promise<void> {
         await this.prisma.medicalRecord.create({
             data: {
-                petId,
-                type,
-                reasonForVisit,
-                visitDate,
-                diagnosis: data.diagnosis || "",
-                treatment: data.treatment || "",
-                notes: data.notes || "",
-                veterinarianId: veterinarian.getId()
+                id: medicalRecord.getId(),
+                petId: medicalRecord.getPetId(),
+                type: medicalRecord.getType(),
+                reasonForVisit: medicalRecord.getReasonForVisit(),
+                visitDate: medicalRecord.getVisitDate(),
+                diagnosis: medicalRecord.getDiagnosis() || "",
+                treatment: medicalRecord.getTreatment() || "",
+                notes: medicalRecord.getNotes() || "",
+                veterinarianId: medicalRecord.getVeterinarianId()
             }
         });
     }
 
-    async findById(id: string): Promise<MedicalRecordModel | null> {
+    async findById(id: string): Promise<MedicalRecordEntity | null> {
         const medicalRecord = await this.prisma.medicalRecord.findUnique({
             where: { id },
             include: {
@@ -91,15 +93,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
 
         if (!medicalRecord) return null;
 
-        return {
-            ...medicalRecord,
-            type: medicalRecord.type as MedicalRecordType,
-            diagnosis: medicalRecord.diagnosis || "",
-            treatment: medicalRecord.treatment || "",
-            notes: medicalRecord.notes || "",
-            ownerId: medicalRecord.pet.owner?.id || "",
-            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
-        };
+        return this.mapToDomain(medicalRecord);
     }
 
     async uploadDocumentToMedicalRecord(medicalRecordId: string, documents: RegisterDocumentModel[]): Promise<void> {
@@ -110,22 +104,22 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         if (!medicalRecord) throw new MedicalRecordIdNotFoundException();
 
         let veterinaryClinic: { id: string, name: string } | null = null;
-        if (medicalRecord.veterinarianId) {
-            veterinaryClinic = await this.veterinarianRepository.findClinicByVeterinarianId(medicalRecord.veterinarianId);
+        if (medicalRecord.getVeterinarianId()) {
+            veterinaryClinic = await this.veterinarianRepository.findClinicByVeterinarianId(medicalRecord.getVeterinarianId());
         }
 
         for (const document of documents) {
             await this.documentRepository.registerDocument({
                 ...document,
                 medicalRecordId,
-                petId: medicalRecord.petId,
+                petId: medicalRecord.getPetId(),
                 ...(veterinaryClinic && { clinicId: veterinaryClinic.id }),
             });
             await sleep(500);
         }
     }
 
-    async findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordModel[] | null> {
+    async findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordEntity[] | null> {
         if (!veterinarianId) throw new VeterinarianIdNotFoundException();
 
         const medicalRecords = await this.prisma.medicalRecord.findMany({
@@ -163,18 +157,10 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
 
         if (!medicalRecords) return null;
 
-        return medicalRecords.map((medicalRecord) => ({
-            ...medicalRecord,
-            type: medicalRecord.type as MedicalRecordType,
-            diagnosis: medicalRecord.diagnosis || "",
-            treatment: medicalRecord.treatment || "",
-            notes: medicalRecord.notes || "",
-            ownerId: medicalRecord.pet.owner?.id || "",
-            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
-        }));
+        return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
     }
 
-    async findByPetId(petId: string): Promise<MedicalRecordModel[] | null> {
+    async findByPetId(petId: string): Promise<MedicalRecordEntity[] | null> {
         if (!petId) throw new PetIdNotFoundException();
 
         const medicalRecords = await this.prisma.medicalRecord.findMany({
@@ -212,18 +198,10 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
 
         if (!medicalRecords) return null;
 
-        return medicalRecords.map((medicalRecord) => ({
-            ...medicalRecord,
-            type: medicalRecord.type as MedicalRecordType,
-            diagnosis: medicalRecord.diagnosis || "",
-            treatment: medicalRecord.treatment || "",
-            notes: medicalRecord.notes || "",
-            ownerId: medicalRecord.pet.owner.id || "",
-            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
-        }));
+        return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
     }
 
-    async findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordModel[]> {
+    async findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordEntity[]> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: { owner: true, veterinarian: true },
@@ -285,15 +263,6 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
         });
 
-        return medicalRecords.map((medicalRecord) => ({
-            ...medicalRecord,
-            type: medicalRecord.type as MedicalRecordType,
-            diagnosis: medicalRecord.diagnosis || "",
-            treatment: medicalRecord.treatment || "",
-            notes: medicalRecord.notes || "",
-            ownerId: medicalRecord.pet.owner.id || "",
-            clinicId: medicalRecord.veterinarian?.clinic?.id || "",
-            documentIds: medicalRecord.documents.map((document) => document.id),
-        }));
+        return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
     }
 }

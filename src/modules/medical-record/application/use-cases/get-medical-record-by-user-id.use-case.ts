@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { MedicalRecordModel } from "@medical-record/domain/models";
+import { MedicalRecordEntity } from "@medical-record/domain/entities";
 import type { MedicalRecordRepository } from "@medical-record/domain/ports";
 import { ResponseDto } from "@/common/domain/dto";
 import { ServerErrorException, UserIdNotFoundException } from "@/common/domain/exceptions";
@@ -11,7 +11,7 @@ export class GetMedicalRecordByUserIdUseCase {
         private readonly medicalRecordRepository: MedicalRecordRepository,
     ) { }
 
-    async execute(userId: string, medicalRecordId?: string): Promise<ResponseDto<MedicalRecordModel[]>> {
+    async execute(userId: string, medicalRecordId?: string): Promise<ResponseDto<MedicalRecordEntity[]>> {
         try {
             if (!userId) throw new UserIdNotFoundException();
 

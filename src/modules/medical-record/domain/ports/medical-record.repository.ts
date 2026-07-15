@@ -1,11 +1,11 @@
 import { RegisterDocumentModel } from "@/common/domain/models";
-import { MedicalRecordModel, RegisterMedicalRecordModel } from "@medical-record/domain/models";
+import { MedicalRecordEntity } from "@medical-record/domain/entities";
 
 export interface MedicalRecordRepository {
-    create(data: RegisterMedicalRecordModel): Promise<void>;
-    findById(id: string): Promise<MedicalRecordModel | null>;
+    create(medicalRecord: MedicalRecordEntity): Promise<void>;
+    findById(id: string): Promise<MedicalRecordEntity | null>;
     uploadDocumentToMedicalRecord(medicalRecordId: string, documents: RegisterDocumentModel[]): Promise<void>;
-    findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordModel[] | null>;
-    findByPetId(petId: string): Promise<MedicalRecordModel[] | null>;
-    findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordModel[]>;
+    findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordEntity[] | null>;
+    findByPetId(petId: string): Promise<MedicalRecordEntity[] | null>;
+    findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordEntity[]>;
 }
