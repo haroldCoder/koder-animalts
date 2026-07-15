@@ -1,29 +1,43 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { IVeterinaryClinicRepository } from "@veterinary-clinics/domain/ports";
-import { CreateVeterinaryClinicModel, VeterinaryClinicModel, VeterinaryClinicSummaryModel } from "@veterinary-clinics/domain/models";
-import { EmailOrPhoneNotFoundException, NameClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
-import { AdressNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
+import { VeterinaryClinicSummaryModel } from "@veterinary-clinics/domain/models";
+import { UserIdNotFoundException } from "@/common/domain/exceptions";
 import { VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
+import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities/veterinary-clinic.entity";
 
 @Injectable()
 export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreateVeterinaryClinicModel): Promise<string> {
-        const { name, address, phone, email } = data;
+    private mapToDomain(clinic: any): VeterinaryClinicEntity {
+        return VeterinaryClinicEntity.create({
+            id: clinic.id,
+            name: clinic.name,
+            address: clinic.address,
+            phone: clinic.phone,
+            email: clinic.email,
+            createdAt: clinic.createdAt,
+            updatedAt: clinic.updatedAt,
+        });
+    }
 
-        if (!name) throw new NameClinicNotFoundException();
-        if (!address) throw new AdressNotFoundException();
-        if (!phone && !email) throw new EmailOrPhoneNotFoundException();
-
-        const { id } = await this.prisma.veterinaryClinic.create({ data });
+    async create(entity: VeterinaryClinicEntity): Promise<string> {
+        const { id } = await this.prisma.veterinaryClinic.create({
+            data: {
+                id: entity.getId(),
+                name: entity.getName(),
+                address: entity.getAddress(),
+                phone: entity.getPhone(),
+                email: entity.getEmail(),
+            }
+        });
         return id;
     }
 
-    async findAll(): Promise<VeterinaryClinicModel[]> {
+    async findAll(): Promise<VeterinaryClinicEntity[]> {
         const clinics = await this.prisma.veterinaryClinic.findMany();
-        return clinics as VeterinaryClinicModel[];
+        return clinics.map(clinic => this.mapToDomain(clinic));
     }
 
     async getSummaryByVeterinarianUserId(userId: string): Promise<VeterinaryClinicSummaryModel> {
@@ -60,3 +74,4 @@ export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepositor
         };
     }
 }
+

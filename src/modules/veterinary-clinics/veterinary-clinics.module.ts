@@ -7,6 +7,7 @@ import {
     GetVeterinaryClinicSummaryUseCase,
 } from "@veterinary-clinics/application/use-cases";
 import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructure/persistence";
+import { randomUUID } from "crypto";
 
 @Module({
     imports: [PrismaModule],
@@ -18,6 +19,10 @@ import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructur
         {
             provide: "IVeterinaryClinicRepository",
             useClass: PrismaVeterinaryClinicService,
+        },
+        {
+            provide: "IIdGenerator",
+            useValue: randomUUID,
         },
     ],
     exports: [
