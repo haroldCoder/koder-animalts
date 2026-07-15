@@ -9,7 +9,7 @@ import {
     PetIdNotFoundException,
     VeterinarianIdNotFoundException,
 } from "@/common/domain/exceptions";
-import { VaccinationModel } from "@vaccination/domain/models";
+import { VaccinationEntity } from "@vaccination/domain/entities";
 
 export class MedicalRecordEntity {
     private readonly id: string;
@@ -25,7 +25,7 @@ export class MedicalRecordEntity {
     private readonly ownerId: string;
     private readonly clinicId: string;
     private readonly documentIds: string[];
-    private readonly vaccinations: VaccinationModel[];
+    private readonly vaccinations: VaccinationEntity[];
 
     private constructor(properties: {
         id: string;
@@ -41,7 +41,7 @@ export class MedicalRecordEntity {
         ownerId?: string;
         clinicId?: string;
         documentIds?: string[];
-        vaccinations?: VaccinationModel[];
+        vaccinations?: VaccinationEntity[];
     }) {
         if (!properties.id) {
             throw new MedicalRecordIdNotFoundException();
@@ -92,7 +92,7 @@ export class MedicalRecordEntity {
         ownerId?: string;
         clinicId?: string;
         documentIds?: string[];
-        vaccinations?: VaccinationModel[];
+        vaccinations?: VaccinationEntity[];
     }): MedicalRecordEntity {
         return new MedicalRecordEntity({
             id: properties.id,
@@ -126,5 +126,5 @@ export class MedicalRecordEntity {
     public getOwnerId(): string { return this.ownerId; }
     public getClinicId(): string { return this.clinicId; }
     public getDocumentIds(): string[] { return this.documentIds; }
-    public getVaccinations(): VaccinationModel[] { return this.vaccinations; }
+    public getVaccinations(): VaccinationEntity[] { return this.vaccinations; }
 }
