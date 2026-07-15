@@ -1,12 +1,30 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { DocumentFileUrlNotFoundException, DocumentIdNotFoundException, DocumentTitleNotFoundException } from "@document/domain/exceptions";
-import { DocumentModel, RegisterDocumentModel, UpdateDocumentModel, FindDocumentsCriteria } from "@document/domain/models";
-import { IDocumentRepository } from "@document/domain/ports/document.repository";
+import { IDocumentRepository, FindDocumentsCriteria, UpdateDocumentFields } from "@document/domain/ports/document.repository";
+import { DocumentEntity } from "@document/domain/entities";
+import { RegisterDocumentModel } from "@/common/domain/models";
 
 @Injectable()
 export class PrismaDocumentService implements IDocumentRepository {
     constructor(private readonly prisma: PrismaService) { }
+
+    private mapToDomain(document: any): DocumentEntity {
+        return DocumentEntity.create({
+            id: document.id,
+            title: document.title,
+            fileUrl: document.fileUrl,
+            fileKey: document.fileKey,
+            fileSize: document.fileSize,
+            fileType: document.fileType,
+            category: document.category,
+            petId: document.petId,
+            clinicId: document.clinicId,
+            medicalRecordId: document.medicalRecordId,
+            createdAt: document.createdAt,
+            updatedAt: document.updatedAt,
+        });
+    }
 
     async registerDocument(document: RegisterDocumentModel): Promise<string> {
         const { title, fileUrl } = document;
@@ -26,7 +44,7 @@ export class PrismaDocumentService implements IDocumentRepository {
         return id;
     }
 
-    async updateDocument(document: UpdateDocumentModel, id: string): Promise<string> {
+    async updateDocument(document: UpdateDocumentFields, id: string): Promise<string> {
         if (!id) {
             throw new DocumentIdNotFoundException();
         }
@@ -51,7 +69,7 @@ export class PrismaDocumentService implements IDocumentRepository {
         return deletedId;
     }
 
-    async getDocumentById(id: string): Promise<DocumentModel> {
+    async getDocumentById(id: string): Promise<DocumentEntity> {
         if (!id) {
             throw new DocumentIdNotFoundException();
         }
@@ -64,10 +82,10 @@ export class PrismaDocumentService implements IDocumentRepository {
             throw new DocumentIdNotFoundException();
         }
 
-        return document;
+        return this.mapToDomain(document);
     }
 
-    async findDocumentsByUserId(userId: string, criteria: FindDocumentsCriteria): Promise<DocumentModel[]> {
+    async findDocumentsByUserId(userId: string, criteria: FindDocumentsCriteria): Promise<DocumentEntity[]> {
         const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = criteria;
 
         const whereClause: any = {
@@ -114,7 +132,7 @@ export class PrismaDocumentService implements IDocumentRepository {
             };
         }
 
-        return this.prisma.document.findMany({
+        const documents = await this.prisma.document.findMany({
             where: whereClause,
             include: {
                 medicalRecord: {
@@ -137,6 +155,7 @@ export class PrismaDocumentService implements IDocumentRepository {
                 }
             }
         });
+
+        return documents.map((doc) => this.mapToDomain(doc));
     }
 }
-

@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaDocumentService } from '@document/infrastructure/persistance/prisma-document.service';
 import { PrismaService } from '@/common/infrastructure/db/prisma.service';
-import { DocumentModel, RegisterDocumentModel, UpdateDocumentModel, FindDocumentsCriteria } from '@document/domain/models';
+import { FindDocumentsCriteria, UpdateDocumentFields } from '@document/domain/ports/document.repository';
+import { DocumentEntity } from '@document/domain/entities';
+import { RegisterDocumentModel } from '@/common/domain/models';
 import { DocumentFileUrlNotFoundException, DocumentIdNotFoundException, DocumentTitleNotFoundException } from '@document/domain/exceptions';
 
 describe('PrismaDocumentService', () => {
@@ -71,22 +73,22 @@ describe('PrismaDocumentService', () => {
 
     describe('updateDocument', () => {
         const docId = 'doc-123';
-        const updateDocumentModel: UpdateDocumentModel = { title: 'Updated Title' };
+        const updateDocumentFields: UpdateDocumentFields = { title: 'Updated Title' };
 
         it('should update a document successfully', async () => {
-            mockPrismaService.document.update.mockResolvedValue({ id: docId, ...updateDocumentModel });
+            mockPrismaService.document.update.mockResolvedValue({ id: docId, ...updateDocumentFields });
 
-            const result = await service.updateDocument(updateDocumentModel, docId);
+            const result = await service.updateDocument(updateDocumentFields, docId);
 
             expect(prisma.document.update).toHaveBeenCalledWith({
                 where: { id: docId },
-                data: updateDocumentModel,
+                data: updateDocumentFields,
             });
             expect(result).toEqual(docId);
         });
 
         it('should throw DocumentIdNotFoundException if id is missing', async () => {
-            await expect(service.updateDocument(updateDocumentModel, '')).rejects.toThrow(DocumentIdNotFoundException);
+            await expect(service.updateDocument(updateDocumentFields, '')).rejects.toThrow(DocumentIdNotFoundException);
         });
     });
 
@@ -121,7 +123,8 @@ describe('PrismaDocumentService', () => {
             const result = await service.getDocumentById(docId);
 
             expect(prisma.document.findUnique).toHaveBeenCalledWith({ where: { id: docId } });
-            expect(result).toEqual(mockDoc);
+            expect(result.getId()).toEqual(docId);
+            expect(result.getTitle()).toEqual(mockDoc.title);
         });
 
         it('should throw DocumentIdNotFoundException if id is missing', async () => {
@@ -207,7 +210,8 @@ describe('PrismaDocumentService', () => {
                     },
                 },
             });
-            expect(result).toEqual(mockDocs);
+            expect(result.length).toBe(1);
+            expect(result[0].getId()).toEqual(mockDocs[0].id);
         });
     });
 });

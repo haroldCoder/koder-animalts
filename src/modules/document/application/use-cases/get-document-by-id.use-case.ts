@@ -1,6 +1,6 @@
 import { ResponseDto } from "@/common/domain/dto";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
-import { DocumentModel } from "@document/domain/models";
+import { DocumentEntity } from "@document/domain/entities";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 
@@ -11,7 +11,7 @@ export class GetDocumentByIdUseCase {
         private readonly documentRepository: IDocumentRepository,
     ) { }
 
-    async execute(id: string): Promise<ResponseDto<DocumentModel>> {
+    async execute(id: string): Promise<ResponseDto<DocumentEntity>> {
         try {
             const document = await this.documentRepository.getDocumentById(id);
 

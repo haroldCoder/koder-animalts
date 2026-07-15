@@ -1,6 +1,6 @@
 import { ResponseDto } from "@/common/domain/dto";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
-import { UpdateDocumentModel } from "@document/domain/models";
+import { UpdateDocumentFields } from "@document/domain/ports/document.repository";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 
@@ -11,7 +11,7 @@ export class UpdateDocumentUseCase {
         private readonly documentRepository: IDocumentRepository,
     ) { }
 
-    async execute(document: UpdateDocumentModel, id: string): Promise<ResponseDto<string>> {
+    async execute(document: UpdateDocumentFields, id: string): Promise<ResponseDto<string>> {
         try {
             const updatedId = await this.documentRepository.updateDocument(document, id);
 
