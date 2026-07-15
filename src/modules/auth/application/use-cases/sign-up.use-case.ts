@@ -4,6 +4,7 @@ import type { IAuthRepository } from "@auth/domain/ports";
 import { ResponseDto } from "@/common/domain/dto";
 import { EmailAlreadyExistsException } from "@auth/domain/exceptions";
 import { hashPassword } from "@auth/infrastructure/utils/hash.utils";
+import { ServerErrorException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class SignUpUseCase {
@@ -20,44 +21,52 @@ export class SignUpUseCase {
         ipAddress?: string;
         userAgent?: string;
     }): Promise<ResponseDto<string>> {
-        const { email, name, password, image, ipAddress, userAgent } = params;
+        try {
 
-        // 1. Check if user already exists
-        const existingUser = await this.authRepository.findUserByEmail(email);
-        if (existingUser) {
-            throw new EmailAlreadyExistsException();
-        }
+            const { email, name, password, image, ipAddress, userAgent } = params;
 
-        // 2. Create/Upsert User
-        const user = await this.authRepository.upsertUser(email, name, image);
+            // 1. Check if user already exists
+            const existingUser = await this.authRepository.findUserByEmail(email);
+            if (existingUser) {
+                throw new EmailAlreadyExistsException();
+            }
 
-        // 3. Create Account (if password is provided)
-        if (password) {
-            const hashedPassword = hashPassword(password);
-            await this.authRepository.createAccount({
+            // 2. Create/Upsert User
+            const user = await this.authRepository.upsertUser(email, name, image);
+
+            // 3. Create Account (if password is provided)
+            if (password) {
+                const hashedPassword = hashPassword(password);
+                await this.authRepository.createAccount({
+                    userId: user.getId(),
+                    providerId: "credentials",
+                    accountId: email,
+                    password: hashedPassword,
+                });
+            }
+
+            // 4. Create Session
+            const sessionToken = randomUUID();
+            const sessionExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days default
+
+            await this.authRepository.createSession({
                 userId: user.getId(),
-                providerId: "credentials",
-                accountId: email,
-                password: hashedPassword,
+                token: sessionToken,
+                expiresAt: sessionExpiresAt,
+                ipAddress,
+                userAgent,
             });
+
+            return {
+                message: "Registro exitoso",
+                statusCode: 201,
+                data: user.getId(),
+            };
+        } catch (error) {
+            if (error instanceof EmailAlreadyExistsException) {
+                throw error;
+            }
+            throw new ServerErrorException("Failed to sign up: " + error);
         }
-
-        // 4. Create Session
-        const sessionToken = randomUUID();
-        const sessionExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days default
-
-        await this.authRepository.createSession({
-            userId: user.getId(),
-            token: sessionToken,
-            expiresAt: sessionExpiresAt,
-            ipAddress,
-            userAgent,
-        });
-
-        return {
-            message: "Registro exitoso",
-            statusCode: 201,
-            data: user.getId(),
-        };
     }
 }

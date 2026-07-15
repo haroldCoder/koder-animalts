@@ -115,7 +115,7 @@ export class PrismaPetService implements IPetRepository {
         if (!veterinarian) throw new VeterinarianIdNotFoundException();
 
         const pets = await this.prisma.pet.findMany({
-            where: { clinic: { id: veterinarian.clinicId } }
+            where: { clinic: { id: veterinarian.getClinicId() } }
         });
 
         if (!pets) return null;

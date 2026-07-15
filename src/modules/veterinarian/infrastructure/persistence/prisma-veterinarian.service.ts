@@ -1,30 +1,69 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
 import { IVeterinarianRepository } from "@veterinarian/domain/ports";
-import { CreateVeterinarianModel, VeterinarianModel, VeterinarianWithDetailsModel } from "@veterinarian/domain/models";
-import { PhoneNotFoundException, UserIdNotFoundException, VeterinarianIdNotExistException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
-import { ClinicIdNotFoundException, VeterinarianAlreadyExistsException } from "@veterinarian/domain/exceptions";
+import { VeterinarianEntity } from "@veterinarian/domain/entities";
+import { UserIdNotFoundException, VeterinarianIdNotExistException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
+import { VeterinarianAlreadyExistsException } from "@veterinarian/domain/exceptions";
 
 @Injectable()
 export class PrismaVeterinarianService implements IVeterinarianRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreateVeterinarianModel): Promise<string> {
-        const { phone, userId, clinicId } = data;
+    private mapToDomain(veterinarian: {
+        id: string;
+        phone: string;
+        specialty?: string | null;
+        userId: string;
+        clinicId: string;
+        createdAt?: Date;
+        updatedAt?: Date;
+        user?: {
+            id: string;
+            name: string | null;
+            email: string;
+        };
+        clinic?: {
+            id: string;
+            name: string;
+        };
+    }): VeterinarianEntity {
+        return VeterinarianEntity.create({
+            id: veterinarian.id,
+            phone: veterinarian.phone,
+            specialty: veterinarian.specialty,
+            userId: veterinarian.userId,
+            clinicId: veterinarian.clinicId,
+            createdAt: veterinarian.createdAt,
+            updatedAt: veterinarian.updatedAt,
+            user: veterinarian.user ? {
+                id: veterinarian.user.id,
+                name: veterinarian.user.name || "",
+                email: veterinarian.user.email,
+            } : undefined,
+            clinic: veterinarian.clinic,
+        });
+    }
 
-        if (!phone) throw new PhoneNotFoundException();
-        if (!userId) throw new UserIdNotFoundException();
-        if (!clinicId) throw new ClinicIdNotFoundException();
+    async create(veterinarian: VeterinarianEntity): Promise<string> {
+        const existing = await this.prisma.veterinarian.findUnique({
+            where: { userId: veterinarian.getUserId() }
+        });
 
-        const veterinarian = await this.findByUserId(userId);
+        if (existing) throw new VeterinarianAlreadyExistsException();
 
-        if (veterinarian) throw new VeterinarianAlreadyExistsException();
-
-        const { id } = await this.prisma.veterinarian.create({ data });
+        const { id } = await this.prisma.veterinarian.create({
+            data: {
+                id: veterinarian.getId(),
+                phone: veterinarian.getPhone(),
+                specialty: veterinarian.getSpecialty(),
+                userId: veterinarian.getUserId(),
+                clinicId: veterinarian.getClinicId(),
+            }
+        });
         return id;
     }
 
-    async findByIdWithDetails(id: string): Promise<VeterinarianWithDetailsModel | null> {
+    async findByIdWithDetails(id: string): Promise<VeterinarianEntity | null> {
         if (!id) throw new VeterinarianIdNotFoundException();
 
         const veterinarian = await this.prisma.veterinarian.findUnique({
@@ -39,15 +78,12 @@ export class PrismaVeterinarianService implements IVeterinarianRepository {
             }
         });
 
-        if (!veterinarian) throw new VeterinarianIdNotExistException();
+        if (!veterinarian) return null;
 
-        return {
-            ...veterinarian,
-            user: { ...veterinarian.user, name: veterinarian.user.name || "" },
-        } as VeterinarianWithDetailsModel;
+        return this.mapToDomain(veterinarian);
     }
 
-    async findByUserId(userId: string): Promise<VeterinarianModel | null> {
+    async findByUserId(userId: string): Promise<VeterinarianEntity | null> {
         if (!userId) throw new UserIdNotFoundException();
 
         const veterinarian = await this.prisma.veterinarian.findUnique({
@@ -56,10 +92,10 @@ export class PrismaVeterinarianService implements IVeterinarianRepository {
 
         if (!veterinarian) return null;
 
-        return {
+        return this.mapToDomain({
             ...veterinarian,
-            specialty: veterinarian?.specialty || ""
-        };
+            specialty: veterinarian.specialty || ""
+        });
     }
 
     async findClinicByVeterinarianId(veterinarianId: string): Promise<{ id: string; name: string } | null> {

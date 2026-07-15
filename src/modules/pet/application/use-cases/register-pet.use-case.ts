@@ -2,10 +2,15 @@ import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IPetRepository } from "@pet/domain/ports";
 import { PetEntity } from "@pet/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
-import { UserIdNotFoundException } from "@/common/domain/exceptions";
-import { PetOwnerIdNotFoundException } from "@pet/domain/exceptions";
+import { ServerErrorException, UserIdNotFoundException } from "@/common/domain/exceptions";
+import {
+    PetClinicIdNotFoundException,
+    PetMainImageNotFoundException,
+    PetNameNotFoundException,
+    PetOwnerIdNotFoundException,
+    PetSpeciesNotFoundException,
+} from "@pet/domain/exceptions";
 import type { RegisterPetParams } from "@pet/application/types";
-
 
 @Injectable()
 export class RegisterPetUseCase {
@@ -17,19 +22,33 @@ export class RegisterPetUseCase {
     ) { }
 
     async execute(params: RegisterPetParams, userId: string): Promise<ResponseDto<string>> {
-        this.ensureUserIdPresent(userId);
+        try {
+            this.ensureUserIdPresent(userId);
 
-        const ownerId = await this.resolveOwnerId(userId);
+            const ownerId = await this.resolveOwnerId(userId);
 
-        const pet = this.buildPetEntity(params, ownerId);
+            const pet = this.buildPetEntity(params, ownerId);
 
-        const petCreatedId = await this.petRepository.create(pet);
+            const petCreatedId = await this.petRepository.create(pet);
 
-        return {
-            statusCode: HttpStatus.CREATED,
-            message: "Pet registered successfully",
-            data: petCreatedId,
-        };
+            return {
+                statusCode: HttpStatus.CREATED,
+                message: "Pet registered successfully",
+                data: petCreatedId,
+            };
+        } catch (error) {
+            if (
+                error instanceof UserIdNotFoundException ||
+                error instanceof PetOwnerIdNotFoundException ||
+                error instanceof PetClinicIdNotFoundException ||
+                error instanceof PetMainImageNotFoundException ||
+                error instanceof PetNameNotFoundException ||
+                error instanceof PetSpeciesNotFoundException
+            ) {
+                throw error;
+            }
+            throw new ServerErrorException("Failed to register pet: " + error);
+        }
     }
 
     private ensureUserIdPresent(userId: string): void {

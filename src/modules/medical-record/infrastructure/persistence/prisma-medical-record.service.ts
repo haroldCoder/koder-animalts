@@ -50,7 +50,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
                 diagnosis: data.diagnosis || "",
                 treatment: data.treatment || "",
                 notes: data.notes || "",
-                veterinarianId: veterinarian.id
+                veterinarianId: veterinarian.getId()
             }
         });
     }
