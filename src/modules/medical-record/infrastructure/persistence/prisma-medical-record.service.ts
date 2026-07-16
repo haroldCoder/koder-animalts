@@ -12,6 +12,30 @@ import { RegisterDocumentModel } from "@/common/domain/models";
 import { MedicalRecordIdNotFoundException, PetIdNotFoundException, VeterinarianIdNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
 import { DocumentIdNotFoundException } from "@document/domain/exceptions";
 
+interface ExtendedMedicalRecordEntity extends MedicalRecordEntity {
+    pet: {
+        id: string,
+        name: string,
+        mainImage: string,
+        owner?: {
+            id: string,
+            user: {
+                name: string
+            }
+        }
+    },
+    veterinarian: {
+        id: string,
+        user: {
+            name: string
+        },
+        clinic: {
+            name: string
+            id: string
+        }
+    };
+}
+
 @Injectable()
 export class PrismaMedicalRecordService implements MedicalRecordRepository {
     constructor(
@@ -201,7 +225,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
     }
 
-    async findByUserId(userId: string, medicalRecordId?: string): Promise<MedicalRecordEntity[]> {
+    async findByUserId(userId: string, medicalRecordId?: string): Promise<ExtendedMedicalRecordEntity[]> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: { owner: true, veterinarian: true },
@@ -263,6 +287,33 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             },
         });
 
-        return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
+        return medicalRecords.map((medicalRecord) => {
+            const pet = medicalRecord.pet;
+            const veterinarian = medicalRecord.veterinarian;
+            return Object.assign(this.mapToDomain(medicalRecord), {
+                pet: {
+                    id: pet.id,
+                    name: pet.name,
+                    mainImage: pet.mainImage,
+                    owner: pet.owner ? {
+                        id: pet.owner.id,
+                        user: {
+                            id: pet.owner.user.id,
+                            name: pet.owner.user.name ?? "",
+                        }
+                    } : undefined
+                },
+                veterinarian: {
+                    id: veterinarian.id,
+                    user: {
+                        name: veterinarian.user.name ?? "",
+                    },
+                    clinic: {
+                        id: veterinarian.clinic?.id ?? "",
+                        name: veterinarian.clinic?.name ?? "",
+                    }
+                }
+            }) as ExtendedMedicalRecordEntity;
+        });
     }
 }
