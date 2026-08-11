@@ -11,10 +11,11 @@ import { PetModule } from '@pet/pet.module';
 import { MedicalRecordModule } from '@medical-record/medical-record.module';
 import { VaccinationModule } from '@vaccination/vaccination.module';
 import { UserModule } from './modules/user/user.module';
+import { AppointmentModule } from './modules/appointment/appointment.module';
 
 
 @Module({
-  imports: [PrismaModule, AuthModule, OwnerModule, VeterinarianModule, VeterinaryClinicsModule, DocumentModule, PetModule, MedicalRecordModule, VaccinationModule, UserModule],
+  imports: [PrismaModule, AuthModule, OwnerModule, VeterinarianModule, VeterinaryClinicsModule, DocumentModule, PetModule, MedicalRecordModule, VaccinationModule, UserModule, AppointmentModule],
   controllers: [AppController],
   providers: [AppService],
 })
