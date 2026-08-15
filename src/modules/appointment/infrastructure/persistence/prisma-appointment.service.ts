@@ -8,7 +8,7 @@ import { CreateAppointmentDto } from "../../domain/dto/create-appointment.dto";
 
 export type AppointmentWithRelations = Prisma.AppointmentGetPayload<{
     include: {
-        pet: { select: { id: true; name: true } };
+        pet: { select: { id: true; name: true, mainImage: true } },
         veterinarian: {
             include: {
                 user: { select: { name: true } };
@@ -66,7 +66,8 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                 ]
             },
             include: {
-                pet: { select: { id: true, name: true } },
+                pet: { select: { id: true, name: true, mainImage: true, owner: { select: { user: { select: { name: true } } } } } },
+
                 veterinarian: {
                     include: {
                         user: { select: { name: true } },

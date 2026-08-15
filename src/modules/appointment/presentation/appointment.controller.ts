@@ -43,28 +43,7 @@ export class AppointmentController {
     async getAppointmentsByUser(@Param("id") id: string) {
         try {
             const appointments = await this.getAppointmentsByUserUseCase.execute(id);
-            const data = appointments.map((a) => ({
-                id: a.id,
-                date: a.date.toISOString(),
-                reason: a.reason,
-                notes: a.notes ?? undefined,
-                petId: a.petId,
-                veterinarianId: a.veterinarianId,
-                status: a.status,
-                pet: a.pet
-                    ? { id: a.pet.id, name: a.pet.name }
-                    : undefined,
-                veterinarian: a.veterinarian
-                    ? {
-                        id: a.veterinarian.id,
-                        user: { name: a.veterinarian.user.name },
-                        clinic: a.veterinarian.clinic
-                            ? { name: a.veterinarian.clinic.name }
-                            : undefined,
-                    }
-                    : undefined,
-            }));
-            return new ResponseDto(HttpStatus.OK, "Appointments found", data);
+            return new ResponseDto(HttpStatus.OK, "Appointments found", appointments);
         } catch (error: any) {
             if (error instanceof HttpException) throw error;
             throw new BadRequestException(error.message);
