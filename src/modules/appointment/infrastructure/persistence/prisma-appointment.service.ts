@@ -5,6 +5,7 @@ import { AppointmentEntity } from "../../domain/entities";
 import { AppointmentStatus } from "../../domain/enums/appointment-status.enum";
 import { Appointment, Prisma } from "@prisma/client";
 import { CreateAppointmentDto } from "../../domain/dto/create-appointment.dto";
+import { AppointmentRelationUserDto } from "@appointment/domain/dto/appointment-relation-user.dto";
 
 export type AppointmentWithRelations = Prisma.AppointmentGetPayload<{
     include: {
@@ -57,8 +58,8 @@ export class PrismaAppointmentService implements IAppointmentRepository {
         return this.mapToEntity(appointment);
     }
 
-    async findByUserId(userId: string): Promise<AppointmentWithRelations[]> {
-        return this.prisma.appointment.findMany({
+    async findByUserId(userId: string): Promise<AppointmentRelationUserDto[]> {
+        const appointments = await this.prisma.appointment.findMany({
             where: {
                 OR: [
                     { pet: { owner: { userId } } },
@@ -76,6 +77,36 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                 },
             },
         });
+
+        return appointments.map(a => ({
+            id: a.id,
+            date: a.date,
+            reason: a.reason,
+            status: a.status as AppointmentStatus,
+            notes: a.notes ?? "",
+            createdAt: a.createdAt,
+            updatedAt: a.updatedAt,
+            petId: a.petId,
+            veterinarianId: a.veterinarianId,
+            pet: {
+                id: a.pet.id,
+                name: a.pet.name,
+                mainImage: a.pet.mainImage,
+                owner: {
+                    user: {
+                        name: a.pet.owner.user.name ?? ""
+                    }
+                }
+            },
+            veterinarian: {
+                user: {
+                    name: a.veterinarian.user.name ?? ""
+                },
+                clinic: {
+                    name: a.veterinarian.clinic.name
+                }
+            }
+        }));
     }
 
     async findByPetId(petId: string): Promise<AppointmentEntity[]> {

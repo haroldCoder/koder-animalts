@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { IAppointmentRepository } from "../../domain/ports/appointment.repository";
-import type { AppointmentWithRelations } from "../../infrastructure/persistence/prisma-appointment.service";
+import { AppointmentRelationUserDto } from "@appointment/domain/dto/appointment-relation-user.dto";
 
 @Injectable()
 export class GetAppointmentsByUserUseCase {
@@ -9,7 +9,7 @@ export class GetAppointmentsByUserUseCase {
         private readonly appointmentRepository: IAppointmentRepository
     ) { }
 
-    async execute(userId: string): Promise<AppointmentWithRelations[]> {
+    async execute(userId: string): Promise<AppointmentRelationUserDto[]> {
         return this.appointmentRepository.findByUserId(userId);
     }
 }
