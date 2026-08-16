@@ -225,7 +225,11 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
         return medicalRecords.map((medicalRecord) => this.mapToDomain(medicalRecord));
     }
 
-    async findByUserId(userId: string, medicalRecordId?: string): Promise<ExtendedMedicalRecordEntity[]> {
+    async findByUserId(userId: string, medicalRecordId?: string, petId?: string, startDate?: Date, endDate?: Date): Promise<ExtendedMedicalRecordEntity[]> {
+        if (!medicalRecordId && !petId && !startDate && !endDate) {
+            return [];
+        }
+
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: { owner: true, veterinarian: true },
@@ -247,6 +251,13 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             where: {
                 pet: petFilter,
                 ...(medicalRecordId ? { id: medicalRecordId } : {}),
+                ...(petId ? { petId } : {}),
+                ...(startDate || endDate ? {
+                    visitDate: {
+                        ...(startDate ? { gte: startDate } : {}),
+                        ...(endDate ? { lte: endDate } : {}),
+                    }
+                } : {})
             },
             include: {
                 vaccinations: true,

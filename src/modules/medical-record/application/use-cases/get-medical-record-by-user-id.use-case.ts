@@ -11,11 +11,11 @@ export class GetMedicalRecordByUserIdUseCase {
         private readonly medicalRecordRepository: MedicalRecordRepository,
     ) { }
 
-    async execute(userId: string, medicalRecordId?: string): Promise<ResponseDto<MedicalRecordEntity[]>> {
+    async execute(userId: string, medicalRecordId?: string, petId?: string, startDate?: Date, endDate?: Date): Promise<ResponseDto<MedicalRecordEntity[]>> {
         try {
             if (!userId) throw new UserIdNotFoundException();
 
-            const medicalRecords = await this.medicalRecordRepository.findByUserId(userId, medicalRecordId);
+            const medicalRecords = await this.medicalRecordRepository.findByUserId(userId, medicalRecordId, petId, startDate, endDate);
 
             return {
                 data: medicalRecords,

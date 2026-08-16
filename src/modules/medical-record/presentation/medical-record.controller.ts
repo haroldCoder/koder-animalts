@@ -56,7 +56,19 @@ export class MedicalRecordController {
     }
 
     @Get("pet/userId/:id")
-    async getMedicalRecordByUserId(@Param("id") id: string, @Query("medicalRecordId") medicalRecordId?: string) {
-        return this.getMedicalRecordByUserIdUseCase.execute(id, medicalRecordId);
+    async getMedicalRecordByUserId(
+        @Param("id") id: string,
+        @Query("medicalRecordId") medicalRecordId?: string,
+        @Query("petId") petId?: string,
+        @Query("startDate") startDate?: string,
+        @Query("endDate") endDate?: string
+    ) {
+        return this.getMedicalRecordByUserIdUseCase.execute(
+            id,
+            medicalRecordId,
+            petId,
+            startDate ? new Date(startDate) : undefined,
+            endDate ? new Date(endDate) : undefined
+        );
     }
 }
