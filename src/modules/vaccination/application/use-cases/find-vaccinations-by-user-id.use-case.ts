@@ -3,6 +3,7 @@ import type { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccinat
 import { VaccinationEntity } from "@vaccination/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { UserIdNotFoundException, ServerErrorException } from "@/common/domain/exceptions";
+import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 
 @Injectable()
 export class FindVaccinationsByUserIdUseCase {
@@ -11,7 +12,7 @@ export class FindVaccinationsByUserIdUseCase {
         private readonly vaccinationRepository: IVaccinationRepository
     ) { }
 
-    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<VaccinationEntity[]>> {
+    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<ResponseVaccinationDto[]>> {
         try {
             const vaccinations = await this.vaccinationRepository.findByUserId(userId, criteria);
 

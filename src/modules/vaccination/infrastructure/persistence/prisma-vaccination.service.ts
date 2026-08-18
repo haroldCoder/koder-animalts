@@ -3,6 +3,7 @@ import { PrismaService } from "@/common/infrastructure/db";
 import { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
 import { VaccinationEntity } from "@vaccination/domain/entities";
 import { PetIdNotExistException, UserIdNotFoundException } from "@/common/domain/exceptions";
+import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 
 @Injectable()
 export class PrismaVaccinationService implements IVaccinationRepository {
@@ -19,6 +20,23 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             createdAt: vaccination.createdAt,
             petName: vaccination.medicalRecord?.pet?.name || null,
         });
+    }
+
+    mapToResponse(vaccination: any): ResponseVaccinationDto {
+        return {
+            id: vaccination.id,
+            vaccineName: vaccination.vaccineName,
+            dateAdministered: vaccination.dateAdministered,
+            nextDueDate: vaccination.nextDueDate,
+            lotNumber: vaccination.lotNumber,
+            createdAt: vaccination.createdAt,
+            medicalRecordId: vaccination.medicalRecordId,
+            medicalRecord: {
+                pet: {
+                    name: vaccination.medicalRecord?.pet?.name || null,
+                }
+            }
+        };
     }
 
     async create(vaccination: VaccinationEntity): Promise<string> {
@@ -68,7 +86,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         return this.mapToDomain(vaccination);
     }
 
-    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<VaccinationEntity[]> {
+    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto[]> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
         });
@@ -117,6 +135,6 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             },
         });
 
-        return vaccinations.map((vaccination) => this.mapToDomain(vaccination));
+        return vaccinations.map((vaccination) => this.mapToResponse(vaccination));
     }
 }
