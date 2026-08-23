@@ -138,6 +138,7 @@ model Veterinarian {
 
   medicalRecords MedicalRecord[]
   appointments   Appointment[]
+  vaccinations   Vaccination[]
 }
 
 model MedicalRecord {
@@ -171,6 +172,9 @@ model Vaccination {
 
   medicalRecordId String
   medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+
+  veterinarianId String
+  veterinarian   Veterinarian @relation(fields: [veterinarianId], references: [id])
 }
 
 model Appointment {
