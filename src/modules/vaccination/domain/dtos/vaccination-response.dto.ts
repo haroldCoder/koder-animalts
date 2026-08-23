@@ -11,4 +11,8 @@ export interface ResponseVaccinationDto {
             name: string;
         }
     }
+    veterinarian: {
+        id: string;
+        name: string;
+    }
 }

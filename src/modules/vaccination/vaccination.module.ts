@@ -9,6 +9,7 @@ import {
     FindVaccinationsByUserIdUseCase,
 } from '@vaccination/application/use-cases';
 import { PrismaVaccinationService } from '@vaccination/infrastructure/persistence';
+import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
 
 @Module({
     imports: [PrismaModule],
@@ -21,6 +22,10 @@ import { PrismaVaccinationService } from '@vaccination/infrastructure/persistenc
         {
             provide: "IVaccinationRepository",
             useClass: PrismaVaccinationService,
+        },
+        {
+            provide: "IVeterinarianRepository",
+            useClass: PrismaVeterinarianService
         },
         {
             provide: "IIdGenerator",

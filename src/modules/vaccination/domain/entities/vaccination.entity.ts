@@ -1,3 +1,4 @@
+import { VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import {
     VaccinationNameNotFoundException,
     VaccinationNotFoundException,
@@ -13,6 +14,7 @@ export class VaccinationEntity {
     private readonly medicalRecordId: string;
     private readonly createdAt: Date;
     private readonly petName: string | null;
+    private readonly veterinarianId: string;
 
     private constructor(properties: {
         id: string;
@@ -23,6 +25,7 @@ export class VaccinationEntity {
         medicalRecordId: string;
         createdAt: Date;
         petName?: string | null;
+        veterinarianId: string;
     }) {
         if (!properties.id) {
             throw new VaccinationNotFoundException();
@@ -33,6 +36,9 @@ export class VaccinationEntity {
         if (!properties.medicalRecordId) {
             throw new MedicalRecordVisitDateNotFoundException();
         }
+        if (!properties.veterinarianId) {
+            throw new VeterinarianIdNotFoundException();
+        }
 
         this.id = properties.id;
         this.vaccineName = properties.vaccineName;
@@ -42,6 +48,7 @@ export class VaccinationEntity {
         this.medicalRecordId = properties.medicalRecordId;
         this.createdAt = properties.createdAt;
         this.petName = properties.petName ?? null;
+        this.veterinarianId = properties.veterinarianId;
     }
 
     public static create(properties: {
@@ -53,6 +60,7 @@ export class VaccinationEntity {
         medicalRecordId: string;
         createdAt?: Date;
         petName?: string | null;
+        veterinarianId: string;
     }): VaccinationEntity {
         return new VaccinationEntity({
             id: properties.id,
@@ -63,6 +71,7 @@ export class VaccinationEntity {
             medicalRecordId: properties.medicalRecordId,
             createdAt: properties.createdAt ?? new Date(),
             petName: properties.petName,
+            veterinarianId: properties.veterinarianId,
         });
     }
 
@@ -75,4 +84,5 @@ export class VaccinationEntity {
     public getMedicalRecordId(): string { return this.medicalRecordId; }
     public getCreatedAt(): Date { return this.createdAt; }
     public getPetName(): string | null { return this.petName; }
+    public getVeterinarianId(): string { return this.veterinarianId; }
 }

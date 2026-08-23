@@ -19,6 +19,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             medicalRecordId: vaccination.medicalRecordId,
             createdAt: vaccination.createdAt,
             petName: vaccination.medicalRecord?.pet?.name || null,
+            veterinarianId: vaccination.veterinarian.id,
         });
     }
 
@@ -35,6 +36,10 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                 pet: {
                     name: vaccination.medicalRecord?.pet?.name || null,
                 }
+            },
+            veterinarian: {
+                id: vaccination.veterinarian.id,
+                name: vaccination.veterinarian.user?.name,
             }
         };
     }
@@ -48,6 +53,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                 nextDueDate: vaccination.getNextDueDate(),
                 lotNumber: vaccination.getLotNumber(),
                 medicalRecordId: vaccination.getMedicalRecordId(),
+                veterinarianId: vaccination.getVeterinarianId(),
             },
         });
         return id;
@@ -100,22 +106,22 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const vaccinations = await this.prisma.vaccination.findMany({
             where: {
                 ...(medicalRecordId && { medicalRecordId }),
-                medicalRecord: {
-                    OR: [
-                        {
+                OR: [
+                    {
+                        medicalRecord: {
                             pet: {
                                 owner: {
                                     userId,
-                                },
-                            },
-                        },
-                        {
-                            veterinarian: {
-                                userId,
-                            },
-                        },
-                    ],
-                },
+                                }
+                            }
+                        }
+                    },
+                    {
+                        veterinarian: {
+                            userId
+                        }
+                    }
+                ]
             },
             include: {
                 medicalRecord: {
@@ -127,6 +133,16 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                         }
                     }
                 },
+                veterinarian: {
+                    select: {
+                        id: true,
+                        user: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
             },
             skip,
             take,

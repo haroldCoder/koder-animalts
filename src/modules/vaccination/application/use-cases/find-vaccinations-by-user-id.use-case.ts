@@ -1,6 +1,5 @@
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
-import { VaccinationEntity } from "@vaccination/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { UserIdNotFoundException, ServerErrorException } from "@/common/domain/exceptions";
 import { ResponseVaccinationDto } from "@vaccination/domain/dtos";

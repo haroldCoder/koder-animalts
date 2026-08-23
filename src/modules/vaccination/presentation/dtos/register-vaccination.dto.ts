@@ -22,4 +22,8 @@ export class RegisterVaccinationDto {
 
     @IsNotEmpty()
     medicalRecordId: string;
+
+    @IsNotEmpty()
+    @IsString()
+    userId: string;
 }
