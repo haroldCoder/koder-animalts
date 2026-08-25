@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+.postman
+postman
+.vercel
 
 # Logs
 logs

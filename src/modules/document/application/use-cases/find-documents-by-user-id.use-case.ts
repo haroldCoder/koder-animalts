@@ -1,5 +1,6 @@
 import { ResponseDto } from "@/common/domain/dto";
-import { DocumentModel, FindDocumentsCriteria } from "@document/domain/models";
+import { DocumentEntity } from "@document/domain/entities";
+import { FindDocumentsCriteria } from "@document/domain/ports/document.repository";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 
@@ -13,7 +14,7 @@ export class FindDocumentsByUserIdUseCase {
     async execute(
         userId: string,
         queries: FindDocumentsCriteria
-    ): Promise<ResponseDto<DocumentModel[]>> {
+    ): Promise<ResponseDto<DocumentEntity[]>> {
         const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = queries;
 
         const hasStartDate = !!startDate;

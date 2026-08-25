@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IVaccinationRepository } from "@vaccination/domain/ports";
-import { VaccinationModel } from "@vaccination/domain/models";
+import { VaccinationEntity } from "@vaccination/domain/entities";
 import { ResponseDto } from "@/common/domain/dto";
 import { PetIdNotExistException, ServerErrorException } from "@/common/domain/exceptions";
 
@@ -11,7 +11,7 @@ export class GetUpcomingVaccinationsByPetUseCase {
         private readonly vaccinationRepository: IVaccinationRepository
     ) { }
 
-    async execute(petId: string): Promise<ResponseDto<VaccinationModel[]>> {
+    async execute(petId: string): Promise<ResponseDto<VaccinationEntity[]>> {
         try {
             const vaccinations = await this.vaccinationRepository.findUpcomingByPetId(petId);
 

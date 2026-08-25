@@ -1,8 +1,8 @@
-import { CreateVeterinarianModel, VeterinarianModel, VeterinarianWithDetailsModel } from "@veterinarian/domain/models";
+import { VeterinarianEntity } from "@veterinarian/domain/entities";
 
 export interface IVeterinarianRepository {
-    create(data: CreateVeterinarianModel): Promise<string>;
-    findByIdWithDetails(id: string): Promise<VeterinarianWithDetailsModel | null>;
-    findByUserId(userId: string): Promise<VeterinarianModel | null>;
+    create(veterinarian: VeterinarianEntity): Promise<string>;
+    findByIdWithDetails(id: string): Promise<VeterinarianEntity | null>;
+    findByUserId(userId: string): Promise<VeterinarianEntity | null>;
     findClinicByVeterinarianId(veterinarianId: string): Promise<{ id: string; name: string } | null>;
 }

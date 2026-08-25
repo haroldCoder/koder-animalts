@@ -51,6 +51,9 @@
       ],
       "@user/*": [
         "./src/modules/user/*"
+      ],
+      "@appointment/*": [
+        "./src/modules/appointment/*"
       ]
     }
   }

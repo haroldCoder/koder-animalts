@@ -9,6 +9,7 @@ export class VaccinationModel {
     medicalRecordId: string;
     createdAt: Date;
     petName?: string;
+    veterinarianId: string;
 }
 
 export class CreateVaccinationModel {
@@ -17,6 +18,7 @@ export class CreateVaccinationModel {
     nextDueDate?: Date | null;
     lotNumber?: string | null;
     medicalRecordId: string;
+    veterinarianId: string;
 }
 
 export class UpdateVaccinationModel extends PartialType(CreateVaccinationModel) { }

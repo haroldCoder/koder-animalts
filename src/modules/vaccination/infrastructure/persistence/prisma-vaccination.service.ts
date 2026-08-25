@@ -1,34 +1,65 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db";
-import { IVaccinationRepository } from "@vaccination/domain/ports";
-import { CreateVaccinationModel, VaccinationModel, FindVaccinationsCriteria } from "@vaccination/domain/models";
+import { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
+import { VaccinationEntity } from "@vaccination/domain/entities";
 import { PetIdNotExistException, UserIdNotFoundException } from "@/common/domain/exceptions";
-import { VaccinationNameNotFoundException } from "@vaccination/domain/exceptions";
-import { MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
+import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 
 @Injectable()
 export class PrismaVaccinationService implements IVaccinationRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(data: CreateVaccinationModel): Promise<string> {
-        const { vaccineName, medicalRecordId } = data;
+    private mapToDomain(vaccination: any): VaccinationEntity {
+        return VaccinationEntity.create({
+            id: vaccination.id,
+            vaccineName: vaccination.vaccineName,
+            dateAdministered: vaccination.dateAdministered,
+            nextDueDate: vaccination.nextDueDate,
+            lotNumber: vaccination.lotNumber,
+            medicalRecordId: vaccination.medicalRecordId,
+            createdAt: vaccination.createdAt,
+            petName: vaccination.medicalRecord?.pet?.name || null,
+            veterinarianId: vaccination.veterinarian.id,
+        });
+    }
 
-        if (!vaccineName) throw new VaccinationNameNotFoundException();
-        if (!medicalRecordId) throw new MedicalRecordVisitDateNotFoundException();
+    mapToResponse(vaccination: any): ResponseVaccinationDto {
+        return {
+            id: vaccination.id,
+            vaccineName: vaccination.vaccineName,
+            dateAdministered: vaccination.dateAdministered,
+            nextDueDate: vaccination.nextDueDate,
+            lotNumber: vaccination.lotNumber,
+            createdAt: vaccination.createdAt,
+            medicalRecordId: vaccination.medicalRecordId,
+            medicalRecord: {
+                pet: {
+                    name: vaccination.medicalRecord?.pet?.name || null,
+                }
+            },
+            veterinarian: {
+                id: vaccination.veterinarian.id,
+                name: vaccination.veterinarian.user?.name,
+            }
+        };
+    }
 
+    async create(vaccination: VaccinationEntity): Promise<string> {
         const { id } = await this.prisma.vaccination.create({
             data: {
-                vaccineName: data.vaccineName,
-                dateAdministered: data.dateAdministered ?? new Date(),
-                nextDueDate: data.nextDueDate,
-                lotNumber: data.lotNumber,
-                medicalRecordId: data.medicalRecordId,
+                id: vaccination.getId(),
+                vaccineName: vaccination.getVaccineName(),
+                dateAdministered: vaccination.getDateAdministered(),
+                nextDueDate: vaccination.getNextDueDate(),
+                lotNumber: vaccination.getLotNumber(),
+                medicalRecordId: vaccination.getMedicalRecordId(),
+                veterinarianId: vaccination.getVeterinarianId(),
             },
         });
         return id;
     }
 
-    async findUpcomingByPetId(petId: string): Promise<VaccinationModel[]> {
+    async findUpcomingByPetId(petId: string): Promise<VaccinationEntity[]> {
         if (!petId) throw new PetIdNotExistException();
 
         const vaccinations = await this.prisma.vaccination.findMany({
@@ -41,10 +72,10 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                 nextDueDate: "asc",
             },
         });
-        return vaccinations as VaccinationModel[];
+        return vaccinations.map((vaccination) => this.mapToDomain(vaccination));
     }
 
-    async findNextByPetId(petId: string): Promise<VaccinationModel | null> {
+    async findNextByPetId(petId: string): Promise<VaccinationEntity | null> {
         if (!petId) throw new PetIdNotExistException();
 
         const vaccination = await this.prisma.vaccination.findFirst({
@@ -57,10 +88,11 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                 nextDueDate: "asc",
             },
         });
-        return vaccination as VaccinationModel | null;
+        if (!vaccination) return null;
+        return this.mapToDomain(vaccination);
     }
 
-    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<VaccinationModel[]> {
+    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto[]> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
         });
@@ -74,27 +106,26 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const vaccinations = await this.prisma.vaccination.findMany({
             where: {
                 ...(medicalRecordId && { medicalRecordId }),
-                medicalRecord: {
-                    OR: [
-                        {
+                OR: [
+                    {
+                        medicalRecord: {
                             pet: {
                                 owner: {
                                     userId,
-                                },
-                            },
-                        },
-                        {
-                            veterinarian: {
-                                userId,
-                            },
-                        },
-                    ],
-                },
+                                }
+                            }
+                        }
+                    },
+                    {
+                        veterinarian: {
+                            userId
+                        }
+                    }
+                ]
             },
             include: {
                 medicalRecord: {
                     select: {
-
                         pet: {
                             select: {
                                 name: true
@@ -102,6 +133,16 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                         }
                     }
                 },
+                veterinarian: {
+                    select: {
+                        id: true,
+                        user: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
             },
             skip,
             take,
@@ -110,8 +151,6 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             },
         });
 
-        return vaccinations.map((vc) => {
-            return { ...vc, petName: vc.medicalRecord.pet.name, }
-        });
+        return vaccinations.map((vaccination) => this.mapToResponse(vaccination));
     }
 }

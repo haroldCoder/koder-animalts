@@ -3,6 +3,7 @@ import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaVeterinarianService } from "./prisma-veterinarian.service";
 import { VeterinarianIdNotExistException } from "@/common/domain/exceptions";
 import { VeterinarianAlreadyExistsException } from "@veterinarian/domain/exceptions";
+import { VeterinarianEntity } from "@veterinarian/domain/entities";
 
 describe("PrismaVeterinarianService", () => {
     let service: PrismaVeterinarianService;
@@ -40,32 +41,34 @@ describe("PrismaVeterinarianService", () => {
 
     describe("create", () => {
         it("should throw VeterinarianAlreadyExistsException if veterinarian already exists", async () => {
-            const vetData = {
+            const veterinarian = VeterinarianEntity.create({
+                id: "vet-123",
                 specialty: "Surgery",
                 phone: "987654321",
                 userId: "user-123",
                 clinicId: "clinic-123",
-            };
-            const mockVet = { id: "vet-123", ...vetData };
+            });
+            const mockVet = { id: "vet-123", specialty: "Surgery", phone: "987654321", userId: "user-123", clinicId: "clinic-123" };
 
             mockPrismaService.veterinarian.findUnique.mockResolvedValueOnce(mockVet);
 
-            await expect(service.create(vetData)).rejects.toThrow(VeterinarianAlreadyExistsException);
+            await expect(service.create(veterinarian)).rejects.toThrow(VeterinarianAlreadyExistsException);
         });
 
         it("should create veterinarian if not exists", async () => {
-            const vetData = {
+            const veterinarian = VeterinarianEntity.create({
+                id: "vet-123",
                 specialty: "Surgery",
                 phone: "987654321",
                 userId: "user-123",
                 clinicId: "clinic-123",
-            };
-            const mockVet = { id: "vet-123", ...vetData };
+            });
+            const mockVet = { id: "vet-123", specialty: "Surgery", phone: "987654321", userId: "user-123", clinicId: "clinic-123" };
 
             mockPrismaService.veterinarian.findUnique.mockResolvedValueOnce(null);
             mockPrismaService.veterinarian.create.mockResolvedValueOnce(mockVet);
 
-            const result = await service.create(vetData);
+            const result = await service.create(veterinarian);
 
             expect(result).toBe("vet-123");
         });
@@ -99,10 +102,9 @@ describe("PrismaVeterinarianService", () => {
                     }
                 }
             });
-            expect(result).toEqual({
-                ...mockVet,
-                user: { ...mockVet.user, name: "Dr. Smith" }
-            });
+            expect(result).toBeInstanceOf(VeterinarianEntity);
+            expect(result?.getId()).toBe(id);
+            expect(result?.getUser()?.name).toBe("Dr. Smith");
         });
     });
 
@@ -118,16 +120,15 @@ describe("PrismaVeterinarianService", () => {
 
         it("should return veterinarian with specialty default if found", async () => {
             const userId = "user-123";
-            const mockVet = { id: "vet-123", userId, specialty: null };
+            const mockVet = { id: "vet-123", userId, specialty: null, phone: "987654321", clinicId: "clinic-123" };
 
             mockPrismaService.veterinarian.findUnique.mockResolvedValue(mockVet);
 
             const result = await service.findByUserId(userId);
 
-            expect(result).toEqual({
-                ...mockVet,
-                specialty: ""
-            });
+            expect(result).toBeInstanceOf(VeterinarianEntity);
+            expect(result?.getUserId()).toBe(userId);
+            expect(result?.getSpecialty()).toBe("");
         });
     });
 

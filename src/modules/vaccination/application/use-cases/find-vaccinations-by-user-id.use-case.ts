@@ -1,8 +1,8 @@
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
-import type { IVaccinationRepository } from "@vaccination/domain/ports";
-import { VaccinationModel, FindVaccinationsCriteria } from "@vaccination/domain/models";
+import type { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
 import { ResponseDto } from "@/common/domain/dto";
 import { UserIdNotFoundException, ServerErrorException } from "@/common/domain/exceptions";
+import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 
 @Injectable()
 export class FindVaccinationsByUserIdUseCase {
@@ -11,7 +11,7 @@ export class FindVaccinationsByUserIdUseCase {
         private readonly vaccinationRepository: IVaccinationRepository
     ) { }
 
-    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<VaccinationModel[]>> {
+    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<ResponseVaccinationDto[]>> {
         try {
             const vaccinations = await this.vaccinationRepository.findByUserId(userId, criteria);
 

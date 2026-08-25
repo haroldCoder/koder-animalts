@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaAuthService } from "./prisma-auth.service";
-import { randomUUID } from "crypto";
+import { AccountEntity, SessionEntity, UserEntity } from "@auth/domain/entities";
 
 describe("PrismaAuthService", () => {
     let service: PrismaAuthService;
@@ -61,12 +61,16 @@ describe("PrismaAuthService", () => {
                 update: { name, image },
                 create: { email, name, image },
             });
-            expect(result).toEqual(mockUser);
+            expect(result).toBeInstanceOf(UserEntity);
+            expect(result.getId()).toBe(mockUser.id);
+            expect(result.getEmailValue()).toBe(mockUser.email);
+            expect(result.getName()).toBe(mockUser.name);
+            expect(result.getImage()).toBe(mockUser.image);
         });
 
         it("should handle optional name and image as null", async () => {
             const email = "test@example.com";
-            mockPrismaService.user.upsert.mockResolvedValue({ id: "1", email });
+            mockPrismaService.user.upsert.mockResolvedValue({ id: "1", email, name: null, image: null });
 
             await service.upsertUser(email);
 
@@ -90,7 +94,11 @@ describe("PrismaAuthService", () => {
             expect(prisma.user.findUnique).toHaveBeenCalledWith({
                 where: { email },
             });
-            expect(result).toEqual(mockUser);
+            expect(result).toBeInstanceOf(UserEntity);
+            expect(result?.getId()).toBe(mockUser.id);
+            expect(result?.getEmailValue()).toBe(mockUser.email);
+            expect(result?.getName()).toBe(mockUser.name);
+            expect(result?.getImage()).toBe(mockUser.image);
         });
     });
 
@@ -99,7 +107,7 @@ describe("PrismaAuthService", () => {
             const providerId = "google";
             const accountId = "acc-123";
             const userId = "user-123";
-            const mockAccount = { id: "1", providerId, accountId, userId };
+            const mockAccount = { id: "1", providerId, accountId, userId, accessToken: null, refreshToken: null, password: null };
 
             mockPrismaService.account.findFirst.mockResolvedValue(mockAccount);
 
@@ -108,7 +116,11 @@ describe("PrismaAuthService", () => {
             expect(prisma.account.findFirst).toHaveBeenCalledWith({
                 where: { providerId, accountId, userId },
             });
-            expect(result).toEqual(mockAccount);
+            expect(result).toBeInstanceOf(AccountEntity);
+            expect(result?.getId()).toBe(mockAccount.id);
+            expect(result?.getUserId()).toBe(mockAccount.userId);
+            expect(result?.getProviderId()).toBe(mockAccount.providerId);
+            expect(result?.getAccountId()).toBe(mockAccount.accountId);
         });
     });
 
@@ -119,6 +131,8 @@ describe("PrismaAuthService", () => {
                 providerId: "google",
                 accountId: "acc-123",
                 accessToken: "token",
+                refreshToken: null,
+                password: null,
             };
             const mockAccount = { id: "uuid-123", ...accountData };
 
@@ -132,7 +146,12 @@ describe("PrismaAuthService", () => {
             expect(prisma.account.create).toHaveBeenCalledWith({
                 data: expect.objectContaining({ id: expect.any(String) }),
             });
-            expect(result).toEqual(mockAccount);
+            expect(result).toBeInstanceOf(AccountEntity);
+            expect(result.getId()).toBe(mockAccount.id);
+            expect(result.getUserId()).toBe(mockAccount.userId);
+            expect(result.getProviderId()).toBe(mockAccount.providerId);
+            expect(result.getAccountId()).toBe(mockAccount.accountId);
+            expect(result.getAccessToken()).toBe(mockAccount.accessToken);
         });
     });
 
@@ -140,7 +159,15 @@ describe("PrismaAuthService", () => {
         it("should call prisma.account.update with correct data", async () => {
             const id = "1";
             const data = { accessToken: "new-token" };
-            const mockAccount = { id, ...data };
+            const mockAccount = {
+                id,
+                userId: "user-123",
+                providerId: "google",
+                accountId: "acc-123",
+                refreshToken: null,
+                password: null,
+                ...data
+            };
 
             mockPrismaService.account.update.mockResolvedValue(mockAccount);
 
@@ -150,7 +177,9 @@ describe("PrismaAuthService", () => {
                 where: { id },
                 data,
             });
-            expect(result).toEqual(mockAccount);
+            expect(result).toBeInstanceOf(AccountEntity);
+            expect(result.getId()).toBe(mockAccount.id);
+            expect(result.getAccessToken()).toBe(mockAccount.accessToken);
         });
     });
 
@@ -160,6 +189,8 @@ describe("PrismaAuthService", () => {
                 userId: "user-123",
                 token: "session-token",
                 expiresAt: new Date(),
+                ipAddress: null,
+                userAgent: null,
             };
             const mockSession = { id: "uuid-456", ...sessionData };
 
@@ -173,7 +204,11 @@ describe("PrismaAuthService", () => {
             expect(prisma.session.create).toHaveBeenCalledWith({
                 data: expect.objectContaining({ id: expect.any(String) }),
             });
-            expect(result).toEqual(mockSession);
+            expect(result).toBeInstanceOf(SessionEntity);
+            expect(result.getId()).toBe(mockSession.id);
+            expect(result.getUserId()).toBe(mockSession.userId);
+            expect(result.getToken()).toBe(mockSession.token);
+            expect(result.getExpiresAt()).toEqual(mockSession.expiresAt);
         });
     });
 });

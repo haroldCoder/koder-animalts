@@ -1,6 +1,6 @@
 import { ResponseDto } from "@/common/domain/dto";
 import { DocumentFileUrlNotFoundException, DocumentTitleNotFoundException } from "@document/domain/exceptions";
-import { RegisterDocumentModel } from "@document/domain/models";
+import { RegisterDocumentModel } from "@/common/domain/models";
 import type { IDocumentRepository } from "@document/domain/ports/document.repository";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { SignUpUseCase } from "./sign-up.use-case";
 import { EmailAlreadyExistsException } from "@auth/domain/exceptions";
+import { UserEntity } from "@auth/domain/entities";
 
 describe("SignUpUseCase", () => {
     let useCase: SignUpUseCase;
@@ -40,7 +41,9 @@ describe("SignUpUseCase", () => {
         };
 
         mockAuthRepository.findUserByEmail.mockResolvedValue(null);
-        mockAuthRepository.upsertUser.mockResolvedValue({ id: "user-123", email: params.email });
+        mockAuthRepository.upsertUser.mockResolvedValue(
+            UserEntity.create({ id: "user-123", email: params.email, name: params.name, image: params.image })
+        );
         mockAuthRepository.createAccount.mockResolvedValue({});
         mockAuthRepository.createSession.mockResolvedValue({});
 
@@ -67,7 +70,9 @@ describe("SignUpUseCase", () => {
             password: "password123",
         };
 
-        mockAuthRepository.findUserByEmail.mockResolvedValue({ id: "user-123", email: params.email });
+        mockAuthRepository.findUserByEmail.mockResolvedValue(
+            UserEntity.create({ id: "user-123", email: params.email })
+        );
 
         await expect(useCase.execute(params)).rejects.toThrow(EmailAlreadyExistsException);
     });

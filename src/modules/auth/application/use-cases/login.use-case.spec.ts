@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { LoginUseCase } from "./login.use-case";
 import { InvalidCredentialsException } from "@auth/domain/exceptions";
 import { hashPassword } from "@auth/infrastructure/utils/hash.utils";
+import { AccountEntity, UserEntity } from "@auth/domain/entities";
 
 describe("LoginUseCase", () => {
     let useCase: LoginUseCase;
@@ -39,14 +40,18 @@ describe("LoginUseCase", () => {
             password,
         };
 
-        mockAuthRepository.findUserByEmail.mockResolvedValue({ id: "user-123", email: params.email });
-        mockAuthRepository.findAccount.mockResolvedValue({
-            id: "acc-123",
-            userId: "user-123",
-            providerId: "credentials",
-            accountId: params.email,
-            password: hashedPassword,
-        });
+        mockAuthRepository.findUserByEmail.mockResolvedValue(
+            UserEntity.create({ id: "user-123", email: params.email })
+        );
+        mockAuthRepository.findAccount.mockResolvedValue(
+            AccountEntity.create({
+                id: "acc-123",
+                userId: "user-123",
+                providerId: "credentials",
+                accountId: params.email,
+                password: hashedPassword,
+            })
+        );
         mockAuthRepository.createSession.mockResolvedValue({});
 
         const result = await useCase.execute(params);
@@ -77,14 +82,18 @@ describe("LoginUseCase", () => {
             password: "wrongpassword",
         };
 
-        mockAuthRepository.findUserByEmail.mockResolvedValue({ id: "user-123", email: params.email });
-        mockAuthRepository.findAccount.mockResolvedValue({
-            id: "acc-123",
-            userId: "user-123",
-            providerId: "credentials",
-            accountId: params.email,
-            password: hashPassword("correctpassword"),
-        });
+        mockAuthRepository.findUserByEmail.mockResolvedValue(
+            UserEntity.create({ id: "user-123", email: params.email })
+        );
+        mockAuthRepository.findAccount.mockResolvedValue(
+            AccountEntity.create({
+                id: "acc-123",
+                userId: "user-123",
+                providerId: "credentials",
+                accountId: params.email,
+                password: hashPassword("correctpassword"),
+            })
+        );
 
         await expect(useCase.execute(params)).rejects.toThrow(InvalidCredentialsException);
     });

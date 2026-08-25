@@ -1,7 +1,7 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import { ResponseDto } from "@/common/domain/dto";
-import { VeterinarianIdNotFoundException, VeterinarianIdNotExistException, ServerErrorException } from "@/common/domain/exceptions";
+import { ServerErrorException, VeterinarianIdNotExistException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class FindClinicOfVeterinarianUseCase {
@@ -12,28 +12,33 @@ export class FindClinicOfVeterinarianUseCase {
 
     async execute(veterinarianId: string): Promise<ResponseDto<any>> {
         try {
-            const data = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
+            if (!veterinarianId) {
+                throw new VeterinarianIdNotFoundException();
+            }
 
-            if (!data) throw new VeterinarianIdNotFoundException();
+            const veterinarian = await this.veterinarianRepository.findByIdWithDetails(veterinarianId);
+
+            if (!veterinarian) {
+                throw new VeterinarianIdNotExistException();
+            }
 
             return {
-                statusCode: 200,
+                statusCode: HttpStatus.OK,
                 data: {
-                    user: data?.user,
-                    clinic: data?.clinic,
-                    specialty: data?.specialty,
-                    phone: data?.phone,
+                    user: veterinarian.getUser(),
+                    clinic: veterinarian.getClinic(),
+                    specialty: veterinarian.getSpecialty(),
+                    phone: veterinarian.getPhone(),
                 },
             };
-        }
-        catch (error) {
+        } catch (error) {
             if (
-                error instanceof VeterinarianIdNotFoundException ||
-                error instanceof VeterinarianIdNotExistException
-            ) throw error;
-            throw new ServerErrorException("Failed to find veterinarian");
+                error instanceof VeterinarianIdNotExistException ||
+                error instanceof VeterinarianIdNotFoundException
+            ) {
+                throw error;
+            }
+            throw new ServerErrorException("Failed to find clinic of veterinarian: " + error);
         }
-
-
     }
 }

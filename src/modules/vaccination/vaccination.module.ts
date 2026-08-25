@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaModule } from '@/common/infrastructure/prisma.module';
 import { VaccinationController } from '@vaccination/presentation';
 import {
@@ -8,6 +9,7 @@ import {
     FindVaccinationsByUserIdUseCase,
 } from '@vaccination/application/use-cases';
 import { PrismaVaccinationService } from '@vaccination/infrastructure/persistence';
+import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
 
 @Module({
     imports: [PrismaModule],
@@ -20,6 +22,14 @@ import { PrismaVaccinationService } from '@vaccination/infrastructure/persistenc
         {
             provide: "IVaccinationRepository",
             useClass: PrismaVaccinationService,
+        },
+        {
+            provide: "IVeterinarianRepository",
+            useClass: PrismaVeterinarianService
+        },
+        {
+            provide: "IIdGenerator",
+            useValue: randomUUID,
         },
     ],
     exports: [

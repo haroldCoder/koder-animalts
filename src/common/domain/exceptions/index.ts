@@ -7,5 +7,7 @@ export * from './server-error.exception';
 export * from './veterinarian-id-not-found.exception';
 export * from './veterinarian-id-not-exist.exception';
 export * from './medical-record-id-not-found.exception';
+export * from './email-required.exception';
+export * from './invalid-email-format.exception';
 
 
