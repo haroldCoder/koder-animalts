@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/common/infrastructure/db";
-import { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
-import { VaccinationEntity } from "@vaccination/domain/entities";
-import { PetIdNotExistException, UserIdNotFoundException } from "@/common/domain/exceptions";
-import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
+import { PrismaService } from "../../../../common/infrastructure/db";
+import { IVaccinationRepository, FindVaccinationsCriteria } from "../../domain/ports";
+import { VaccinationEntity } from "../../domain/entities";
+import { PetIdNotExistException, UserIdNotFoundException } from "../../../../common/domain/exceptions";
+import { ResponseVaccinationDto } from "../../domain/dtos";
 
 @Injectable()
 export class PrismaVaccinationService implements IVaccinationRepository {
@@ -99,7 +99,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
 
         if (!user) throw new UserIdNotFoundException();
 
-        const { page, limit, medicalRecordId } = criteria;
+        const { page, limit, medicalRecordId, petId } = criteria;
         const skip = page && limit ? (page - 1) * limit : undefined;
         const take = limit ? limit : undefined;
 
@@ -112,15 +112,16 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                             pet: {
                                 owner: {
                                     userId,
-                                }
+                                },
+                                ...(petId && { id: petId })
                             }
                         }
                     },
                     {
                         veterinarian: {
-                            userId
+                            userId,
                         }
-                    }
+                    },
                 ]
             },
             include: {
@@ -129,6 +130,16 @@ export class PrismaVaccinationService implements IVaccinationRepository {
                         pet: {
                             select: {
                                 name: true
+                            }
+                        },
+                        veterinarian: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select: {
+                                        name: true
+                                    }
+                                }
                             }
                         }
                     }

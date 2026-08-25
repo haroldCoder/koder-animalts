@@ -37,11 +37,13 @@ export class VaccinationController {
         @Query("page") page?: string,
         @Query("limit") limit?: string,
         @Query("medicalRecordId") medicalRecordId?: string,
+        @Query("petId") petId?: string,
     ) {
         return this.findVaccinationsByUserIdUseCase.execute(userId, {
             page: page ? parseInt(page, 10) : undefined,
             limit: limit ? parseInt(limit, 10) : undefined,
             medicalRecordId,
+            petId
         });
     }
 }
