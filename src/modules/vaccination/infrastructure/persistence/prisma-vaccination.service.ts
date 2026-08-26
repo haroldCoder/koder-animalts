@@ -99,13 +99,15 @@ export class PrismaVaccinationService implements IVaccinationRepository {
 
         if (!user) throw new UserIdNotFoundException();
 
-        const { page, limit, medicalRecordId, petId } = criteria;
+        const { page, limit, medicalRecordId, petId, startDate, endDate } = criteria;
         const skip = page && limit ? (page - 1) * limit : undefined;
         const take = limit ? limit : undefined;
 
         const vaccinations = await this.prisma.vaccination.findMany({
             where: {
                 ...(medicalRecordId && { medicalRecordId }),
+                ...(startDate && { dateAdministered: { gte: startDate } }),
+                ...(endDate && { nextDueDate: { lte: endDate } }),
                 OR: [
                     {
                         medicalRecord: {

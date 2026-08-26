@@ -6,6 +6,8 @@ export interface FindVaccinationsCriteria {
     limit?: number;
     medicalRecordId?: string;
     petId?: string;
+    startDate?: Date;
+    endDate?: Date;
 }
 
 export interface IVaccinationRepository {
