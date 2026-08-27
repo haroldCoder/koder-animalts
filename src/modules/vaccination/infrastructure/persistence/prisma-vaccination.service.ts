@@ -103,27 +103,49 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const skip = page && limit ? (page - 1) * limit : undefined;
         const take = limit ? limit : undefined;
 
+        const dateFilter = (startDate || endDate) ? [
+            {
+                OR: [
+                    {
+                        dateAdministered: {
+                            ...(startDate && { gte: startDate }),
+                            ...(endDate && { lte: endDate }),
+                        },
+                    },
+                    {
+                        nextDueDate: {
+                            ...(startDate && { gte: startDate }),
+                            ...(endDate && { lte: endDate }),
+                        },
+                    },
+                ],
+            },
+        ] : [];
+
         const vaccinations = await this.prisma.vaccination.findMany({
             where: {
                 ...(medicalRecordId && { medicalRecordId }),
-                ...(startDate && { dateAdministered: { gte: startDate } }),
-                ...(endDate && { nextDueDate: { lte: endDate } }),
-                OR: [
+                AND: [
                     {
-                        medicalRecord: {
-                            pet: {
-                                owner: {
+                        OR: [
+                            {
+                                medicalRecord: {
+                                    pet: {
+                                        owner: {
+                                            userId,
+                                        },
+                                        ...(petId && { id: petId })
+                                    }
+                                }
+                            },
+                            {
+                                veterinarian: {
                                     userId,
-                                },
-                                ...(petId && { id: petId })
-                            }
-                        }
+                                }
+                            },
+                        ]
                     },
-                    {
-                        veterinarian: {
-                            userId,
-                        }
-                    },
+                    ...dateFilter,
                 ]
             },
             include: {
