@@ -4,6 +4,7 @@ import { IVaccinationRepository, FindVaccinationsCriteria } from "../../domain/p
 import { VaccinationEntity } from "../../domain/entities";
 import { PetIdNotExistException, UserIdNotFoundException } from "../../../../common/domain/exceptions";
 import { ResponseVaccinationDto } from "../../domain/dtos";
+import { normalizeEndDate, normalizeStartDAte } from "@/common/utils";
 
 @Injectable()
 export class PrismaVaccinationService implements IVaccinationRepository {
@@ -103,19 +104,22 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const skip = page && limit ? (page - 1) * limit : undefined;
         const take = limit ? limit : undefined;
 
-        const dateFilter = (startDate || endDate) ? [
+        const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
+        const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
+
+        const dateFilter = (normalizedStartDate || normalizedEndDate) ? [
             {
                 OR: [
                     {
                         dateAdministered: {
-                            ...(startDate && { gte: startDate }),
-                            ...(endDate && { lte: endDate }),
+                            ...(normalizedStartDate && { gte: normalizedStartDate }),
+                            ...(normalizedEndDate && { lte: normalizedEndDate }),
                         },
                     },
                     {
                         nextDueDate: {
-                            ...(startDate && { gte: startDate }),
-                            ...(endDate && { lte: endDate }),
+                            ...(normalizedStartDate && { gte: normalizedStartDate }),
+                            ...(normalizedEndDate && { lte: normalizedEndDate }),
                         },
                     },
                 ],

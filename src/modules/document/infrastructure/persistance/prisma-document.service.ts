@@ -109,8 +109,19 @@ export class PrismaDocumentService implements IDocumentRepository {
 
         if (startDate || endDate) {
             const dateFilter: any = {};
-            if (startDate) dateFilter.gte = startDate;
-            if (endDate) dateFilter.lte = endDate;
+            // Normalize dates to avoid timezone off-by-one issues:
+            // startDate → start of day UTC (00:00:00.000Z)
+            // endDate   → end of day UTC (23:59:59.999Z)
+            if (startDate) {
+                const d = new Date(startDate);
+                d.setUTCHours(0, 0, 0, 0);
+                dateFilter.gte = d;
+            }
+            if (endDate) {
+                const d = new Date(endDate);
+                d.setUTCHours(23, 59, 59, 999);
+                dateFilter.lte = d;
+            }
             whereClause.createdAt = dateFilter;
         }
 

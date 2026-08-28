@@ -247,15 +247,25 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             return [];
         }
 
+        // Normalize dates to avoid timezone off-by-one issues:
+        // startDate → start of day UTC (00:00:00.000Z)
+        // endDate   → end of day UTC (23:59:59.999Z)
+        const normalizedStartDate = startDate
+            ? (() => { const d = new Date(startDate); d.setUTCHours(0, 0, 0, 0); return d; })()
+            : undefined;
+        const normalizedEndDate = endDate
+            ? (() => { const d = new Date(endDate); d.setUTCHours(23, 59, 59, 999); return d; })()
+            : undefined;
+
         const medicalRecords = await this.prisma.medicalRecord.findMany({
             where: {
                 pet: petFilter,
                 ...(medicalRecordId ? { id: medicalRecordId } : {}),
                 ...(petId ? { petId } : {}),
-                ...(startDate || endDate ? {
+                ...(normalizedStartDate || normalizedEndDate ? {
                     visitDate: {
-                        ...(startDate ? { gte: startDate } : {}),
-                        ...(endDate ? { lte: endDate } : {}),
+                        ...(normalizedStartDate ? { gte: normalizedStartDate } : {}),
+                        ...(normalizedEndDate ? { lte: normalizedEndDate } : {}),
                     }
                 } : {})
             },
