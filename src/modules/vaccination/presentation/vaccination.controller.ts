@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 import {
     RegisterVaccinationUseCase,
     GetUpcomingVaccinationsByPetUseCase,
     GetNextVaccinationReminderUseCase,
     FindVaccinationsByUserIdUseCase,
+    UpdateStatusVaccinationUseCase,
 } from "@vaccination/application/use-cases";
-import { RegisterVaccinationDto } from "@vaccination/presentation/dtos";
+import { RegisterVaccinationDto, UpdateStatusVaccinationDto } from "@vaccination/presentation/dtos";
 
 @Controller('vaccination')
 export class VaccinationController {
@@ -14,6 +15,7 @@ export class VaccinationController {
         private readonly getUpcomingVaccinationsByPetUseCase: GetUpcomingVaccinationsByPetUseCase,
         private readonly getNextVaccinationReminderUseCase: GetNextVaccinationReminderUseCase,
         private readonly findVaccinationsByUserIdUseCase: FindVaccinationsByUserIdUseCase,
+        private readonly updateStatusVaccinationUseCase: UpdateStatusVaccinationUseCase,
     ) { }
 
     @Post("register")
@@ -49,6 +51,11 @@ export class VaccinationController {
             startDate: startDate ? new Date(startDate) : undefined,
             endDate: endDate ? new Date(endDate) : undefined,
         });
+    }
+
+    @Put("status/:id")
+    async updateStatus(@Param("id") id: string, @Body() dto: UpdateStatusVaccinationDto) {
+        return this.updateStatusVaccinationUseCase.execute(id, dto.status);
     }
 }
 

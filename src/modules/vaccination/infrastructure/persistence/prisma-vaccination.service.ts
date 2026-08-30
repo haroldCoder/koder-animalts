@@ -5,6 +5,7 @@ import { VaccinationEntity } from "@vaccination/domain/entities";
 import { PetIdNotExistException, UserIdNotFoundException } from "@/common/domain/exceptions";
 import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 import { normalizeEndDate, normalizeStartDAte } from "@/common/utils";
+import { VaccinationStatus } from "@vaccination/domain/enums";
 
 @Injectable()
 export class PrismaVaccinationService implements IVaccinationRepository {
@@ -18,6 +19,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             nextDueDate: vaccination.nextDueDate,
             lotNumber: vaccination.lotNumber,
             medicalRecordId: vaccination.medicalRecordId,
+            status: vaccination.status as VaccinationStatus,
             createdAt: vaccination.createdAt,
             petName: vaccination.medicalRecord?.pet?.name || null,
             veterinarianId: vaccination.veterinarian.id,
@@ -31,6 +33,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             dateAdministered: vaccination.dateAdministered,
             nextDueDate: vaccination.nextDueDate,
             lotNumber: vaccination.lotNumber,
+            status: vaccination.status,
             createdAt: vaccination.createdAt,
             medicalRecordId: vaccination.medicalRecordId,
             medicalRecord: {
@@ -58,6 +61,26 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             },
         });
         return id;
+    }
+
+    async findById(id: string): Promise<VaccinationEntity | null> {
+        const vaccination = await this.prisma.vaccination.findUnique({
+            where: { id },
+            include: {
+                medicalRecord: {
+                    include: {
+                        pet: {
+                            select: { name: true }
+                        }
+                    }
+                },
+                veterinarian: true
+            }
+        });
+
+        if (!vaccination) return null;
+
+        return this.mapToDomain(vaccination);
     }
 
     async findUpcomingByPetId(petId: string): Promise<VaccinationEntity[]> {
@@ -191,5 +214,12 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         });
 
         return vaccinations.map((vaccination) => this.mapToResponse(vaccination));
+    }
+
+    async updateStatus(id: string, status: VaccinationStatus): Promise<void> {
+        await this.prisma.vaccination.update({
+            where: { id },
+            data: { status },
+        });
     }
 }
