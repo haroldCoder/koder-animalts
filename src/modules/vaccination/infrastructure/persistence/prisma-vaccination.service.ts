@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../../../common/infrastructure/db";
-import { IVaccinationRepository, FindVaccinationsCriteria } from "../../domain/ports";
-import { VaccinationEntity } from "../../domain/entities";
-import { PetIdNotExistException, UserIdNotFoundException } from "../../../../common/domain/exceptions";
-import { ResponseVaccinationDto } from "../../domain/dtos";
+import { PrismaService } from "@/common/infrastructure/db";
+import { IVaccinationRepository, FindVaccinationsCriteria } from "@vaccination/domain/ports";
+import { VaccinationEntity } from "@vaccination/domain/entities";
+import { PetIdNotExistException, UserIdNotFoundException } from "@/common/domain/exceptions";
+import { ResponseVaccinationDto } from "@vaccination/domain/dtos";
 import { normalizeEndDate, normalizeStartDAte } from "@/common/utils";
 
 @Injectable()
