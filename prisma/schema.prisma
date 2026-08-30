@@ -7,43 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum MedicalRecordType {
-  CONSULTATION
-  VACCINATION
-  SURGERY
-  EMERGENCY
-  LAB_RESULTS
-  HOSPITALIZATION
-}
-
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            String        @id @default(uuid())
+  email         String        @unique
   name          String?
-  emailVerified Boolean  @default(false)
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  sessions Session[]
-  accounts Account[]
-
-  owner        Owner?
-  veterinarian Veterinarian?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  accounts      Account[]
+  owner         Owner?
+  sessions      Session[]
+  veterinarian  Veterinarian?
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
-  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
-
-  @@unique([token])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -51,7 +38,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(references: [id], fields: [userId], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -61,6 +47,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Verification {
@@ -73,143 +60,140 @@ model Verification {
 }
 
 model VeterinaryClinic {
-  id        String   @id @default(uuid())
-  name      String
-  address   String
-  phone     String?
-  email     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  veterinarians Veterinarian[]
-  pets          Pet[]
+  id            String         @id @default(uuid())
+  name          String
+  address       String
+  phone         String?
+  email         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   documents     Document[]
+  pets          Pet[]
+  veterinarians Veterinarian[]
 }
 
 model Owner {
-  id        String   @id @default(uuid())
-  phone     String
-  address   String
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  pets Pet[]
+  id      String @id @default(uuid())
+  phone   String
+  address String
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id])
+  pets    Pet[]
 }
 
 model Pet {
-  id        String    @id @default(uuid())
-  name      String
-  species   String // e.g., Dog, Cat
-  breed     String?
-  birthDate DateTime?
-  gender    String? // e.g., Male, Female
-  weight    Float?
-  color     String?
-  microchip String?   @unique
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  mainImage String
-  iaImage   String?
-  images    String[]  @default([])
-
-  ownerId String
-  owner   Owner  @relation(fields: [ownerId], references: [id])
-
-  clinicId String
-  clinic   VeterinaryClinic @relation(fields: [clinicId], references: [id])
-
-  medicalRecords MedicalRecord[]
+  id             String           @id @default(uuid())
+  name           String
+  species        String
+  breed          String?
+  birthDate      DateTime?
+  gender         String?
+  weight         Float?
+  color          String?
+  microchip      String?          @unique
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ownerId        String
+  clinicId       String
+  iaImage        String?
+  images         String[]         @default([])
+  mainImage      String
   appointments   Appointment[]
   documents      Document[]
+  medicalRecords MedicalRecord[]
+  clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
+  owner          Owner            @relation(fields: [ownerId], references: [id])
 }
 
 model Veterinarian {
-  id        String   @id @default(uuid())
-  phone     String
-  specialty String?
-
-  userId String @unique
-  user   User @relation(fields: [userId], references: [id])
-
-  clinicId String
-  clinic   VeterinaryClinic @relation(fields: [clinicId], references: [id])
-
-  medicalRecords MedicalRecord[]
+  id             String           @id @default(uuid())
+  specialty      String?
+  phone          String
+  userId         String           @unique
+  clinicId       String
   appointments   Appointment[]
+  medicalRecords MedicalRecord[]
   vaccinations   Vaccination[]
+  clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
 }
 
 model MedicalRecord {
-  id             String   @id @default(uuid())
-  visitDate      DateTime @default(now())
-  type           MedicalRecordType @default(CONSULTATION)
+  id             String            @id @default(uuid())
+  visitDate      DateTime          @default(now())
   reasonForVisit String
   diagnosis      String?
   treatment      String?
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  petId String
-  pet   Pet    @relation(fields: [petId], references: [id])
-
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  petId          String
   veterinarianId String
-  veterinarian   Veterinarian @relation(fields: [veterinarianId], references: [id])
-
-  vaccinations Vaccination[]
-  documents    Document[]
+  type           MedicalRecordType @default(CONSULTATION)
+  documents      Document[]
+  pet            Pet               @relation(fields: [petId], references: [id])
+  veterinarian   Veterinarian      @relation(fields: [veterinarianId], references: [id])
+  vaccinations   Vaccination[]
 }
 
 model Vaccination {
-  id               String    @id @default(uuid())
+  id               String        @id @default(uuid())
   vaccineName      String
-  dateAdministered DateTime  @default(now())
+  dateAdministered DateTime      @default(now())
   nextDueDate      DateTime?
   lotNumber        String?
-  createdAt        DateTime  @default(now())
-
-  medicalRecordId String
-  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
-
-  veterinarianId String
-  veterinarian   Veterinarian @relation(fields: [veterinarianId], references: [id])
+  createdAt        DateTime      @default(now())
+  status           VaccinationStatus @default(PENDING)
+  medicalRecordId  String
+  veterinarianId   String
+  medicalRecord    MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+  veterinarian     Veterinarian  @relation(fields: [veterinarianId], references: [id])
 }
 
 model Appointment {
-  id        String   @id @default(uuid())
-  date      DateTime
-  reason    String
-  status    String   @default("SCHEDULED") // e.g., SCHEDULED, COMPLETED, CANCELLED
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  petId String
-  pet   Pet    @relation(fields: [petId], references: [id])
-
+  id             String       @id @default(uuid())
+  date           DateTime
+  reason         String
+  status         String       @default("SCHEDULED")
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  petId          String
   veterinarianId String
+  pet            Pet          @relation(fields: [petId], references: [id])
   veterinarian   Veterinarian @relation(fields: [veterinarianId], references: [id])
 }
 
 model Document {
-  id        String   @id @default(uuid())
-  title     String
-  fileUrl   String
-  fileKey   String? // For S3 or other storage providers
-  fileSize  Int? // In bytes
-  fileType  String? // MIME type
-  category  String? // e.g., INVOICE, MEDICAL_REPORT, PET_PHOTO
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  petId String?
-  pet   Pet?    @relation(fields: [petId], references: [id])
-
+  id              String            @id @default(uuid())
+  title           String
+  fileUrl         String
+  fileKey         String?
+  fileSize        Int?
+  fileType        String?
+  category        String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  petId           String?
   medicalRecordId String?
-  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+  clinicId        String?
+  clinic          VeterinaryClinic? @relation(fields: [clinicId], references: [id])
+  medicalRecord   MedicalRecord?    @relation(fields: [medicalRecordId], references: [id])
+  pet             Pet?              @relation(fields: [petId], references: [id])
+}
 
-  clinicId String?
-  clinic   VeterinaryClinic? @relation(fields: [clinicId], references: [id])
+enum MedicalRecordType {
+  CONSULTATION
+  VACCINATION
+  SURGERY
+  EMERGENCY
+  LAB_RESULTS
+  HOSPITALIZATION
+}
+
+enum VaccinationStatus {
+  PENDING
+  CANCELLED
+  DONE
 }

@@ -5,6 +5,7 @@ export interface ResponseVaccinationDto {
     nextDueDate: string;
     lotNumber: string;
     createdAt: string;
+    status: string;
     medicalRecordId: string;
     medicalRecord: {
         pet: {
