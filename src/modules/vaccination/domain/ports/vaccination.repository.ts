@@ -9,6 +9,7 @@ export interface FindVaccinationsCriteria {
     petId?: string;
     startDate?: Date;
     endDate?: Date;
+    status?: VaccinationStatus
 }
 
 export interface IVaccinationRepository {

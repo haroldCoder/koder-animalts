@@ -8,6 +8,7 @@ import {
     GetNextVaccinationReminderUseCase,
     FindVaccinationsByUserIdUseCase,
     UpdateStatusVaccinationUseCase,
+    GetVaccinationByIdUseCase,
 } from '@vaccination/application/use-cases';
 import { PrismaVaccinationService } from '@vaccination/infrastructure/persistence';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
@@ -21,6 +22,7 @@ import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
         GetNextVaccinationReminderUseCase,
         FindVaccinationsByUserIdUseCase,
         UpdateStatusVaccinationUseCase,
+        GetVaccinationByIdUseCase,
         {
             provide: "IVaccinationRepository",
             useClass: PrismaVaccinationService,
@@ -40,6 +42,7 @@ import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
         GetNextVaccinationReminderUseCase,
         FindVaccinationsByUserIdUseCase,
         UpdateStatusVaccinationUseCase,
+        GetVaccinationByIdUseCase,
     ],
 })
 export class VaccinationModule { }

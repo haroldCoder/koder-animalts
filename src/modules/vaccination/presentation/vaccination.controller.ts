@@ -5,7 +5,9 @@ import {
     GetNextVaccinationReminderUseCase,
     FindVaccinationsByUserIdUseCase,
     UpdateStatusVaccinationUseCase,
+    GetVaccinationByIdUseCase,
 } from "@vaccination/application/use-cases";
+import { VaccinationStatus } from "@vaccination/domain/enums";
 import { RegisterVaccinationDto, UpdateStatusVaccinationDto } from "@vaccination/presentation/dtos";
 
 @Controller('vaccination')
@@ -13,6 +15,7 @@ export class VaccinationController {
     constructor(
         private readonly registerVaccinationUseCase: RegisterVaccinationUseCase,
         private readonly getUpcomingVaccinationsByPetUseCase: GetUpcomingVaccinationsByPetUseCase,
+        private readonly getVaccinationByIdUseCase: GetVaccinationByIdUseCase,
         private readonly getNextVaccinationReminderUseCase: GetNextVaccinationReminderUseCase,
         private readonly findVaccinationsByUserIdUseCase: FindVaccinationsByUserIdUseCase,
         private readonly updateStatusVaccinationUseCase: UpdateStatusVaccinationUseCase,
@@ -42,6 +45,7 @@ export class VaccinationController {
         @Query("petId") petId?: string,
         @Query("startDate") startDate?: string,
         @Query("endDate") endDate?: string,
+        @Query("status") status?: VaccinationStatus,
     ) {
         return this.findVaccinationsByUserIdUseCase.execute(userId, {
             page: page ? parseInt(page, 10) : undefined,
@@ -50,7 +54,13 @@ export class VaccinationController {
             petId,
             startDate: startDate ? new Date(startDate) : undefined,
             endDate: endDate ? new Date(endDate) : undefined,
+            status,
         });
+    }
+
+    @Get(":id")
+    async getVaccinationById(@Param("id") id: string) {
+        return this.getVaccinationByIdUseCase.execute(id);
     }
 
     @Put("status/:id")
