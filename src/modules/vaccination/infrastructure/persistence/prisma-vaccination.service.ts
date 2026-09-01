@@ -152,7 +152,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const vaccinations = await this.prisma.vaccination.findMany({
             where: {
                 ...(medicalRecordId && { medicalRecordId }),
-                ...(status && { status }),
+                ...(status && status.length > 0 && { status: { in: status } }),
                 AND: [
                     {
                         OR: [

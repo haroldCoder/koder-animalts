@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseArrayPipe, Post, Put, Query } from "@nestjs/common";
 import {
     RegisterVaccinationUseCase,
     GetUpcomingVaccinationsByPetUseCase,
@@ -45,7 +45,7 @@ export class VaccinationController {
         @Query("petId") petId?: string,
         @Query("startDate") startDate?: string,
         @Query("endDate") endDate?: string,
-        @Query("status") status?: VaccinationStatus,
+        @Query("status", new ParseArrayPipe({ items: String, optional: true, separator: "," })) status?: VaccinationStatus[],
     ) {
         return this.findVaccinationsByUserIdUseCase.execute(userId, {
             page: page ? parseInt(page, 10) : undefined,
