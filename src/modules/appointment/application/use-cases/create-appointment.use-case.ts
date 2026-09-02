@@ -5,6 +5,8 @@ import type { IPetRepository } from "@pet/domain/ports";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import { PetIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import { RegisterAppointmentDto } from "../../presentation/dtos";
+import { RegisterAppointmentPolicy } from "@appointment/domain/policies";
+import { AppointmentDuplicatedDateException } from "@appointment/domain/exceptions";
 
 @Injectable()
 export class CreateAppointmentUseCase {
@@ -30,6 +32,15 @@ export class CreateAppointmentUseCase {
             throw new VeterinarianIdNotFoundException();
         }
 
+        const appointments = await this.appointmentRepository.findByUserId(data.userId);
+
+        if (!RegisterAppointmentPolicy.canRegisterByDate(appointments.map((appointment) => AppointmentEntity.create({
+            ...appointment,
+            notes: appointment.notes ?? undefined,
+        })), new Date(data.date))) {
+            throw new AppointmentDuplicatedDateException();
+        }
+
         const appointment = AppointmentEntity.create({
             id: this.idGenerator(),
             date: new Date(data.date),
@@ -41,7 +52,7 @@ export class CreateAppointmentUseCase {
 
         return this.appointmentRepository.create({
             ...data,
-            date: new Date(data.date),
+            date: appointment.getDate(),
         });
     }
 }

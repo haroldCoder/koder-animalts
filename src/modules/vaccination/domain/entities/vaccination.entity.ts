@@ -2,6 +2,7 @@ import { VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import {
     DateFutureStatusChangeException,
     StatusAlreadyChangedException,
+    VaccinationDatesConflictTimeException,
     VaccinationNameNotFoundException,
     VaccinationNotFoundException,
 } from "../exceptions";
@@ -61,7 +62,7 @@ export class VaccinationEntity {
         id: string;
         vaccineName: string;
         dateAdministered?: Date;
-        nextDueDate?: Date | null;
+        nextDueDate?: Date;
         lotNumber?: string | null;
         medicalRecordId: string;
         status?: VaccinationStatus;
@@ -69,6 +70,7 @@ export class VaccinationEntity {
         petName?: string | null;
         veterinarianId: string;
     }): VaccinationEntity {
+        VaccinationEntity.validateDates(properties.dateAdministered, properties.nextDueDate);
         return new VaccinationEntity({
             id: properties.id,
             vaccineName: properties.vaccineName,
@@ -93,6 +95,14 @@ export class VaccinationEntity {
         }
 
         this.status = status;
+    }
+
+    static validateDates(dateAdministered?: Date, nextDueDate?: Date): void {
+        if (dateAdministered && nextDueDate) {
+            if (dateAdministered > nextDueDate) {
+                throw new VaccinationDatesConflictTimeException();
+            }
+        }
     }
 
     // Getters

@@ -1,3 +1,5 @@
+import { BadRequestException } from "@nestjs/common";
+
 export class AppointmentDateNotFoundException extends Error {
     constructor() {
         super('Appointment date is required');
@@ -30,5 +32,12 @@ export class EarlyAppointmentStatusUpdateException extends Error {
     constructor() {
         super('Cannot update appointment status before the appointment date');
         this.name = 'EarlyAppointmentStatusUpdateException';
+    }
+}
+
+export class AppointmentDuplicatedDateException extends BadRequestException {
+    constructor() {
+        super('Appointment with the same date already exists');
+        this.name = 'AppointmentDuplicatedDateException';
     }
 }

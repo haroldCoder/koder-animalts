@@ -158,7 +158,7 @@ describe('PrismaDocumentService', () => {
                 where: {
                     createdAt: {
                         gte: criteria.startDate,
-                        lte: criteria.endDate,
+                        lte: new Date('2026-12-31T23:59:59.999Z'),
                     },
                     title: {
                         contains: criteria.documentName,

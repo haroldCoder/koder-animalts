@@ -5,10 +5,13 @@ import { ResponseDto } from "@/common/domain/dto";
 import { VaccinationEntity } from "@vaccination/domain/entities";
 import {
     VaccinationNameNotFoundException,
+    VaccinationDuplicatedDateException,
 } from "@vaccination/domain/exceptions";
+import { RegisterVaccinationPolicy } from "@vaccination/domain/policies";
 import { ServerErrorException, VeterinarianIdNotExistException } from "@/common/domain/exceptions";
 import { MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
+import { VaccinationDatesConflictTimeException } from "@vaccination/domain/exceptions/";
 
 @Injectable()
 export class RegisterVaccinationUseCase {
@@ -30,11 +33,29 @@ export class RegisterVaccinationUseCase {
                 throw new VeterinarianIdNotExistException()
             }
 
+            const existingVaccinationsDto = await this.vaccinationRepository.findByUserId(params.userId, {});
+            const existingVaccinations = existingVaccinationsDto.map(v => VaccinationEntity.create({
+                id: v.id,
+                vaccineName: v.vaccineName,
+                dateAdministered: new Date(v.dateAdministered),
+                nextDueDate: v.nextDueDate ? new Date(v.nextDueDate) : undefined,
+                lotNumber: v.lotNumber,
+                medicalRecordId: v.medicalRecordId,
+                veterinarianId: veterinarian.getId(),
+            }));
+
+            const dateAdministered = params.dateAdministered ?? undefined;
+            const nextDueDate = params.nextDueDate ? new Date(params.nextDueDate) : undefined;
+
+            if (!RegisterVaccinationPolicy.canRegisterByDate(existingVaccinations, dateAdministered, nextDueDate)) {
+                throw new VaccinationDuplicatedDateException();
+            }
+
             const vaccination = VaccinationEntity.create({
                 id,
                 vaccineName: params.vaccineName,
-                dateAdministered: params.dateAdministered ?? new Date(),
-                nextDueDate: params.nextDueDate ?? null,
+                dateAdministered,
+                nextDueDate: params.nextDueDate,
                 lotNumber: params.lotNumber ?? null,
                 medicalRecordId: params.medicalRecordId,
                 veterinarianId: veterinarian.getId(),
@@ -51,9 +72,12 @@ export class RegisterVaccinationUseCase {
         catch (error) {
             if (
                 error instanceof VaccinationNameNotFoundException ||
-                error instanceof MedicalRecordVisitDateNotFoundException
+                error instanceof MedicalRecordVisitDateNotFoundException ||
+                error instanceof VaccinationDuplicatedDateException ||
+                error instanceof VaccinationDatesConflictTimeException
             ) throw error;
             throw new ServerErrorException("Failed to register vaccination");
         }
     }
 }
+

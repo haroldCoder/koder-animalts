@@ -5,6 +5,8 @@ import {
     GetUpcomingVaccinationsByPetUseCase,
     GetNextVaccinationReminderUseCase,
     FindVaccinationsByUserIdUseCase,
+    GetVaccinationByIdUseCase,
+    UpdateStatusVaccinationUseCase,
 } from '@vaccination/application/use-cases';
 import { HttpStatus } from '@nestjs/common';
 
@@ -13,8 +15,10 @@ describe('VaccinationController', () => {
 
     const mockRegisterUseCase = { execute: jest.fn() };
     const mockGetUpcomingUseCase = { execute: jest.fn() };
+    const mockGetVaccinationByIdUseCase = { execute: jest.fn() };
     const mockGetNextReminderUseCase = { execute: jest.fn() };
     const mockFindVaccinationsByUserIdUseCase = { execute: jest.fn() };
+    const mockUpdateStatusVaccinationUseCase = { execute: jest.fn() };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -22,8 +26,10 @@ describe('VaccinationController', () => {
             providers: [
                 { provide: RegisterVaccinationUseCase, useValue: mockRegisterUseCase },
                 { provide: GetUpcomingVaccinationsByPetUseCase, useValue: mockGetUpcomingUseCase },
+                { provide: GetVaccinationByIdUseCase, useValue: mockGetVaccinationByIdUseCase },
                 { provide: GetNextVaccinationReminderUseCase, useValue: mockGetNextReminderUseCase },
                 { provide: FindVaccinationsByUserIdUseCase, useValue: mockFindVaccinationsByUserIdUseCase },
+                { provide: UpdateStatusVaccinationUseCase, useValue: mockUpdateStatusVaccinationUseCase },
             ],
         }).compile();
 
