@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
-import type { IAppointmentRepository } from "../../domain/ports/appointment.repository";
+import type { FindAppointmentsCriteria, IAppointmentRepository } from "../../domain/ports/appointment.repository";
 import { AppointmentEntity } from "../../domain/entities";
 import { AppointmentStatus } from "../../domain/enums/appointment-status.enum";
 import { Appointment, Prisma } from "@prisma/client";
 import { CreateAppointmentDto } from "../../domain/dto/create-appointment.dto";
 import { AppointmentRelationUserDto } from "@appointment/domain/dto/appointment-relation-user.dto";
+import { normalizeEndDate, normalizeStartDAte } from "@/common/utils";
 
 export type AppointmentWithRelations = Prisma.AppointmentGetPayload<{
     include: {
@@ -58,13 +59,21 @@ export class PrismaAppointmentService implements IAppointmentRepository {
         return this.mapToEntity(appointment);
     }
 
-    async findByUserId(userId: string): Promise<AppointmentRelationUserDto[]> {
+    async findByUserId(userId: string, criteria?: FindAppointmentsCriteria): Promise<AppointmentRelationUserDto[]> {
+        const { startDate, endDate } = criteria || {};
+
+        const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
+        const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
+
         const appointments = await this.prisma.appointment.findMany({
             where: {
                 OR: [
                     { pet: { owner: { userId } } },
                     { veterinarian: { userId } }
-                ]
+                ],
+                ...(normalizedStartDate && { date: { gte: normalizedStartDate } }),
+                ...(normalizedEndDate && { date: { lte: normalizedEndDate } }),
+
             },
             include: {
                 pet: { select: { id: true, name: true, mainImage: true, owner: { select: { user: { select: { name: true } } } } } },

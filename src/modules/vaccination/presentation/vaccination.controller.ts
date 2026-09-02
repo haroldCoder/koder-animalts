@@ -7,8 +7,8 @@ import {
     UpdateStatusVaccinationUseCase,
     GetVaccinationByIdUseCase,
 } from "@vaccination/application/use-cases";
-import { VaccinationStatus } from "@vaccination/domain/enums";
 import { RegisterVaccinationDto, UpdateStatusVaccinationDto } from "@vaccination/presentation/dtos";
+import { FindVaccinationsCriteriaDto } from "./dtos/find-vaccination-criteria.dto";
 
 @Controller('vaccination')
 export class VaccinationController {
@@ -39,23 +39,9 @@ export class VaccinationController {
     @Get("user/:userId")
     async findVaccinationsByUserId(
         @Param("userId") userId: string,
-        @Query("page") page?: string,
-        @Query("limit") limit?: string,
-        @Query("medicalRecordId") medicalRecordId?: string,
-        @Query("petId") petId?: string,
-        @Query("startDate") startDate?: string,
-        @Query("endDate") endDate?: string,
-        @Query("status", new ParseArrayPipe({ items: String, optional: true, separator: "," })) status?: VaccinationStatus[],
+        @Query() criteria: FindVaccinationsCriteriaDto
     ) {
-        return this.findVaccinationsByUserIdUseCase.execute(userId, {
-            page: page ? parseInt(page, 10) : undefined,
-            limit: limit ? parseInt(limit, 10) : undefined,
-            medicalRecordId,
-            petId,
-            startDate: startDate ? new Date(startDate) : undefined,
-            endDate: endDate ? new Date(endDate) : undefined,
-            status,
-        });
+        return this.findVaccinationsByUserIdUseCase.execute(userId, criteria);
     }
 
     @Get(":id")

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, BadRequestException, HttpException, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, BadRequestException, HttpException, HttpStatus, Query } from "@nestjs/common";
 import { RegisterAppointmentDto, UpdateAppointmentStatusDto } from "./dtos";
 import {
     CreateAppointmentUseCase,
@@ -7,6 +7,7 @@ import {
     UpdateAppointmentStatusUseCase
 } from "../application/use-cases";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
+import type { FindAppointmentsCriteria } from "@appointment/domain/ports/appointment.repository";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -40,9 +41,12 @@ export class AppointmentController {
     }
 
     @Get("user/:id")
-    async getAppointmentsByUser(@Param("id") id: string) {
+    async getAppointmentsByUser(
+        @Param("id") id: string,
+        @Query() criteria: FindAppointmentsCriteria
+    ) {
         try {
-            const appointments = await this.getAppointmentsByUserUseCase.execute(id);
+            const appointments = await this.getAppointmentsByUserUseCase.execute(id, criteria);
             return new ResponseDto(HttpStatus.OK, "Appointments found", appointments);
         } catch (error: any) {
             if (error instanceof HttpException) throw error;

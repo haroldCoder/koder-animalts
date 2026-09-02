@@ -123,7 +123,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
 
         if (!user) throw new UserIdNotFoundException();
 
-        const { page, limit, medicalRecordId, petId, startDate, endDate, status } = criteria;
+        const { page, limit, medicalRecordId, petId, startDate, endDate, status, sortOrder = 'desc' } = criteria;
         const skip = page && limit ? (page - 1) * limit : undefined;
         const take = limit ? limit : undefined;
 
@@ -210,7 +210,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             skip,
             take,
             orderBy: {
-                createdAt: "desc",
+                createdAt: sortOrder,
             },
         });
 

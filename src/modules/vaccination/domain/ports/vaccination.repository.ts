@@ -1,10 +1,9 @@
+import { FindCriteriaQueries } from "@/common/interfaces";
 import { VaccinationEntity } from "@vaccination/domain/entities";
 import { ResponseVaccinationDto } from "../dtos";
 import { VaccinationStatus } from "../enums";
 
-export interface FindVaccinationsCriteria {
-    page?: number;
-    limit?: number;
+export interface FindVaccinationsCriteria extends FindCriteriaQueries {
     medicalRecordId?: string;
     petId?: string;
     startDate?: Date;
