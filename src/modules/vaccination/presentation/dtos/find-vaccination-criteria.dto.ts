@@ -37,4 +37,8 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @IsOptional()
     @Transform(({ value }) => typeof value === 'string' ? value.split(',') : value)
     status?: VaccinationStatus[];
+
+    @IsOptional()
+    @IsString()
+    petId?: string;
 }
