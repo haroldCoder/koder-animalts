@@ -11,14 +11,15 @@ export class FindVaccinationsByUserIdUseCase {
         private readonly vaccinationRepository: IVaccinationRepository
     ) { }
 
-    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<ResponseVaccinationDto[]>> {
+    async execute(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseDto<ResponseVaccinationDto["data"]>> {
         try {
             const vaccinations = await this.vaccinationRepository.findByUserId(userId, criteria);
 
             return {
                 statusCode: HttpStatus.OK,
                 message: "Vaccinations retrieved successfully",
-                data: vaccinations,
+                data: vaccinations.data,
+                pagination: vaccinations.pagination
             };
         }
         catch (error) {

@@ -1,7 +1,7 @@
 import { VaccinationStatus } from "@vaccination/domain/enums";
 import { FindVaccinationsCriteria } from "@vaccination/domain/ports";
 import { Transform, Type } from "class-transformer";
-import { IsInt, IsOptional, IsString, Min, IsIn } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min, IsIn, IsDate } from 'class-validator';
 
 export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @IsOptional()
@@ -15,6 +15,16 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @IsInt()
     @Min(1)
     limit?: number;
+
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    startDate?: Date;
+
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    endDate?: Date;
 
     @IsOptional()
     @IsString()

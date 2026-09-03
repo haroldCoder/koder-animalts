@@ -26,7 +26,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         });
     }
 
-    mapToResponse(vaccination: any): ResponseVaccinationDto {
+    mapToResponse(vaccination: any): ResponseVaccinationDto['data'][number] {
         return {
             id: vaccination.id,
             vaccineName: vaccination.vaccineName,
@@ -38,12 +38,12 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             medicalRecordId: vaccination.medicalRecordId,
             medicalRecord: {
                 pet: {
-                    name: vaccination.medicalRecord?.pet?.name || null,
+                    name: vaccination.medicalRecord?.pet?.name ?? null,
                 }
             },
             veterinarian: {
                 id: vaccination.veterinarian.id,
-                name: vaccination.veterinarian.user?.name,
+                name: vaccination.veterinarian.user?.name ?? null,
             }
         };
     }
@@ -116,16 +116,16 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         return this.mapToDomain(vaccination);
     }
 
-    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto[]> {
+    async findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
         });
 
         if (!user) throw new UserIdNotFoundException();
 
-        const { page, limit, medicalRecordId, petId, startDate, endDate, status, sortOrder = 'desc' } = criteria;
-        const skip = page && limit ? (page - 1) * limit : undefined;
-        const take = limit ? limit : undefined;
+        const { page = 1, limit = 10, medicalRecordId, petId, startDate, endDate, status, sortOrder = 'desc' } = criteria;
+        const skip = (page - 1) * limit;
+        const take = limit;
 
         const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
         const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
@@ -149,72 +149,89 @@ export class PrismaVaccinationService implements IVaccinationRepository {
             },
         ] : [];
 
-        const vaccinations = await this.prisma.vaccination.findMany({
-            where: {
-                ...(medicalRecordId && { medicalRecordId }),
-                ...(status && status.length > 0 && { status: { in: status } }),
-                AND: [
-                    {
-                        OR: [
-                            {
-                                medicalRecord: {
-                                    pet: {
-                                        owner: {
-                                            userId,
-                                        },
-                                        ...(petId && { id: petId })
-                                    }
+        const whereClause = {
+            ...(medicalRecordId && { medicalRecordId }),
+            ...(status && status.length > 0 && { status: { in: status } }),
+            AND: [
+                {
+                    OR: [
+                        {
+                            medicalRecord: {
+                                pet: {
+                                    owner: {
+                                        userId,
+                                    },
+                                    ...(petId && { id: petId })
                                 }
-                            },
-                            {
-                                veterinarian: {
-                                    userId,
-                                }
-                            },
-                        ]
-                    },
-                    ...dateFilter,
-                ]
-            },
-            include: {
-                medicalRecord: {
-                    select: {
-                        pet: {
-                            select: {
-                                name: true
                             }
                         },
-                        veterinarian: {
-                            select: {
-                                id: true,
-                                user: {
-                                    select: {
-                                        name: true
+                        {
+                            veterinarian: {
+                                userId,
+                            }
+                        },
+                    ]
+                },
+                ...dateFilter,
+            ]
+        };
+
+        const [total, vaccinations] = await Promise.all([
+            this.prisma.vaccination.count({ where: whereClause }),
+            this.prisma.vaccination.findMany({
+                where: whereClause,
+                include: {
+                    medicalRecord: {
+                        select: {
+                            pet: {
+                                select: {
+                                    name: true
+                                }
+                            },
+                            veterinarian: {
+                                select: {
+                                    id: true,
+                                    user: {
+                                        select: {
+                                            name: true
+                                        }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    veterinarian: {
+                        select: {
+                            id: true,
+                            user: {
+                                select: {
+                                    name: true
                                 }
                             }
                         }
                     }
                 },
-                veterinarian: {
-                    select: {
-                        id: true,
-                        user: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
-                }
-            },
-            skip,
-            take,
-            orderBy: {
-                createdAt: sortOrder,
-            },
-        });
+                skip,
+                take,
+                orderBy: {
+                    createdAt: sortOrder,
+                },
+            }),
+        ]);
 
-        return vaccinations.map((vaccination) => this.mapToResponse(vaccination));
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: vaccinations.map((vaccination) => this.mapToResponse(vaccination)),
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages,
+                hasPrev: page > 1,
+                hasNext: page < totalPages,
+            },
+        };
     }
 
     async updateStatus(id: string, status: VaccinationStatus): Promise<void> {

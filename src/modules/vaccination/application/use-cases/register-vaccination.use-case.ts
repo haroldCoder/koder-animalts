@@ -34,7 +34,7 @@ export class RegisterVaccinationUseCase {
             }
 
             const existingVaccinationsDto = await this.vaccinationRepository.findByUserId(params.userId, {});
-            const existingVaccinations = existingVaccinationsDto.map(v => VaccinationEntity.create({
+            const existingVaccinations = existingVaccinationsDto.data.map(v => VaccinationEntity.create({
                 id: v.id,
                 vaccineName: v.vaccineName,
                 dateAdministered: new Date(v.dateAdministered),

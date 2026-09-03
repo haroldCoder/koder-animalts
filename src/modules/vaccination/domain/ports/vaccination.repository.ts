@@ -16,6 +16,6 @@ export interface IVaccinationRepository {
     findById(id: string): Promise<VaccinationEntity | null>;
     findUpcomingByPetId(petId: string): Promise<VaccinationEntity[]>;
     findNextByPetId(petId: string): Promise<VaccinationEntity | null>;
-    findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto[]>;
+    findByUserId(userId: string, criteria: FindVaccinationsCriteria): Promise<ResponseVaccinationDto>;
     updateStatus(id: string, status: VaccinationStatus): Promise<void>;
 }
