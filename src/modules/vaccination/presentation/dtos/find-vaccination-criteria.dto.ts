@@ -41,4 +41,8 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @IsOptional()
     @IsString()
     petId?: string;
+
+    @IsOptional()
+    @IsString()
+    medicalRecordId?: string;
 }
