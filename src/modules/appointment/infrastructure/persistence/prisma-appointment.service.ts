@@ -60,7 +60,7 @@ export class PrismaAppointmentService implements IAppointmentRepository {
     }
 
     async findByUserId(userId: string, criteria?: FindAppointmentsCriteria): Promise<AppointmentRelationUserDto[]> {
-        const { startDate, endDate } = criteria || {};
+        const { startDate, endDate, sortOrder } = criteria || {};
 
         const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
         const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
@@ -73,7 +73,6 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                 ],
                 ...(normalizedStartDate && { date: { gte: normalizedStartDate } }),
                 ...(normalizedEndDate && { date: { lte: normalizedEndDate } }),
-
             },
             include: {
                 pet: { select: { id: true, name: true, mainImage: true, owner: { select: { user: { select: { name: true } } } } } },
@@ -84,6 +83,9 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                         clinic: { select: { name: true } },
                     },
                 },
+            },
+            orderBy: {
+                date: sortOrder,
             },
         });
 

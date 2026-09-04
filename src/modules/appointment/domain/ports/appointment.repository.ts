@@ -8,6 +8,7 @@ export interface FindAppointmentsCriteria extends FindCriteriaQueries {
     startDate?: Date;
     endDate?: Date;
     status?: AppointmentStatus[];
+    sortOrder?: 'desc' | 'asc';
 }
 
 export interface IAppointmentRepository {
