@@ -5,6 +5,14 @@ import { Transform, Type } from "class-transformer";
 
 export class FindAppointmentsCriteriaDto implements FindAppointmentsCriteria {
     @IsOptional()
+    @Type(() => Date)
+    startDate?: Date;
+
+    @IsOptional()
+    @Type(() => Date)
+    endDate?: Date;
+
+    @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)

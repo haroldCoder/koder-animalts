@@ -65,15 +65,25 @@ export class PrismaAppointmentService implements IAppointmentRepository {
         const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
         const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
 
+        const statusArray = Array.isArray(status)
+            ? status
+            : typeof status === 'string'
+                ? (status as string).split(',').map((s) => s.trim() as AppointmentStatus).filter(Boolean)
+                : undefined;
+
         const appointments = await this.prisma.appointment.findMany({
             where: {
                 OR: [
                     { pet: { owner: { userId } } },
                     { veterinarian: { userId } }
                 ],
-                ...(normalizedStartDate && { date: { gte: normalizedStartDate } }),
-                ...(normalizedEndDate && { date: { lte: normalizedEndDate } }),
-                ...(status && status.length > 0 && { status: { in: status as AppointmentStatus[] } })
+                ...((normalizedStartDate || normalizedEndDate) && {
+                    date: {
+                        ...(normalizedStartDate && { gte: normalizedStartDate }),
+                        ...(normalizedEndDate && { lte: normalizedEndDate }),
+                    },
+                }),
+                ...(statusArray && statusArray.length > 0 && { status: { in: statusArray } })
             },
             include: {
                 pet: { select: { id: true, name: true, mainImage: true, owner: { select: { user: { select: { name: true } } } } } },

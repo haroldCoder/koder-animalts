@@ -130,6 +130,12 @@ export class PrismaVaccinationService implements IVaccinationRepository {
         const normalizedStartDate = startDate ? normalizeStartDAte(startDate) : undefined;
         const normalizedEndDate = endDate ? normalizeEndDate(endDate) : undefined;
 
+        const statusArray = Array.isArray(status)
+            ? status
+            : typeof status === 'string'
+            ? (status as string).split(',').map((s) => s.trim() as VaccinationStatus).filter(Boolean)
+            : undefined;
+
         const dateFilter = (normalizedStartDate || normalizedEndDate) ? [
             {
                 OR: [
@@ -151,7 +157,7 @@ export class PrismaVaccinationService implements IVaccinationRepository {
 
         const whereClause = {
             ...(medicalRecordId && { medicalRecordId }),
-            ...(status && status.length > 0 && { status: { in: status } }),
+            ...(statusArray && statusArray.length > 0 && { status: { in: statusArray } }),
             AND: [
                 {
                     OR: [

@@ -7,7 +7,7 @@ import {
     UpdateAppointmentStatusUseCase
 } from "../application/use-cases";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
-import type { FindAppointmentsCriteria } from "@appointment/domain/ports/appointment.repository";
+import { FindAppointmentsCriteriaDto } from "./dtos/find-appointment-criteria.dto";
 
 @Controller('appointment')
 export class AppointmentController {
@@ -43,7 +43,7 @@ export class AppointmentController {
     @Get("user/:id")
     async getAppointmentsByUser(
         @Param("id") id: string,
-        @Query() criteria: FindAppointmentsCriteria
+        @Query() criteria: FindAppointmentsCriteriaDto
     ) {
         try {
             const appointments = await this.getAppointmentsByUserUseCase.execute(id, criteria);
