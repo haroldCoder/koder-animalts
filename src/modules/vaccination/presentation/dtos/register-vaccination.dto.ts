@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterVaccinationDto {
     @IsNotEmpty()
@@ -21,9 +21,10 @@ export class RegisterVaccinationDto {
     lotNumber?: string;
 
     @IsNotEmpty()
+    @IsUUID()
     medicalRecordId: string;
 
     @IsNotEmpty()
-    @IsString()
+    @IsUUID()
     userId: string;
 }

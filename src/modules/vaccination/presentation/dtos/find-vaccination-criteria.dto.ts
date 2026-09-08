@@ -1,7 +1,7 @@
 import { VaccinationStatus } from "@vaccination/domain/enums";
 import { FindVaccinationsCriteria } from "@vaccination/domain/ports";
 import { Transform, Type } from "class-transformer";
-import { IsInt, IsOptional, IsString, Min, IsIn, IsDate } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min, IsIn, IsDate, IsUUID } from 'class-validator';
 
 export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @IsOptional()
@@ -39,10 +39,10 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     status?: VaccinationStatus[];
 
     @IsOptional()
-    @IsString()
+    @IsUUID()
     petId?: string;
 
     @IsOptional()
-    @IsString()
+    @IsUUID()
     medicalRecordId?: string;
 }

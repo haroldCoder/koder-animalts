@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterDocumentDto {
     @IsString()
@@ -9,24 +9,31 @@ export class RegisterDocumentDto {
     @IsNotEmpty()
     fileUrl: string;
 
+    @IsOptional()
     @IsString()
     fileKey?: string;
 
+    @IsOptional()
     @IsNumber()
     fileSize?: number;
 
+    @IsOptional()
     @IsString()
     fileType?: string;
 
+    @IsOptional()
     @IsString()
     category?: string;
 
-    @IsString()
+    @IsOptional()
+    @IsUUID()
     petId?: string;
 
-    @IsString()
+    @IsOptional()
+    @IsUUID()
     medicalRecordId?: string;
 
-    @IsString()
+    @IsOptional()
+    @IsUUID()
     clinicId?: string;
 }

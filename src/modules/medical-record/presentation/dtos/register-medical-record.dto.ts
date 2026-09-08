@@ -1,13 +1,13 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterMedicalRecordDto {
     @IsNotEmpty()
-    @IsString()
+    @IsUUID()
     petId: string;
 
     @IsNotEmpty()
-    @IsString()
+    @IsUUID()
     userId: string;
 
     @IsNotEmpty()

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterDocumentRequestDto {
     @IsNotEmpty()
@@ -9,11 +9,11 @@ export class RegisterDocumentRequestDto {
     @IsOptional()
     category?: string;
 
-    @IsString()
+    @IsUUID()
     @IsOptional()
     petId?: string;
 
-    @IsString()
+    @IsUUID()
     @IsOptional()
     medicalRecordId?: string;
 

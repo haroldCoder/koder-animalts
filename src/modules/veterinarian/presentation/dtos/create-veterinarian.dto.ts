@@ -1,12 +1,15 @@
-import { IsString } from "class-validator";
+import { IsString, IsUUID } from "class-validator";
 
 export class CreateVeterinarianDto {
     @IsString()
     specialty: string;
+
     @IsString()
     phone: string;
-    @IsString()
+
+    @IsUUID()
     userId: string;
-    @IsString()
+
+    @IsUUID()
     clinicId: string;
 }
