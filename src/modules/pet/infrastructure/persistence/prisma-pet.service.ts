@@ -3,9 +3,11 @@ import { PrismaService } from "@/common/infrastructure/db";
 import { IPetRepository } from "@pet/domain/ports";
 import { PetEntity } from "@pet/domain/entities";
 import { GenderPet } from "@pet/domain/enums";
-import { UserIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
+import { PetIdNotExistException, PetIdNotFoundException, UserIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 import { PetOwnerIdNotFoundException } from "@pet/domain/exceptions";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
+import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
+import { ClinicNotExistException } from "@veterinary-clinics/domain/exceptions";
 
 @Injectable()
 export class PrismaPetService implements IPetRepository {
@@ -167,5 +169,27 @@ export class PrismaPetService implements IPetRepository {
         if (!pets) return null;
 
         return pets.map(pet => this.mapToDomain(pet));
+    }
+
+    async updateClinic(petId: string, clinicId: string): Promise<void> {
+        if (!petId) throw new PetIdNotFoundException();
+        if (!clinicId) throw new ClinicIdNotFoundException();
+
+        const clinic = await this.prisma.veterinaryClinic.findUnique({
+            where: { id: clinicId }
+        });
+
+        if (!clinic) throw new ClinicNotExistException(clinicId);
+
+        const pet = await this.prisma.pet.findUnique({
+            where: { id: petId }
+        });
+
+        if (!pet) throw new PetIdNotExistException();
+
+        await this.prisma.pet.update({
+            where: { id: petId },
+            data: { clinicId }
+        });
     }
 }

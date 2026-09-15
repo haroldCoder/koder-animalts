@@ -10,10 +10,12 @@ import {
     GetPetByVeterinarianIdUseCase,
     GetPetByOwnerIdUseCase,
     GetPetByUserOwnerUseCase,
-    GetPetByVeterinarianUserIdUseCase
+    GetPetByVeterinarianUserIdUseCase,
+    UpdateClinicUseCase
 } from "@pet/application/use-cases";
 import { PrismaPetService } from "@pet/infrastructure/persistence";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence";
+import { PrismaAppointmentService } from "@appointment/infrastructure";
 
 @Module({
     imports: [PrismaModule],
@@ -28,9 +30,14 @@ import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persiste
         GetPetByUserOwnerUseCase,
         GetPetByVeterinarianUserIdUseCase,
         PrismaVeterinarianService,
+        UpdateClinicUseCase,
         {
             provide: "IPetRepository",
             useClass: PrismaPetService
+        },
+        {
+            provide: "IAppointmentRepository",
+            useClass: PrismaAppointmentService
         },
         {
             provide: "IIdGenerator",
@@ -45,7 +52,8 @@ import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persiste
         GetPetByVeterinarianIdUseCase,
         GetPetByOwnerIdUseCase,
         GetPetByUserOwnerUseCase,
-        GetPetByVeterinarianUserIdUseCase
+        GetPetByVeterinarianUserIdUseCase,
+        UpdateClinicUseCase
     ]
 })
 export class PetModule { }

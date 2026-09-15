@@ -10,4 +10,5 @@ export interface IPetRepository {
     findByOwnerUserId(userId: string): Promise<PetEntity[] | null>;
     findByVeterinarianUserId(userId: string, petName?: string, ownerName?: string): Promise<PetEntity[] | null>;
     findOwnerIdByUserId(userId: string): Promise<string | null>;
+    updateClinic(petId: string, clinicId: string): Promise<void>;
 }

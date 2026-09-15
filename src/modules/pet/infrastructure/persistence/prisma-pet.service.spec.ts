@@ -4,6 +4,9 @@ import { PrismaPetService } from "./prisma-pet.service";
 import { GenderPet } from "@pet/domain/enums";
 import { PetEntity } from "@pet/domain/entities";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
+import { PetIdNotExistException, PetIdNotFoundException } from "@/common/domain/exceptions";
+import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
+import { ClinicNotExistException } from "@veterinary-clinics/domain/exceptions";
 
 describe("PrismaPetService", () => {
     let service: PrismaPetService;
@@ -18,6 +21,9 @@ describe("PrismaPetService", () => {
         },
         owner: {
             findFirst: jest.fn(),
+        },
+        veterinaryClinic: {
+            findUnique: jest.fn(),
         },
     };
 
@@ -210,6 +216,62 @@ describe("PrismaPetService", () => {
             const result = await service.findById(id);
 
             expect(result).toBeNull();
+        });
+    });
+
+    describe("updateClinic", () => {
+        it("should throw PetIdNotFoundException if petId is empty", async () => {
+            await expect(service.updateClinic("", "clinic-123")).rejects.toThrow(
+                PetIdNotFoundException
+            );
+        });
+
+        it("should throw ClinicIdNotFoundException if clinicId is empty", async () => {
+            await expect(service.updateClinic("pet-123", "")).rejects.toThrow(
+                ClinicIdNotFoundException
+            );
+        });
+
+        it("should throw ClinicNotExistException if clinic is not found", async () => {
+            mockPrismaService.veterinaryClinic.findUnique.mockResolvedValue(null);
+
+            await expect(service.updateClinic("pet-123", "clinic-123")).rejects.toThrow(
+                ClinicNotExistException
+            );
+            expect(prisma.veterinaryClinic.findUnique).toHaveBeenCalledWith({
+                where: { id: "clinic-123" }
+            });
+        });
+
+        it("should throw PetIdNotExistException if pet is not found", async () => {
+            mockPrismaService.veterinaryClinic.findUnique.mockResolvedValue({ id: "clinic-123" });
+            mockPrismaService.pet.findUnique.mockResolvedValue(null);
+
+            await expect(service.updateClinic("pet-123", "clinic-123")).rejects.toThrow(
+                PetIdNotExistException
+            );
+            expect(prisma.pet.findUnique).toHaveBeenCalledWith({
+                where: { id: "pet-123" }
+            });
+        });
+
+        it("should update pet with new clinicId when clinic and pet exist", async () => {
+            mockPrismaService.veterinaryClinic.findUnique.mockResolvedValue({ id: "clinic-123" });
+            mockPrismaService.pet.findUnique.mockResolvedValue({ id: "pet-123" });
+            mockPrismaService.pet.update.mockResolvedValue({ id: "pet-123", clinicId: "clinic-123" });
+
+            await service.updateClinic("pet-123", "clinic-123");
+
+            expect(prisma.veterinaryClinic.findUnique).toHaveBeenCalledWith({
+                where: { id: "clinic-123" }
+            });
+            expect(prisma.pet.findUnique).toHaveBeenCalledWith({
+                where: { id: "pet-123" }
+            });
+            expect(prisma.pet.update).toHaveBeenCalledWith({
+                where: { id: "pet-123" },
+                data: { clinicId: "clinic-123" }
+            });
         });
     });
 });

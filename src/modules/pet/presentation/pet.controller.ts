@@ -1,9 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase } from "@pet/application/use-cases";
+import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase } from "@pet/application/use-cases";
 import { RegisterPetDto, UpdatePetDto } from "@pet/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
+import { ClinicNotExistException } from "@veterinary-clinics/domain/exceptions";
+import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
+import { ClinicChangeNotAllowedByAppointmentException, PetIdNotExistException, PetIdNotFoundException } from "@/common/domain/exceptions";
+import { ResponseDto } from "@/common/domain/dto";
 
 @Controller('pet')
 export class PetController {
@@ -16,6 +20,7 @@ export class PetController {
         private readonly getPetByOwnerIdUseCase: GetPetByOwnerIdUseCase,
         private readonly getPetByOwnerUserIdUseCase: GetPetByUserOwnerUseCase,
         private readonly getPetByVeterinarianUserIdUseCase: GetPetByVeterinarianUserIdUseCase,
+        private readonly updateClinicUseCase: UpdateClinicUseCase,
     ) { }
 
     @Post("register")
@@ -94,5 +99,30 @@ export class PetController {
         @Query("ownerName") ownerName?: string
     ) {
         return this.getPetByVeterinarianUserIdUseCase.execute(id, petName, ownerName);
+    }
+
+    @Patch("clinic/:petId")
+    async updateClinic(
+        @Param("petId") petId: string,
+        @Body() { clinicId }: { clinicId: string }
+    ): Promise<ResponseDto<void>> {
+        try {
+            await this.updateClinicUseCase.execute(petId, clinicId);
+
+            return {
+                statusCode: HttpStatus.OK,
+                message: "Clinic updated successfully",
+            };
+        } catch (error) {
+            if (error instanceof ClinicNotExistException
+                || error instanceof ClinicIdNotFoundException
+                || error instanceof PetIdNotFoundException
+                || error instanceof PetIdNotExistException
+                || error instanceof ClinicChangeNotAllowedByAppointmentException
+            ) {
+                throw error;
+            }
+            throw new InternalServerErrorException(error.message);
+        }
     }
 }
