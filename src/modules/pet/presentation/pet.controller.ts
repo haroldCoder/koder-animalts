@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase } from "@pet/application/use-cases";
 import { RegisterPetDto, UpdatePetDto } from "@pet/presentation/dtos";
@@ -9,6 +10,7 @@ import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
 import { ClinicChangeNotAllowedByAppointmentException, PetIdNotExistException, PetIdNotFoundException } from "@/common/domain/exceptions";
 import { ResponseDto } from "@/common/domain/dto";
 
+@ApiTags('Pets')
 @Controller('pet')
 export class PetController {
     constructor(
@@ -23,6 +25,10 @@ export class PetController {
         private readonly updateClinicUseCase: UpdateClinicUseCase,
     ) { }
 
+    @ApiOperation({ summary: 'Registrar una nueva mascota' })
+    @ApiConsumes('multipart/form-data')
+    @ApiResponse({ status: 201, description: 'Mascota registrada exitosamente.' })
+    @ApiResponse({ status: 400, description: 'Datos inválidos o falta la imagen principal.' })
     @Post("register")
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'mainImage', maxCount: 1 },
@@ -62,36 +68,59 @@ export class PetController {
         }, userId);
     }
 
+    @ApiOperation({ summary: 'Actualizar información de una mascota' })
+    @ApiParam({ name: 'id', description: 'ID de la mascota' })
+    @ApiResponse({ status: 200, description: 'Mascota actualizada exitosamente.' })
     @Patch(":id")
     async updatePet(@Param("id") id: string, @Body() pet: UpdatePetDto) {
         return this.updatePetUseCase.execute(id, pet);
     }
 
+    @ApiOperation({ summary: 'Eliminar una mascota por ID' })
+    @ApiParam({ name: 'id', description: 'ID de la mascota' })
+    @ApiResponse({ status: 200, description: 'Mascota eliminada exitosamente.' })
     @Delete(":id")
     async deletePet(@Param("id") id: string) {
         return this.deletePetUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Obtener mascota por ID' })
+    @ApiParam({ name: 'id', description: 'ID de la mascota' })
+    @ApiResponse({ status: 200, description: 'Datos de la mascota.' })
     @Get(":id")
     async getPetById(@Param("id") id: string) {
         return this.getPetByIdUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Obtener mascotas por ID de veterinario' })
+    @ApiParam({ name: 'veterinarianId', description: 'ID del veterinario' })
+    @ApiResponse({ status: 200, description: 'Lista de mascotas asociadas al veterinario.' })
     @Get("veterinarian/:veterinarianId")
     async getPetByVeterinarianId(@Param("veterinarianId") veterinarianId: string) {
         return this.getPetByVeterinarianIdUseCase.execute(veterinarianId);
     }
 
+    @ApiOperation({ summary: 'Obtener mascotas por ID de propietario' })
+    @ApiParam({ name: 'ownerId', description: 'ID del propietario' })
+    @ApiResponse({ status: 200, description: 'Lista de mascotas del propietario.' })
     @Get("owner/:ownerId")
     async getPetByOwnerId(@Param("ownerId") ownerId: string) {
         return this.getPetByOwnerIdUseCase.execute(ownerId);
     }
 
+    @ApiOperation({ summary: 'Obtener mascotas por ID de usuario del propietario' })
+    @ApiParam({ name: 'id', description: 'ID del usuario (propietario)' })
+    @ApiResponse({ status: 200, description: 'Lista de mascotas.' })
     @Get("owner/userId/:id")
     async getPetByOwnerUserId(@Param("id") id: string) {
         return this.getPetByOwnerUserIdUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Obtener mascotas por ID de usuario del veterinario' })
+    @ApiParam({ name: 'id', description: 'ID del usuario (veterinario)' })
+    @ApiQuery({ name: 'petName', required: false, description: 'Filtro por nombre de mascota' })
+    @ApiQuery({ name: 'ownerName', required: false, description: 'Filtro por nombre de propietario' })
+    @ApiResponse({ status: 200, description: 'Lista de mascotas filtradas.' })
     @Get("veterinarian/userId/:id")
     async getPetByVeterinarianUserId(
         @Param("id") id: string,
@@ -101,6 +130,11 @@ export class PetController {
         return this.getPetByVeterinarianUserIdUseCase.execute(id, petName, ownerName);
     }
 
+    @ApiOperation({ summary: 'Actualizar la clínica asociada a una mascota' })
+    @ApiParam({ name: 'petId', description: 'ID de la mascota' })
+    @ApiResponse({ status: 200, description: 'Clínica actualizada exitosamente.' })
+    @ApiResponse({ status: 400, description: 'Error de validación o lógica de negocio (ej. cambio no permitido por cita).' })
+    @ApiResponse({ status: 404, description: 'Mascota o clínica no encontrada.' })
     @Patch("clinic/:petId")
     async updateClinic(
         @Param("petId") petId: string,
