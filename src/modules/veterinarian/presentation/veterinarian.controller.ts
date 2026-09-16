@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateVeterinarianUseCase, FindClinicOfVeterinarianUseCase, FindVeterinarianByUserIdUseCase, GetVeterinarianByIdUseCase } from "@veterinarian/application/use-cases";
 import { CreateVeterinarianDto } from "@veterinarian/presentation/dtos";
 
