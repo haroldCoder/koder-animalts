@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { AppointmentStatus } from "../enums/appointment-status.enum";
 
 export interface AppointmentRelationUserDto {

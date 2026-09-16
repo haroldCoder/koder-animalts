@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 export interface CreateAppointmentDto {
     date: Date;
     reason: string;

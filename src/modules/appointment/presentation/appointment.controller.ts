@@ -1,3 +1,4 @@
+import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, BadRequestException, HttpException, HttpStatus, Query } from "@nestjs/common";
 import { RegisterAppointmentDto, UpdateAppointmentStatusDto } from "./dtos";
 import {
@@ -9,6 +10,7 @@ import {
 import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { FindAppointmentsCriteriaDto } from "./dtos/find-appointment-criteria.dto";
 
+@ApiTags('Appointment')
 @Controller('appointment')
 export class AppointmentController {
     constructor(
@@ -18,6 +20,9 @@ export class AppointmentController {
         private readonly updateAppointmentStatusUseCase: UpdateAppointmentStatusUseCase
     ) { }
 
+    @ApiOperation({ summary: 'Create appointment' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Post("register")
     async createAppointment(@Body() appointment: RegisterAppointmentDto) {
         try {
@@ -29,6 +34,9 @@ export class AppointmentController {
         }
     }
 
+    @ApiOperation({ summary: 'Get appointment by id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("/:id")
     async getAppointmentById(@Param("id") id: string) {
         try {
@@ -40,6 +48,9 @@ export class AppointmentController {
         }
     }
 
+    @ApiOperation({ summary: 'Get appointments by user' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("user/:id")
     async getAppointmentsByUser(
         @Param("id") id: string,
@@ -54,6 +65,9 @@ export class AppointmentController {
         }
     }
 
+    @ApiOperation({ summary: 'Update appointment status' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Put(":id/status")
     async updateAppointmentStatus(@Param("id") id: string, @Body() data: UpdateAppointmentStatusDto) {
         try {

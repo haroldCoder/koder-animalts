@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { FindAppointmentsCriteria } from "@appointment/domain/ports/appointment.repository";
 import { IsOptional, IsInt, Min, IsString, IsIn } from "class-validator";
 import { AppointmentStatus } from "@appointment/domain/enums/appointment-status.enum";
@@ -24,6 +25,7 @@ export class FindAppointmentsCriteriaDto implements FindAppointmentsCriteria {
     @Min(1)
     limit?: number;
 
+    @ApiProperty({ description: 'Propiedad sortField', example: 'Ejemplo' })
     @IsOptional()
     @IsString()
     sortField?: string;
