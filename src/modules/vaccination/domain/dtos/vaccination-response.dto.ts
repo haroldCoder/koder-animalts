@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from "@/common/interfaces";
 
 export interface ResponseVaccinationDto {

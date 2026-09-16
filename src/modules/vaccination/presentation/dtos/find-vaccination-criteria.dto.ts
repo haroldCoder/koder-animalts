@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { VaccinationStatus } from "@vaccination/domain/enums";
 import { FindVaccinationsCriteria } from "@vaccination/domain/ports";
 import { Transform, Type } from "class-transformer";
@@ -18,14 +19,17 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
 
     @IsOptional()
     @Type(() => Date)
+    @ApiProperty({ description: 'Propiedad startDate', example: 'Ejemplo' })
     @IsDate()
     startDate?: Date;
 
     @IsOptional()
     @Type(() => Date)
+    @ApiProperty({ description: 'Propiedad endDate', example: 'Ejemplo' })
     @IsDate()
     endDate?: Date;
 
+    @ApiProperty({ description: 'Propiedad sortField', example: 'Ejemplo' })
     @IsOptional()
     @IsString()
     sortField?: string;
@@ -38,10 +42,12 @@ export class FindVaccinationsCriteriaDto implements FindVaccinationsCriteria {
     @Transform(({ value }) => typeof value === 'string' ? value.split(',') : value)
     status?: VaccinationStatus[];
 
+    @ApiProperty({ description: 'Propiedad petId', example: 'Ejemplo' })
     @IsOptional()
     @IsUUID()
     petId?: string;
 
+    @ApiProperty({ description: 'Propiedad medicalRecordId', example: 'Ejemplo' })
     @IsOptional()
     @IsUUID()
     medicalRecordId?: string;
