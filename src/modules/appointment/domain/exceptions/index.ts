@@ -41,3 +41,10 @@ export class AppointmentDuplicatedDateException extends BadRequestException {
         this.name = 'AppointmentDuplicatedDateException';
     }
 }
+
+export class StatusAppointmentIsAlreadyEqualToTheNewStatusException extends Error {
+    constructor() {
+        super('The status of the appointment is already the one you want to update');
+        this.name = 'StatusAppointmentIsAlreadyEqualToTheNewStatusException';
+    }
+}
