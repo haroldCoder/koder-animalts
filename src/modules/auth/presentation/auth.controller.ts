@@ -1,3 +1,4 @@
+import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { Body, Controller, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthenticateUseCase, LoginUseCase, SignUpUseCase } from "@auth/application/use-cases";
@@ -5,6 +6,7 @@ import { AuthenticateParamsDto, LoginDto, SignUpDto } from "@auth/presentation/d
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 
+@ApiTags('Auth')
 @Controller("auth")
 export class AuthController {
     constructor(
@@ -13,6 +15,9 @@ export class AuthController {
         private readonly signUpUseCase: SignUpUseCase,
     ) { }
 
+    @ApiOperation({ summary: 'Login' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Post("login")
     async login(@Body() body: LoginDto) {
         return this.loginUseCase.execute(body);
@@ -43,6 +48,9 @@ export class AuthController {
         });
     }
 
+    @ApiOperation({ summary: 'Login provider' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Post("provider")
     async loginProvider(@Body() params: AuthenticateParamsDto) {
         return this.authenticateUseCase.execute(params);

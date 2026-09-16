@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 export class AuthenticateParamsDto {
     email: string;
     name?: string;
