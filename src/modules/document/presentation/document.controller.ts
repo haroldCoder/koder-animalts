@@ -1,3 +1,4 @@
+import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { RegisterDocumentRequestDto, UpdateDocumentDto } from "@document/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
@@ -11,6 +12,7 @@ import {
     UpdateDocumentUseCase
 } from "@document/application/use-cases";
 
+@ApiTags('Document')
 @Controller("document")
 export class DocumentController {
     constructor(
@@ -35,21 +37,33 @@ export class DocumentController {
         });
     }
 
+    @ApiOperation({ summary: 'Update document' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Put(":id")
     async updateDocument(@Param("id") id: string, @Body() document: UpdateDocumentDto) {
         return this.updateDocumentUseCase.execute(document, id);
     }
 
+    @ApiOperation({ summary: 'Delete document' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Delete(":id")
     async deleteDocument(@Param("id") id: string) {
         return this.deleteDocumentUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Get document by id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get(":id")
     async getDocumentById(@Param("id") id: string) {
         return this.getDocumentByIdUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Find documents by user id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("user/:userId")
     async findDocumentsByUserId(
         @Param("userId") userId: string,
