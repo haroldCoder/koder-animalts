@@ -1,3 +1,4 @@
+import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { RegisterMedicalRecordDto } from "@medical-record/presentation/dtos";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -6,6 +7,7 @@ import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/en
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { CreateMedicalRecordUseCase, UploadDocumentToMedicalRecordUseCase, GetMedicalRecordByIdUseCase, GetMedicalRecordByVeterinarianIdUseCase, GetMedicalRecordByPetIdUseCase, GetMedicalRecordByUserIdUseCase } from "@medical-record/application/use-cases";
 
+@ApiTags('Medical-record')
 @Controller('medical-record')
 export class MedicalRecordController {
     constructor(private readonly createMedicalRecordUseCase: CreateMedicalRecordUseCase,
@@ -15,11 +17,17 @@ export class MedicalRecordController {
         private readonly getMedicalRecordByPetIdUseCase: GetMedicalRecordByPetIdUseCase,
         private readonly getMedicalRecordByUserIdUseCase: GetMedicalRecordByUserIdUseCase) { }
 
+    @ApiOperation({ summary: 'Create medical record' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Post("register")
     async createMedicalRecord(@Body() medicalRecord: RegisterMedicalRecordDto) {
         return this.createMedicalRecordUseCase.execute(medicalRecord);
     }
 
+    @ApiOperation({ summary: 'Get medical record by id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("/:id")
     async getMedicalRecordById(@Param("id") id: string) {
         return this.getMedicalRecordByIdUseCase.execute(id);
@@ -45,16 +53,25 @@ export class MedicalRecordController {
         return this.uploadDocumentOfMedicalRecordUseCase.execute(id, documents);
     }
 
+    @ApiOperation({ summary: 'Get medical record by veterinarian id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("veterinarian/:id")
     async getMedicalRecordByVeterinarianId(@Param("id") id: string) {
         return this.getMedicalRecordByVeterinarianIdUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Get medical record by pet id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("pet/:id")
     async getMedicalRecordByPetId(@Param("id") id: string) {
         return this.getMedicalRecordByPetIdUseCase.execute(id);
     }
 
+    @ApiOperation({ summary: 'Get medical record by user id' })
+    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("pet/userId/:id")
     async getMedicalRecordByUserId(
         @Param("id") id: string,
