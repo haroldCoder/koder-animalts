@@ -135,34 +135,37 @@ model MedicalRecord {
   pet            Pet               @relation(fields: [petId], references: [id])
   veterinarian   Veterinarian      @relation(fields: [veterinarianId], references: [id])
   vaccinations   Vaccination[]
+  appointmentId  String?           @unique
+  appointment    Appointment?      @relation(fields: [appointmentId], references: [id])
 }
 
 model Vaccination {
-  id               String        @id @default(uuid())
+  id               String            @id @default(uuid())
   vaccineName      String
-  dateAdministered DateTime      @default(now())
+  dateAdministered DateTime          @default(now())
   nextDueDate      DateTime?
   lotNumber        String?
-  createdAt        DateTime      @default(now())
+  createdAt        DateTime          @default(now())
   status           VaccinationStatus @default(PENDING)
   medicalRecordId  String
   veterinarianId   String
-  medicalRecord    MedicalRecord @relation(fields: [medicalRecordId], references: [id])
-  veterinarian     Veterinarian  @relation(fields: [veterinarianId], references: [id])
+  medicalRecord    MedicalRecord     @relation(fields: [medicalRecordId], references: [id])
+  veterinarian     Veterinarian      @relation(fields: [veterinarianId], references: [id])
 }
 
 model Appointment {
-  id             String       @id @default(uuid())
+  id             String         @id @default(uuid())
   date           DateTime
   reason         String
-  status         String       @default("SCHEDULED")
+  status         String         @default("SCHEDULED")
   notes          String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   petId          String
   veterinarianId String
-  pet            Pet          @relation(fields: [petId], references: [id])
-  veterinarian   Veterinarian @relation(fields: [veterinarianId], references: [id])
+  pet            Pet            @relation(fields: [petId], references: [id])
+  veterinarian   Veterinarian   @relation(fields: [veterinarianId], references: [id])
+  medicalRecord  MedicalRecord?
 }
 
 model Document {

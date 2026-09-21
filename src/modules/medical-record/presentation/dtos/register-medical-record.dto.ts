@@ -44,4 +44,8 @@ export class RegisterMedicalRecordDto {
     @IsDate()
     @Transform(({ value }) => new Date(value))
     updatedAt?: Date;
+
+    @IsNotEmpty()
+    @IsUUID()
+    appointmentId: string;
 }

@@ -8,4 +8,5 @@ export interface MedicalRecordRepository {
     findByVeterinarianId(veterinarianId: string): Promise<MedicalRecordEntity[] | null>;
     findByPetId(petId: string): Promise<MedicalRecordEntity[] | null>;
     findByUserId(userId: string, medicalRecordId?: string, petId?: string, startDate?: Date, endDate?: Date): Promise<MedicalRecordEntity[]>;
+    findByAppointmentId(appointmentId: string): Promise<MedicalRecordEntity | null>;
 }

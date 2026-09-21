@@ -27,5 +27,6 @@ export interface AppointmentRelationUserDto {
         clinic: {
             name: string
         }
-    }
+    };
+    hasMedicalRecord?: boolean;
 }

@@ -94,6 +94,7 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                         clinic: { select: { name: true } },
                     },
                 },
+                medicalRecord: { select: { id: true } },
             },
             orderBy: {
                 date: sortOrder,
@@ -127,7 +128,8 @@ export class PrismaAppointmentService implements IAppointmentRepository {
                 clinic: {
                     name: a.veterinarian.clinic.name
                 }
-            }
+            },
+            hasMedicalRecord: !!a.medicalRecord
         }));
     }
 
