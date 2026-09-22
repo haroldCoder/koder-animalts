@@ -27,7 +27,7 @@ export class MedicalRecordEntity {
     private readonly clinicId: string;
     private readonly documentIds: string[];
     private readonly vaccinations: VaccinationEntity[];
-    private readonly appointmentId: string;
+    private readonly appointmentId?: string;
 
     private constructor(properties: {
         id: string;
@@ -44,7 +44,7 @@ export class MedicalRecordEntity {
         clinicId?: string;
         documentIds?: string[];
         vaccinations?: VaccinationEntity[];
-        appointmentId: string;
+        appointmentId?: string;
     }) {
         if (!properties.id) {
             throw new MedicalRecordIdNotFoundException();
@@ -63,9 +63,6 @@ export class MedicalRecordEntity {
         }
         if (!properties.veterinarianId) {
             throw new VeterinarianIdNotFoundException();
-        }
-        if (!properties.appointmentId) {
-            throw new AppointmentIdNotFoundException();
         }
 
         this.id = properties.id;
@@ -136,5 +133,5 @@ export class MedicalRecordEntity {
     public getClinicId(): string { return this.clinicId; }
     public getDocumentIds(): string[] { return this.documentIds; }
     public getVaccinations(): VaccinationEntity[] { return this.vaccinations; }
-    public getAppointmentId(): string { return this.appointmentId; }
+    public getAppointmentId(): string | undefined { return this.appointmentId; }
 }

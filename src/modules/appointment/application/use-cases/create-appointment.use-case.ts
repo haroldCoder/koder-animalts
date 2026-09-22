@@ -21,7 +21,7 @@ export class CreateAppointmentUseCase {
         private readonly idGenerator: () => string
     ) { }
 
-    async execute(data: RegisterAppointmentDto): Promise<AppointmentEntity> {
+    async execute(data: RegisterAppointmentDto): Promise<string> {
         const pet = await this.petRepository.findById(data.petId);
         if (!pet) {
             throw new PetIdNotFoundException();
@@ -50,9 +50,11 @@ export class CreateAppointmentUseCase {
             veterinarianId: veterinarian.getId(),
         });
 
-        return this.appointmentRepository.create({
+        const newAppointment = await this.appointmentRepository.create({
             ...data,
             date: appointment.getDate(),
         });
+
+        return newAppointment.getId();
     }
 }
