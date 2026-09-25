@@ -71,13 +71,15 @@ export class AppointmentRequestController {
     @ApiResponse({ status: 404, description: "Appointment request not found" })
     async reject(
         @Param("id") id: string,
-        @CurrentUser() vet: any,
+        @Query("userVeterinarianId") userVeterinarianId: string,
         @Body() dto: RejectAppointmentRequestDto,
     ): Promise<ResponseDto<AppointmentRequestEntity>> {
         try {
-            const rejected = await this.rejectUC.execute(id, vet.id, vet.clinicId, dto.reason);
+            const rejected = await this.rejectUC.execute(id, userVeterinarianId, dto.reason);
             return new ResponseDto(HttpStatus.OK, "Appointment request rejected successfully", rejected);
         } catch (error: any) {
+            console.log(error);
+
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException(error.message || "Failed to reject appointment request");
         }

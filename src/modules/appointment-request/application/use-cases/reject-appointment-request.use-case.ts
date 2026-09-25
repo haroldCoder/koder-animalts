@@ -5,22 +5,38 @@ import {
     AppointmentRequestNotFoundException,
     CannotRejectAppointmentRequestException,
 } from "../../domain/exceptions";
+import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
+import { VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
+import { VeterinarianIdNotExistException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class RejectAppointmentRequestUseCase {
     constructor(
         @Inject("IAppointmentRequestRepository")
-        private repo: IAppointmentRequestRepository) { }
+        private repo: IAppointmentRequestRepository,
+        @Inject("IVeterinarianRepository")
+        private vetRepo: IVeterinarianRepository
+    ) { }
 
-    async execute(requestId: string, vetId: string, vetClinicId: string, reason: string) {
+    async execute(requestId: string, userVetId: string, reason: string) {
         const request = await this.repo.findById(requestId);
         if (!request) throw new AppointmentRequestNotFoundException();
-        if (!ReviewRequestPolicy.canApprove(request, vetClinicId)) {
+
+        const vet = await this.vetRepo.findByUserId(userVetId);
+        if (!vet) throw new VeterinarianIdNotExistException();
+        const id = vet.getId();
+
+        const clinic = await this.vetRepo.findClinicByVeterinarianId(id);
+        if (!clinic) throw new VeterinaryClinicNotFoundException();
+
+        if (!ReviewRequestPolicy.canApprove(request, clinic.id)) {
             throw new CannotRejectAppointmentRequestException();
         }
+
+
         return this.repo.updateStatus(requestId, 'REJECTED', {
             rejectionReason: reason,
-            reviewedById: vetId,
+            reviewedById: id,
         });
     }
 }
