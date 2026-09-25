@@ -111,6 +111,7 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
             where: {
                 OR: [
                     { owner: { userId } },
+                    { clinic: { veterinarians: { some: { id: veterinarian?.id } } } },
                     { OR: [{ veterinarian: { userId } }, { reviewedById: veterinarian?.id }] }
                 ],
                 ...(status && { status: { in: status } })
