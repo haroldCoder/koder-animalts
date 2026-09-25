@@ -4,4 +4,5 @@ export interface CreateAppointmentRequestDto {
     clinicId: string;
     reason: string;
     requestedDate: Date;
+    veterinarianId?: string;
 }

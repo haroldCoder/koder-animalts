@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { IAppointmentRequestRepository } from "../../domain/ports";
+import { CriteriaAppointmentRequest, IAppointmentRequestRepository } from "../../domain/ports";
 import { CreateAppointmentRequestDto } from "../../domain/dtos";
 import { RequestStatus } from "../../domain/types";
 import { PrismaService } from "@/common/infrastructure/db";
 import { AppointmentRequestEntity } from "../../domain/entities";
 import { OwnerNotFoundException } from "@owner/domain/exceptions";
+import { UserNotExistException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class PrismaAppointmentRequestRepository implements IAppointmentRequestRepository {
@@ -43,6 +44,7 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
                 clinicId: data.clinicId,
                 reason: data.reason,
                 requestedDate: data.requestedDate,
+                veterinarianId: data.veterinarianId
             },
         });
 
@@ -93,5 +95,32 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
         if (!request) return null;
 
         return new AppointmentRequestEntity(request.id, request.ownerId, request.petId, request.clinicId, request.reason, request.requestedDate, request.status, request.veterinarianId || undefined, request.reviewedById || undefined, request.rejectionReason || undefined);
+    }
+
+    async findByUserId(userId: string, query?: CriteriaAppointmentRequest) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        const { status, page, limit, sortField, sortOrder } = query || {};
+
+        if (!user) {
+            throw new UserNotExistException();
+        }
+
+        const veterinarian = await this.prisma.veterinarian.findUnique({ where: { userId } });
+
+        const requests = await this.prisma.appointmentRequest.findMany({
+            where: {
+                OR: [
+                    { owner: { userId } },
+                    { OR: [{ veterinarian: { userId } }, { reviewedById: veterinarian?.id }] }
+                ],
+                ...(status && { status: { in: status } })
+            },
+            include: { owner: true, pet: true },
+            orderBy: { [sortField || 'createdAt']: sortOrder || 'desc' },
+            skip: page ? (page - 1) * (limit || 10) : undefined,
+            take: limit || 10,
+        });
+
+        return requests.map(r => this.mapToEntity(r));
     }
 }

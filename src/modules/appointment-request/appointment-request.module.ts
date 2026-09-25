@@ -13,6 +13,7 @@ import { TransactionManager } from '@/common/domain/ports';
 import { PrismaTransactionManager } from '@/common/infrastructure/db';
 import { randomUUID } from 'crypto';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
+import { FindAppointmentsRequestUseCase } from './application/use-cases/find-appointments-request.use-case';
 @Module({
     imports: [PrismaModule],
     controllers: [AppointmentRequestController],
@@ -20,6 +21,7 @@ import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
         CreateAppointmentRequestUseCase,
         ApproveAppointmentRequestUseCase,
         RejectAppointmentRequestUseCase,
+        FindAppointmentsRequestUseCase,
         {
             provide: 'IAppointmentRequestRepository',
             useClass: PrismaAppointmentRequestRepository,
@@ -49,6 +51,7 @@ import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
         CreateAppointmentRequestUseCase,
         ApproveAppointmentRequestUseCase,
         RejectAppointmentRequestUseCase,
+        FindAppointmentsRequestUseCase,
     ],
 })
 export class AppointmentRequestModule { }

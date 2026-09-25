@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsString, IsUUID, MaxLength } from "class-validator";
+import { IsDateString, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 export class CreateAppointmentRequestDto {
     @ApiProperty({ description: "ID of the pet", example: "123e4567-e89b-12d3-a456-426614174000" })
@@ -22,4 +22,9 @@ export class CreateAppointmentRequestDto {
     @IsString()
     @MaxLength(500)
     reason: string;
+
+    @ApiProperty({ description: "ID of the veterinarian, in case the owner wants to schedule the appointment with a specific veterinarian", example: "123e4567-e89b-12d3-a456-426614174003" })
+    @IsUUID()
+    @IsOptional()
+    veterinarianId?: string;
 }

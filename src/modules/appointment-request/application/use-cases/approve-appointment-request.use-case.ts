@@ -46,7 +46,9 @@ export class ApproveAppointmentRequestUseCase {
                 userId: userVetId,
             });
 
-            await this.requestRepo.updateStatus(requestId, 'APPROVED');
+            const veterinarianId = veterinarian.getId();
+
+            await this.requestRepo.updateStatus(requestId, 'APPROVED', { reviewedById: veterinarianId });
 
             const id = appointment.getId();
 

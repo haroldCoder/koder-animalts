@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreateAppointmentRequestDto, RejectAppointmentRequestDto } from "../dtos";
 import { CreateAppointmentRequestUseCase, ApproveAppointmentRequestUseCase, RejectAppointmentRequestUseCase } from "../../application/use-cases";
 import { Roles } from "@user/presentation";
@@ -7,6 +7,8 @@ import { ResponseDto } from "@/common/domain/dto";
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { AppointmentRequestEntity } from "../../domain/entities";
+import { CriteriaFindAllDto } from "../dtos/criteria-findall.dto";
+import { FindAppointmentsRequestUseCase } from "../../application/use-cases/find-appointments-request.use-case";
 
 @ApiTags("appointment-requests")
 @ApiBearerAuth()
@@ -16,6 +18,7 @@ export class AppointmentRequestController {
         private readonly createUC: CreateAppointmentRequestUseCase,
         private readonly approveUC: ApproveAppointmentRequestUseCase,
         private readonly rejectUC: RejectAppointmentRequestUseCase,
+        private readonly findUC: FindAppointmentsRequestUseCase,
     ) { }
 
     @Post()
@@ -77,6 +80,25 @@ export class AppointmentRequestController {
         } catch (error: any) {
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException(error.message || "Failed to reject appointment request");
+        }
+    }
+
+    @Get(":userId/user")
+    @Roles("OWNER", "VETERINARIAN")
+    @ApiOperation({ summary: "Find all appointment requests for a user (any role)" })
+    @ApiParam({ name: "userId", description: "User ID" })
+    @ApiResponse({ status: 200, description: "Appointment requests found successfully", type: ResponseDto })
+    @ApiResponse({ status: 404, description: "User not found" })
+    async findByUser(
+        @Param("userId") userId: string,
+        @Query() query?: CriteriaFindAllDto,
+    ): Promise<ResponseDto<AppointmentRequestEntity[]>> {
+        try {
+            const requests = await this.findUC.execute(userId, query);
+            return new ResponseDto(HttpStatus.OK, "Appointment requests found successfully", requests);
+        } catch (error: any) {
+            if (error instanceof HttpException) throw error;
+            throw new InternalServerErrorException(error.message || "Failed to find appointment requests");
         }
     }
 }
