@@ -73,5 +73,20 @@ export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepositor
             clinicName: clinic.name
         };
     }
+
+    async findById(id: string): Promise<VeterinaryClinicEntity | null> {
+        const clinic = await this.prisma.veterinaryClinic.findUnique({
+            where: { id },
+            include: {
+                veterinarians: {
+                    select: {
+                        userId: true
+                    }
+                }
+            }
+        });
+        if (!clinic) return null;
+        return this.mapToDomain(clinic);
+    }
 }
 
