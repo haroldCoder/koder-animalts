@@ -4,6 +4,7 @@ import { CreateAppointmentRequestDto } from "../../domain/dtos";
 import { RequestStatus } from "../../domain/types";
 import { PrismaService } from "@/common/infrastructure/db";
 import { AppointmentRequestEntity } from "../../domain/entities";
+import { OwnerNotFoundException } from "@owner/domain/exceptions";
 
 @Injectable()
 export class PrismaAppointmentRequestRepository implements IAppointmentRequestRepository {
@@ -25,15 +26,26 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
     }
 
     async create(data: CreateAppointmentRequestDto) {
+        const { userId } = data;
+
+        const owner = await this.prisma.owner.findUnique({
+            where: { userId: userId },
+        });
+
+        if (!owner) {
+            throw new OwnerNotFoundException(userId);
+        }
+
         const { id } = await this.prisma.appointmentRequest.create({
             data: {
-                ownerId: data.ownerId,
+                ownerId: owner.id,
                 petId: data.petId,
                 clinicId: data.clinicId,
                 reason: data.reason,
                 requestedDate: data.requestedDate,
             },
         });
+
         return id;
     }
 

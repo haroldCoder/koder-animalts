@@ -1,5 +1,5 @@
 export interface CreateAppointmentRequestDto {
-    ownerId: string;
+    userId: string;
     petId: string;
     clinicId: string;
     reason: string;

@@ -1,26 +1,34 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import type { IAppointmentRequestRepository } from "../../domain/ports";
 import { ReviewRequestPolicy } from "../../domain/policies";
-import { NotFoundException } from "@nestjs/common";
-import { ForbiddenException } from "@nestjs/common";
 import type { IAppointmentRepository } from "@appointment/domain/ports/appointment.repository";
 import type { IVeterinaryClinicRepository } from "@veterinary-clinics/domain/ports";
 import { VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
 import { AppointmentRequestNotFoundException, CannotApproveAppointmentRequestException } from "../../domain/exceptions";
 import { TransactionManager } from "@/common/domain/ports";
+import type { IVeterinarianRepository } from "@veterinarian/domain/ports";
+import { VeterinarianIdNotExistException } from "@/common/domain/exceptions";
 
 @Injectable()
 export class ApproveAppointmentRequestUseCase {
     constructor(
+        @Inject("IAppointmentRequestRepository")
         private requestRepo: IAppointmentRequestRepository,
+        @Inject("IAppointmentRepository")
         private appointmentRepo: IAppointmentRepository,
+        @Inject("IVeterinaryClinicRepository")
         private clinicRepo: IVeterinaryClinicRepository,
+        @Inject("IVeterinarianRepository")
+        private vetRepo: IVeterinarianRepository,
         private tx: TransactionManager
     ) { }
 
-    async execute(requestId: string, vetClinicId: string, notes?: string): Promise<string> {
+    async execute(requestId: string, userVetId: string, vetClinicId: string, notes?: string): Promise<string> {
         const vetClinic = await this.clinicRepo.findById(vetClinicId);
         if (!vetClinic) throw new VeterinaryClinicNotFoundException();
+
+        const veterinarian = await this.vetRepo.findByUserId(userVetId);
+        if (!veterinarian) throw new VeterinarianIdNotExistException();
 
         const request = await this.requestRepo.findById(requestId);
         if (!request) throw new AppointmentRequestNotFoundException();
@@ -30,17 +38,17 @@ export class ApproveAppointmentRequestUseCase {
         }
 
         return this.tx.run(async () => {
-            const { getId } = await this.appointmentRepo.create({
+            const appointment = await this.appointmentRepo.create({
                 date: request.requestedDate,
                 reason: request.reason,
                 notes: notes,
                 petId: request.petId,
-                userId: request.ownerId,
+                userId: userVetId,
             });
 
             await this.requestRepo.updateStatus(requestId, 'APPROVED');
 
-            const id = getId();
+            const id = appointment.getId();
 
             return id;
         });

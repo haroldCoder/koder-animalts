@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import type { IAppointmentRequestRepository } from "../../domain/ports";
 import { ReviewRequestPolicy } from "../../domain/policies";
 import {
@@ -8,7 +8,9 @@ import {
 
 @Injectable()
 export class RejectAppointmentRequestUseCase {
-    constructor(private repo: IAppointmentRequestRepository) { }
+    constructor(
+        @Inject("IAppointmentRequestRepository")
+        private repo: IAppointmentRequestRepository) { }
 
     async execute(requestId: string, vetId: string, vetClinicId: string, reason: string) {
         const request = await this.repo.findById(requestId);

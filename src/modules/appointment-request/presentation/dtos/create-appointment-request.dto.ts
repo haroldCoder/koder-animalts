@@ -10,13 +10,13 @@ export class CreateAppointmentRequestDto {
     @IsUUID()
     clinicId: string;
 
-    @ApiProperty({ description: "ID of the owner", example: "123e4567-e89b-12d3-a456-426614174002" })
+    @ApiProperty({ description: "ID of the user (owner)", example: "123e4567-e89b-12d3-a456-426614174002" })
     @IsUUID()
-    ownerId: string;
+    userId: string;
 
     @ApiProperty({ description: "Requested appointment date and time", example: "2026-10-15T10:00:00.000Z" })
     @IsDateString()
-    requestedDate: Date;
+    requestedDate: string;
 
     @ApiProperty({ description: "Reason for the appointment request", maxLength: 500, example: "Vacunación anual y chequeo general" })
     @IsString()
