@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CriteriaAppointmentRequest, IAppointmentRequestRepository } from "../../domain/ports";
-import { CreateAppointmentRequestDto } from "../../domain/dtos";
+import { CreateAppointmentRequestDto, ResponseAppointmentRequestDto } from "../../domain/dtos";
 import { RequestStatus } from "../../domain/types";
 import { PrismaService } from "@/common/infrastructure/db";
 import { AppointmentRequestEntity } from "../../domain/entities";
@@ -24,6 +24,44 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
             request.reviewedById || undefined,
             request.rejectionReason || undefined
         );
+    }
+
+    private mapToResponseDto(request: any): ResponseAppointmentRequestDto {
+        return {
+            id: request.id,
+            userId: request.owner.userId,
+            petId: request.petId,
+            requestedDate: request.requestedDate,
+            reason: request.reason,
+            notes: request.notes,
+            status: request.status,
+            userVeterinarianId: request.veterinarianId,
+            clinicId: request.clinicId,
+            rejectionReason: request.rejectionReason,
+            createdAt: request.createdAt,
+            updatedAt: request.updatedAt,
+            pet: {
+                id: request.pet.id,
+                name: request.pet.name,
+                mainImage: request.pet.mainImage,
+            },
+            owner: {
+                id: request.owner.id,
+                user: {
+                    name: request.owner.user.name,
+                },
+            },
+            veterinarian: {
+                id: request.reviewedBy?.id,
+                user: {
+                    name: request.reviewedBy?.user?.name,
+                },
+            },
+            clinic: {
+                id: request.clinic.id,
+                name: request.clinic.name,
+            },
+        };
     }
 
     async create(data: CreateAppointmentRequestDto) {
@@ -97,7 +135,7 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
         return new AppointmentRequestEntity(request.id, request.ownerId, request.petId, request.clinicId, request.reason, request.requestedDate, request.status, request.veterinarianId || undefined, request.reviewedById || undefined, request.rejectionReason || undefined);
     }
 
-    async findByUserId(userId: string, query?: CriteriaAppointmentRequest) {
+    async findByUserId(userId: string, query?: CriteriaAppointmentRequest): Promise<ResponseAppointmentRequestDto[]> {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         const { status, page, limit, sortField, sortOrder } = query || {};
 
@@ -116,12 +154,46 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
                 ],
                 ...(status && { status: { in: status } })
             },
-            include: { owner: true, pet: true },
+            include: {
+                owner: {
+                    select: {
+                        userId: true,
+                        user: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                },
+                pet: {
+                    select: {
+                        id: true,
+                        name: true,
+                        mainImage: true
+                    }
+                },
+                reviewedBy: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            },
             orderBy: { [sortField || 'createdAt']: sortOrder || 'desc' },
             skip: page ? (page - 1) * (limit || 10) : undefined,
             take: limit || 10,
         });
 
-        return requests.map(r => this.mapToEntity(r));
+        return requests.map(r => this.mapToResponseDto(r));
     }
 }

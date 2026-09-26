@@ -1,5 +1,5 @@
 import { RequestStatus } from "../types";
-import { CreateAppointmentRequestDto } from "../dtos";
+import { CreateAppointmentRequestDto, ResponseAppointmentRequestDto } from "../dtos";
 import { AppointmentRequestEntity } from "../entities";
 import { FindCriteriaQueries } from "@/common/interfaces";
 
@@ -12,6 +12,6 @@ export interface IAppointmentRequestRepository {
   findById(id: string): Promise<AppointmentRequestEntity | null>;
   findByClinic(clinicId: string, status?: RequestStatus): Promise<AppointmentRequestEntity[]>;
   findByOwner(ownerId: string): Promise<AppointmentRequestEntity[]>;
-  findByUserId(userId: string, query?: CriteriaAppointmentRequest): Promise<AppointmentRequestEntity[]>;
+  findByUserId(userId: string, query?: CriteriaAppointmentRequest): Promise<ResponseAppointmentRequestDto[]>;
   updateStatus(id: string, status: RequestStatus, extra?: Partial<AppointmentRequestEntity>): Promise<AppointmentRequestEntity>;
 }

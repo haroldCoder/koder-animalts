@@ -9,6 +9,7 @@ import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs
 import { AppointmentRequestEntity } from "../../domain/entities";
 import { CriteriaFindAllDto } from "../dtos/criteria-findall.dto";
 import { FindAppointmentsRequestUseCase } from "../../application/use-cases/find-appointments-request.use-case";
+import { ResponseAppointmentRequestDto } from "../../domain/dtos";
 
 @ApiTags("appointment-requests")
 @ApiBearerAuth()
@@ -94,11 +95,13 @@ export class AppointmentRequestController {
     async findByUser(
         @Param("userId") userId: string,
         @Query() query?: CriteriaFindAllDto,
-    ): Promise<ResponseDto<AppointmentRequestEntity[]>> {
+    ): Promise<ResponseDto<ResponseAppointmentRequestDto[]>> {
         try {
             const requests = await this.findUC.execute(userId, query);
             return new ResponseDto(HttpStatus.OK, "Appointment requests found successfully", requests);
         } catch (error: any) {
+            console.log(error);
+
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException(error.message || "Failed to find appointment requests");
         }
