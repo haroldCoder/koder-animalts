@@ -40,6 +40,7 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
             rejectionReason: request.rejectionReason,
             createdAt: request.createdAt,
             updatedAt: request.updatedAt,
+            currentVeterinarian: request.currentVeterinarian,
             pet: {
                 id: request.pet.id,
                 name: request.pet.name,
@@ -194,6 +195,9 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
             take: limit || 10,
         });
 
-        return requests.map(r => this.mapToResponseDto(r));
+        return requests.map(r => this.mapToResponseDto({
+            ...r,
+            currentVeterinarian: r.veterinarianId === veterinarian?.id
+        }));
     }
 }

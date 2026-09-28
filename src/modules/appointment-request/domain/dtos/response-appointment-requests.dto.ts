@@ -9,6 +9,7 @@ export interface ResponseAppointmentRequestDto {
     userVeterinarianId?: string;
     clinicId?: string;
     rejectionReason?: string;
+    currentVeterinarian: boolean;
     createdAt?: string;
     updatedAt?: string;
     pet?: {
