@@ -54,4 +54,15 @@ export class PrismaOwnerService implements IOwnerRepository {
 
         return this.mapToDomain(owner);
     }
+
+    async findById(id: string): Promise<OwnerEntity | null> {
+        const owner = await this.prisma.owner.findUnique({
+            where: { id }
+        });
+
+        if (!owner) return null;
+
+        return this.mapToDomain(owner);
+    }
 }
+

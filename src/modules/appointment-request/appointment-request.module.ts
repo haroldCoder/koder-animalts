@@ -5,6 +5,8 @@ import {
     CreateAppointmentRequestUseCase,
     ApproveAppointmentRequestUseCase,
     RejectAppointmentRequestUseCase,
+    CancelAppointmentRequestUseCase,
+    FindAppointmentsRequestUseCase,
 } from './application/use-cases';
 import { PrismaAppointmentRequestRepository } from './infrastructure/persistance';
 import { PrismaAppointmentService } from '@appointment/infrastructure/persistence/prisma-appointment.service';
@@ -13,7 +15,8 @@ import { TransactionManager } from '@/common/domain/ports';
 import { PrismaTransactionManager } from '@/common/infrastructure/db';
 import { randomUUID } from 'crypto';
 import { PrismaVeterinarianService } from '@veterinarian/infrastructure';
-import { FindAppointmentsRequestUseCase } from './application/use-cases/find-appointments-request.use-case';
+import { PrismaOwnerService } from '@owner/infrastructure';
+
 @Module({
     imports: [PrismaModule],
     controllers: [AppointmentRequestController],
@@ -21,6 +24,7 @@ import { FindAppointmentsRequestUseCase } from './application/use-cases/find-app
         CreateAppointmentRequestUseCase,
         ApproveAppointmentRequestUseCase,
         RejectAppointmentRequestUseCase,
+        CancelAppointmentRequestUseCase,
         FindAppointmentsRequestUseCase,
         {
             provide: 'IAppointmentRequestRepository',
@@ -36,7 +40,11 @@ import { FindAppointmentsRequestUseCase } from './application/use-cases/find-app
         },
         {
             provide: 'IVeterinarianRepository',
-            useClass: PrismaVeterinarianService
+            useClass: PrismaVeterinarianService,
+        },
+        {
+            provide: 'IOwnerRepository',
+            useClass: PrismaOwnerService,
         },
         {
             provide: TransactionManager,
@@ -51,6 +59,7 @@ import { FindAppointmentsRequestUseCase } from './application/use-cases/find-app
         CreateAppointmentRequestUseCase,
         ApproveAppointmentRequestUseCase,
         RejectAppointmentRequestUseCase,
+        CancelAppointmentRequestUseCase,
         FindAppointmentsRequestUseCase,
     ],
 })

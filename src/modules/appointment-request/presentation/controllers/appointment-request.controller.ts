@@ -1,6 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreateAppointmentRequestDto, RejectAppointmentRequestDto } from "../dtos";
-import { CreateAppointmentRequestUseCase, ApproveAppointmentRequestUseCase, RejectAppointmentRequestUseCase } from "../../application/use-cases";
+import {
+    CreateAppointmentRequestUseCase,
+    ApproveAppointmentRequestUseCase,
+    RejectAppointmentRequestUseCase,
+    CancelAppointmentRequestUseCase,
+    FindAppointmentsRequestUseCase,
+} from "../../application/use-cases";
 import { Roles } from "@user/presentation";
 import { CurrentUser } from "../decorators";
 import { ResponseDto } from "@/common/domain/dto";
@@ -8,7 +14,6 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from "@ne
 import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { AppointmentRequestEntity } from "../../domain/entities";
 import { CriteriaFindAllDto } from "../dtos/criteria-findall.dto";
-import { FindAppointmentsRequestUseCase } from "../../application/use-cases/find-appointments-request.use-case";
 import { ResponseAppointmentRequestDto } from "../../domain/dtos";
 
 @ApiTags("appointment-requests")
@@ -19,6 +24,7 @@ export class AppointmentRequestController {
         private readonly createUC: CreateAppointmentRequestUseCase,
         private readonly approveUC: ApproveAppointmentRequestUseCase,
         private readonly rejectUC: RejectAppointmentRequestUseCase,
+        private readonly cancelUC: CancelAppointmentRequestUseCase,
         private readonly findUC: FindAppointmentsRequestUseCase,
     ) { }
 
@@ -83,6 +89,31 @@ export class AppointmentRequestController {
 
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException(error.message || "Failed to reject appointment request");
+        }
+    }
+
+    @Patch(":id/cancel")
+    @Roles("OWNER")
+    @ApiOperation({ summary: "Cancel an appointment request (Owner only)" })
+    @ApiParam({ name: "id", description: "Appointment request ID" })
+    @ApiResponse({ status: 200, description: "Appointment request cancelled successfully", type: ResponseDto })
+    @ApiResponse({ status: 400, description: "User ID not found or invalid" })
+    @ApiResponse({ status: 403, description: "Forbidden - owner cannot cancel this request or request is not pending" })
+    @ApiResponse({ status: 404, description: "Appointment request or owner not found" })
+    async cancel(
+        @Param("id") id: string,
+        @CurrentUser() user: any,
+        @Query("ownerUserId") ownerUserId?: string,
+    ): Promise<ResponseDto<AppointmentRequestEntity>> {
+        try {
+            const userId = user?.id || user?.userId || ownerUserId;
+            const cancelled = await this.cancelUC.execute(id, userId);
+            return new ResponseDto(HttpStatus.OK, "Appointment request cancelled successfully", cancelled);
+        } catch (error: any) {
+            console.log(error);
+
+            if (error instanceof HttpException) throw error;
+            throw new InternalServerErrorException(error.message || "Failed to cancel appointment request");
         }
     }
 
