@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase } from "@pet/application/use-cases";
-import { RegisterPetDto, UpdatePetDto } from "@pet/presentation/dtos";
+import { RegisterPetDto, UpdatePetDto, UpdatePetClinicDto } from "@pet/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 import { ClinicNotExistException } from "@veterinary-clinics/domain/exceptions";
@@ -27,6 +27,28 @@ export class PetController {
 
     @ApiOperation({ summary: 'Registrar una nueva mascota' })
     @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['name', 'species', 'gender', 'isActive', 'userId', 'clinicId', 'mainImage'],
+            properties: {
+                name: { type: 'string', example: 'Firulais' },
+                species: { type: 'string', example: 'Perro' },
+                breed: { type: 'string', example: 'Golden Retriever' },
+                birthDate: { type: 'string', format: 'date-time', example: '2020-01-01T00:00:00.000Z' },
+                gender: { type: 'string', enum: ['MALE', 'FEMALE'], example: 'MALE' },
+                weight: { type: 'number', example: 15.5 },
+                color: { type: 'string', example: 'Dorado' },
+                microchip: { type: 'string', example: '981020000123456' },
+                isActive: { type: 'boolean', example: true },
+                userId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+                clinicId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174001' },
+                mainImage: { type: 'string', format: 'binary', description: 'Imagen principal (obligatoria)' },
+                iaImage: { type: 'string', format: 'binary', description: 'Imagen generada por IA (opcional)' },
+                images: { type: 'array', items: { type: 'string', format: 'binary' }, description: 'Imágenes adicionales (máx 10)' },
+            }
+        }
+    })
     @ApiResponse({ status: 201, description: 'Mascota registrada exitosamente.' })
     @ApiResponse({ status: 400, description: 'Datos inválidos o falta la imagen principal.' })
     @Post("register")
@@ -131,17 +153,17 @@ export class PetController {
     }
 
     @ApiOperation({ summary: 'Actualizar la clínica asociada a una mascota' })
-    @ApiParam({ name: 'petId', description: 'ID de la mascota' })
+    @ApiParam({ name: 'petId', description: 'ID de la mascota', example: '123e4567-e89b-12d3-a456-426614174000' })
     @ApiResponse({ status: 200, description: 'Clínica actualizada exitosamente.' })
     @ApiResponse({ status: 400, description: 'Error de validación o lógica de negocio (ej. cambio no permitido por cita).' })
     @ApiResponse({ status: 404, description: 'Mascota o clínica no encontrada.' })
     @Patch("clinic/:petId")
     async updateClinic(
         @Param("petId") petId: string,
-        @Body() { clinicId }: { clinicId: string }
+        @Body() body: UpdatePetClinicDto
     ): Promise<ResponseDto<void>> {
         try {
-            await this.updateClinicUseCase.execute(petId, clinicId);
+            await this.updateClinicUseCase.execute(petId, body.clinicId);
 
             return {
                 statusCode: HttpStatus.OK,

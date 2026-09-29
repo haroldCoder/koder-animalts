@@ -35,16 +35,20 @@ export class VeterinaryClinicsController {
         return this.findAllVeterinaryClinicsUseCase.execute();
     }
 
-    @ApiOperation({ summary: 'Obtener resumen de clínica por ID de veterinario' })
-    @ApiParam({ name: 'userId', description: 'ID del usuario (veterinario)', example: '123e4567-e89b-12d3-a456-426614174000' })
-    @ApiResponse({ status: 200, description: 'Resumen de la clínica obtenido correctamente.' })
-    @ApiResponse({ status: 404, description: 'Veterinario o clínica no encontrada.' })
+    @ApiOperation({ summary: 'Obtener todos los veterinarios de una clínica' })
+    @ApiParam({ name: 'clinicId', description: 'ID de la clínica veterinaria', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Lista de veterinarios obtenida correctamente.' })
+    @ApiResponse({ status: 404, description: 'Clínica no encontrada.' })
     @Get("all/veterinarians/:clinicId")
     async findAllVeterinariansOfClinc(@Param("clinicId") clinicId: string): Promise<ResponseDto<ResponseFindVeterinariansDto[]>> {
         const veterinarians = await this.getAllVeterinarianOfClinicUseCase.execute(clinicId);
         return new ResponseDto(HttpStatus.OK, "Veterinarians found successfully", veterinarians);
     }
 
+    @ApiOperation({ summary: 'Obtener resumen de clínica por ID de usuario veterinario' })
+    @ApiParam({ name: 'userId', description: 'ID del usuario (veterinario)', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Resumen de la clínica obtenido correctamente.' })
+    @ApiResponse({ status: 404, description: 'Veterinario o clínica no encontrada.' })
     @Get("summary/veterinarian/userId/:userId")
     async getVeterinaryClinicSummary(@Param("userId") userId: string) {
         return this.getVeterinaryClinicSummaryUseCase.execute(userId);

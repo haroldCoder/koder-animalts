@@ -1,5 +1,5 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
-import { Body, Controller, Get, Param, ParseArrayPipe, Post, Put, Query } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 import {
     RegisterVaccinationUseCase,
     GetUpcomingVaccinationsByPetUseCase,
@@ -23,32 +23,35 @@ export class VaccinationController {
         private readonly updateStatusVaccinationUseCase: UpdateStatusVaccinationUseCase,
     ) { }
 
-    @ApiOperation({ summary: 'Register vaccination' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Registrar una nueva vacunación' })
+    @ApiResponse({ status: 201, description: 'Vacunación registrada exitosamente.' })
+    @ApiResponse({ status: 400, description: 'Datos de vacunación inválidos.' })
     @Post("register")
     async registerVaccination(@Body() dto: RegisterVaccinationDto) {
         return this.registerVaccinationUseCase.execute(dto);
     }
 
-    @ApiOperation({ summary: 'Get upcoming vaccinations by pet id' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiOperation({ summary: 'Obtener próximas vacunaciones de una mascota' })
+    @ApiParam({ name: 'petId', description: 'ID de la mascota', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Lista de próximas vacunaciones.' })
     @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("pet/:petId/upcoming")
     async getUpcomingVaccinationsByPetId(@Param("petId") petId: string) {
         return this.getUpcomingVaccinationsByPetUseCase.execute(petId);
     }
 
-    @ApiOperation({ summary: 'Get next vaccination reminder' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiOperation({ summary: 'Obtener recordatorio de la siguiente vacunación de una mascota' })
+    @ApiParam({ name: 'petId', description: 'ID de la mascota', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Recordatorio de siguiente vacunación.' })
     @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("pet/:petId/next-reminder")
     async getNextVaccinationReminder(@Param("petId") petId: string) {
         return this.getNextVaccinationReminderUseCase.execute(petId);
     }
 
-    @ApiOperation({ summary: 'Find vaccinations by user id' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
+    @ApiOperation({ summary: 'Buscar vacunaciones por ID de usuario con criterios' })
+    @ApiParam({ name: 'userId', description: 'ID del usuario', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Lista de vacunaciones encontradas.' })
     @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("user/:userId")
     async findVaccinationsByUserId(
@@ -58,17 +61,19 @@ export class VaccinationController {
         return this.findVaccinationsByUserIdUseCase.execute(userId, criteria);
     }
 
-    @ApiOperation({ summary: 'Get vaccination by id' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Obtener una vacunación por su ID' })
+    @ApiParam({ name: 'id', description: 'ID de la vacunación', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Vacunación encontrada exitosamente.' })
+    @ApiResponse({ status: 404, description: 'Vacunación no encontrada.' })
     @Get(":id")
     async getVaccinationById(@Param("id") id: string) {
         return this.getVaccinationByIdUseCase.execute(id);
     }
 
-    @ApiOperation({ summary: 'Update status' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Actualizar el estado de una vacunación' })
+    @ApiParam({ name: 'id', description: 'ID de la vacunación', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Estado de la vacunación actualizado exitosamente.' })
+    @ApiResponse({ status: 400, description: 'Solicitud inválida o estado no permitido.' })
     @Put("status/:id")
     async updateStatus(@Param("id") id: string, @Body() dto: UpdateStatusVaccinationDto) {
         return this.updateStatusVaccinationUseCase.execute(id, dto.status);

@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiProperty } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, BadRequestException, HttpException, HttpStatus, Query } from "@nestjs/common";
 import { RegisterAppointmentDto, UpdateAppointmentStatusDto } from "./dtos";
 import {
@@ -20,9 +20,9 @@ export class AppointmentController {
         private readonly updateAppointmentStatusUseCase: UpdateAppointmentStatusUseCase
     ) { }
 
-    @ApiOperation({ summary: 'Create appointment' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Crear una nueva cita' })
+    @ApiResponse({ status: 201, description: 'Cita creada exitosamente.', type: ResponseDto })
+    @ApiResponse({ status: 400, description: 'Datos de la cita inválidos o solicitud incorrecta.' })
     @Post("register")
     async createAppointment(@Body() appointment: RegisterAppointmentDto) {
         try {
@@ -34,9 +34,10 @@ export class AppointmentController {
         }
     }
 
-    @ApiOperation({ summary: 'Get appointment by id' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Obtener cita por ID' })
+    @ApiParam({ name: 'id', description: 'ID de la cita', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Cita encontrada exitosamente.', type: ResponseDto })
+    @ApiResponse({ status: 404, description: 'Cita no encontrada.' })
     @Get("/:id")
     async getAppointmentById(@Param("id") id: string) {
         try {
@@ -48,9 +49,10 @@ export class AppointmentController {
         }
     }
 
-    @ApiOperation({ summary: 'Get appointments by user' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Obtener citas por ID de usuario con criterios' })
+    @ApiParam({ name: 'id', description: 'ID del usuario', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Citas encontradas exitosamente.', type: ResponseDto })
+    @ApiResponse({ status: 400, description: 'Solicitud o criterios de búsqueda inválidos.' })
     @Get("user/:id")
     async getAppointmentsByUser(
         @Param("id") id: string,
@@ -65,9 +67,11 @@ export class AppointmentController {
         }
     }
 
-    @ApiOperation({ summary: 'Update appointment status' })
-    @ApiResponse({ status: 200, description: 'Operación exitosa.' })
-    @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
+    @ApiOperation({ summary: 'Actualizar el estado de una cita' })
+    @ApiParam({ name: 'id', description: 'ID de la cita', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiResponse({ status: 200, description: 'Estado de la cita actualizado exitosamente.', type: ResponseDto })
+    @ApiResponse({ status: 400, description: 'Estado o transición de estado inválida.' })
+    @ApiResponse({ status: 404, description: 'Cita no encontrada.' })
     @Put(":id/status")
     async updateAppointmentStatus(@Param("id") id: string, @Body() data: UpdateAppointmentStatusDto) {
         try {
