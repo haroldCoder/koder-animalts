@@ -70,6 +70,7 @@ model VeterinaryClinic {
   documents     Document[]
   pets          Pet[]
   veterinarians Veterinarian[]
+  requests      AppointmentRequest[] @relation("ClinicRequests")
 }
 
 model Owner {
@@ -79,6 +80,7 @@ model Owner {
   userId  String @unique
   user    User   @relation(fields: [userId], references: [id])
   pets    Pet[]
+  appointmentRequests AppointmentRequest[]
 }
 
 model Pet {
@@ -104,6 +106,7 @@ model Pet {
   medicalRecords MedicalRecord[]
   clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
   owner          Owner            @relation(fields: [ownerId], references: [id])
+  appointmentRequests AppointmentRequest[]
 }
 
 model Veterinarian {
@@ -117,6 +120,8 @@ model Veterinarian {
   vaccinations   Vaccination[]
   clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
   user           User             @relation(fields: [userId], references: [id])
+  assignedRequests AppointmentRequest[] @relation("AssignedRequests")
+  reviewedRequests AppointmentRequest[] @relation("ReviewedRequests")
 }
 
 model MedicalRecord {
@@ -166,7 +171,43 @@ model Appointment {
   pet            Pet            @relation(fields: [petId], references: [id])
   veterinarian   Veterinarian   @relation(fields: [veterinarianId], references: [id])
   medicalRecord  MedicalRecord?
+
+  requestId String?             @unique
+  request   AppointmentRequest? @relation(fields: [requestId], references: [id])
 }
+
+model AppointmentRequest {
+  id              String                   @id @default(uuid())
+  reason          String
+  requestedDate   DateTime
+  status          AppointmentRequestStatus @default(PENDING)
+  rejectionReason String?
+  reviewedAt      DateTime?
+
+  ownerId        String
+  owner          Owner        @relation(fields: [ownerId], references: [id])
+
+  petId          String
+  pet            Pet          @relation(fields: [petId], references: [id])
+
+  clinicId       String
+  clinic         VeterinaryClinic       @relation("ClinicRequests",fields: [clinicId], references: [id])
+
+  veterinarianId String?
+  veterinarian   Veterinarian? @relation("AssignedRequests", fields: [veterinarianId], references: [id])
+
+  reviewedById   String?
+  reviewedBy     Veterinarian? @relation("ReviewedRequests", fields: [reviewedById], references: [id])
+
+  appointment    Appointment?  // 1:1, se llena solo cuando se aprueba
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([clinicId, status])
+  @@index([ownerId])
+}
+
 
 model Document {
   id              String            @id @default(uuid())
@@ -199,4 +240,11 @@ enum VaccinationStatus {
   PENDING
   CANCELLED
   DONE
+}
+
+enum AppointmentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
 }

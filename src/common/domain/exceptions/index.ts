@@ -10,5 +10,6 @@ export * from './medical-record-id-not-found.exception';
 export * from './email-required.exception';
 export * from './invalid-email-format.exception';
 export * from './clinic-change-not-allowed-by-appointment.exception';
+export * from './user-not-exist.exception';
 
 

@@ -27,6 +27,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.0.0",
     "@prisma/client": "^6.19.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
@@ -86,7 +87,9 @@
       "^@document/(.*)$": "<rootDir>/src/modules/document/$1",
       "^@medical-record/(.*)$": "<rootDir>/src/modules/medical-record/$1",
       "^@vaccination/(.*)$": "<rootDir>/src/modules/vaccination/$1",
-      "^@appointment/(.*)$": "<rootDir>/src/modules/appointment/$1"
+      "^@appointment/(.*)$": "<rootDir>/src/modules/appointment/$1",
+      "^@user/(.*)$": "<rootDir>/src/modules/user/$1",
+      "^@appointment-request/(.*)$": "<rootDir>/src/modules/appointment-request/$1"
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
