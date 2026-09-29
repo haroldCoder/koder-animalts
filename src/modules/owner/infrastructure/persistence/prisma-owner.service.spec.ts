@@ -106,4 +106,35 @@ describe("PrismaOwnerService", () => {
             expect(result).toBeNull();
         });
     });
+
+    describe("findById", () => {
+        it("should return an OwnerEntity when owner is found by id", async () => {
+            const mockDbOwner = {
+                id: "owner-123",
+                userId: "user-123",
+                address: "Street 123",
+                phone: "123456789",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            mockPrismaService.owner.findUnique.mockResolvedValue(mockDbOwner);
+
+            const result = await service.findById("owner-123");
+
+            expect(prisma.owner.findUnique).toHaveBeenCalledWith({
+                where: { id: "owner-123" },
+            });
+            expect(result).toBeInstanceOf(OwnerEntity);
+            expect(result?.getId()).toBe("owner-123");
+        });
+
+        it("should return null if owner not found by id", async () => {
+            mockPrismaService.owner.findUnique.mockResolvedValue(null);
+
+            const result = await service.findById("non-existent");
+
+            expect(result).toBeNull();
+        });
+    });
 });

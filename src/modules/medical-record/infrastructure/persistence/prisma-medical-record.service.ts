@@ -62,6 +62,7 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
             clinicId: medicalRecord.veterinarian?.clinic?.id || "",
             documentIds: medicalRecord.documents?.map((doc: any) => doc.id) ?? [],
             vaccinations: medicalRecord.vaccinations ?? [],
+            appointmentId: medicalRecord.appointmentId
         });
     }
 
@@ -76,7 +77,8 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
                 diagnosis: medicalRecord.getDiagnosis() || "",
                 treatment: medicalRecord.getTreatment() || "",
                 notes: medicalRecord.getNotes() || "",
-                veterinarianId: medicalRecord.getVeterinarianId()
+                veterinarianId: medicalRecord.getVeterinarianId(),
+                appointmentId: medicalRecord.getAppointmentId() || null
             }
         });
     }
@@ -336,5 +338,15 @@ export class PrismaMedicalRecordService implements MedicalRecordRepository {
                 }
             }) as ExtendedMedicalRecordEntity;
         });
+    }
+
+    async findByAppointmentId(appointmentId: string): Promise<MedicalRecordEntity | null> {
+        const medicalRecord = await this.prisma.medicalRecord.findUnique({
+            where: { appointmentId },
+        });
+
+        if (!medicalRecord) return null;
+
+        return this.mapToDomain(medicalRecord);
     }
 }

@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { RegisterMedicalRecordDto } from "@medical-record/presentation/dtos";
 import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { PetIdNotFoundException, ServerErrorException, VeterinarianIdNotFoundException, UserIdNotFoundException } from "@/common/domain/exceptions";
-import { MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
+import { MedicalRecordAlreadyExistsWithAppointmentException, MedicalRecordReasonForVisitNotFoundException, MedicalRecordTypeNotFoundException, MedicalRecordVisitDateNotFoundException } from "@medical-record/domain/exceptions";
 import type { MedicalRecordRepository } from "@medical-record/domain/ports";
 import { MedicalRecordType } from "@medical-record/domain/enums";
 import { MedicalRecordEntity } from "@medical-record/domain/entities";
@@ -24,7 +24,7 @@ export class CreateMedicalRecordUseCase {
 
     async execute(medicalRecord: RegisterMedicalRecordDto): Promise<ResponseDto<string>> {
         try {
-            const { petId, userId, type, reasonForVisit, visitDate } = medicalRecord;
+            const { petId, userId, type, reasonForVisit, visitDate, appointmentId } = medicalRecord;
 
             if (!petId) throw new PetIdNotFoundException();
             if (!userId) throw new UserIdNotFoundException();
@@ -37,6 +37,9 @@ export class CreateMedicalRecordUseCase {
 
             const veterinarian = await this.veterinarianRepository.findByUserId(userId);
             if (!veterinarian) throw new VeterinarianIdNotFoundException();
+
+            const medicalRecordExists = await this.medicalRecordRepository.findByAppointmentId(appointmentId);
+            if (medicalRecordExists) throw new MedicalRecordAlreadyExistsWithAppointmentException();
 
             const id = this.generateId();
             const entity = MedicalRecordEntity.create({
@@ -51,6 +54,7 @@ export class CreateMedicalRecordUseCase {
                 veterinarianId: veterinarian.getId(),
                 ownerId: pet.getOwnerId(),
                 clinicId: pet.getClinicId(),
+                appointmentId
             });
 
             await this.medicalRecordRepository.create(entity);

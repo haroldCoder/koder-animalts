@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ResponseDto } from "@/common/domain/dto";
+import { Body, Controller, Get, HttpStatus, Param, Post } from "@nestjs/common";
 import {
     CreateVeterinaryClinicUseCase,
     FindAllVeterinaryClinicsUseCase,
     GetVeterinaryClinicSummaryUseCase
 } from "@veterinary-clinics/application/use-cases";
+import { GetAllVeterinarianOfClinicUseCase } from "@veterinary-clinics/application/use-cases/get-all-veterinarian-of-clinic.use-case";
+import { ResponseFindVeterinariansDto } from "@veterinary-clinics/domain/dtos";
 import { RegisterVeterinaryClinicDto } from "@veterinary-clinics/presentation/dtos";
 
 @ApiTags('Veterinary Clinics')
@@ -14,6 +17,7 @@ export class VeterinaryClinicsController {
         private readonly createVeterinaryClinicUseCase: CreateVeterinaryClinicUseCase,
         private readonly findAllVeterinaryClinicsUseCase: FindAllVeterinaryClinicsUseCase,
         private readonly getVeterinaryClinicSummaryUseCase: GetVeterinaryClinicSummaryUseCase,
+        private readonly getAllVeterinarianOfClinicUseCase: GetAllVeterinarianOfClinicUseCase,
     ) { }
 
     @ApiOperation({ summary: 'Registrar una nueva clínica veterinaria' })
@@ -35,6 +39,12 @@ export class VeterinaryClinicsController {
     @ApiParam({ name: 'userId', description: 'ID del usuario (veterinario)', example: '123e4567-e89b-12d3-a456-426614174000' })
     @ApiResponse({ status: 200, description: 'Resumen de la clínica obtenido correctamente.' })
     @ApiResponse({ status: 404, description: 'Veterinario o clínica no encontrada.' })
+    @Get("all/veterinarians/:clinicId")
+    async findAllVeterinariansOfClinc(@Param("clinicId") clinicId: string): Promise<ResponseDto<ResponseFindVeterinariansDto[]>> {
+        const veterinarians = await this.getAllVeterinarianOfClinicUseCase.execute(clinicId);
+        return new ResponseDto(HttpStatus.OK, "Veterinarians found successfully", veterinarians);
+    }
+
     @Get("summary/veterinarian/userId/:userId")
     async getVeterinaryClinicSummary(@Param("userId") userId: string) {
         return this.getVeterinaryClinicSummaryUseCase.execute(userId);

@@ -5,6 +5,7 @@ import { VeterinaryClinicSummaryModel } from "@veterinary-clinics/domain/models"
 import { UserIdNotFoundException } from "@/common/domain/exceptions";
 import { VeterinaryClinicNotFoundException } from "@veterinary-clinics/domain/exceptions";
 import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities/veterinary-clinic.entity";
+import { ResponseFindVeterinariansDto } from "@veterinary-clinics/domain/dtos";
 
 @Injectable()
 export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepository {
@@ -72,6 +73,51 @@ export class PrismaVeterinaryClinicService implements IVeterinaryClinicRepositor
             totalUsers: uniqueOwners.size,
             clinicName: clinic.name
         };
+    }
+
+    async findById(id: string): Promise<VeterinaryClinicEntity | null> {
+        const clinic = await this.prisma.veterinaryClinic.findUnique({
+            where: { id },
+            include: {
+                veterinarians: {
+                    select: {
+                        userId: true
+                    }
+                }
+            }
+        });
+        if (!clinic) return null;
+        return this.mapToDomain(clinic);
+    }
+
+
+    async findAllVeterinariansOfClinic(clinicId: string): Promise<ResponseFindVeterinariansDto[]> {
+        const clinic = await this.prisma.veterinaryClinic.findUnique({
+            where: {
+                id: clinicId
+            },
+            select: {
+                veterinarians: {
+                    select: {
+                        id: true,
+                        user: {
+                            select: {
+                                name: true,
+                                image: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!clinic) throw new VeterinaryClinicNotFoundException();
+
+        return clinic.veterinarians.map(veterinarian => ({
+            id: veterinarian.id,
+            name: veterinarian.user.name || "",
+            image: veterinarian.user.image || ""
+        }));
     }
 }
 

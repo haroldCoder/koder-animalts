@@ -4,7 +4,8 @@ import {
     AppointmentReasonNotFoundException,
     AppointmentStatusNotFoundException,
     AppointmentIdNotFoundException,
-    EarlyAppointmentStatusUpdateException
+    EarlyAppointmentStatusUpdateException,
+    StatusAppointmentIsAlreadyEqualToTheNewStatusException
 } from "../exceptions";
 import { PetIdNotFoundException, VeterinarianIdNotFoundException } from "@/common/domain/exceptions";
 
@@ -89,6 +90,9 @@ export class AppointmentEntity {
         const currentDate = new Date();
         if (currentDate < this.date && newStatus == AppointmentStatus.COMPLETED) {
             throw new EarlyAppointmentStatusUpdateException();
+        }
+        if (newStatus === this.status) {
+            throw new StatusAppointmentIsAlreadyEqualToTheNewStatusException();
         }
         this.status = newStatus;
     }

@@ -4,6 +4,8 @@ import { GetUserRoleUseCase } from "@user/application/use-cases";
 import { PrismaUserRepository } from "@user/infrastructure/persistence";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
 
+import { RolesGuard } from "./presentation/guards";
+
 @Module({
     imports: [PrismaModule],
     controllers: [UserController],
@@ -13,7 +15,8 @@ import { PrismaModule } from "@/common/infrastructure/prisma.module";
             provide: 'IUserRepository',
             useClass: PrismaUserRepository,
         },
+        RolesGuard,
     ],
-    exports: [GetUserRoleUseCase],
+    exports: [GetUserRoleUseCase, RolesGuard],
 })
 export class UserModule { }
