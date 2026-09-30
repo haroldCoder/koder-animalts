@@ -1,4 +1,4 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { RegisterPetDto } from "@pet/presentation/dtos";
+import { PartialType } from "@nestjs/swagger";
+import { RegisterPetDto } from "./register-pet.dto";
 
-export class UpdatePetDto extends PartialType(RegisterPetDto) { }
+export class UpdatePetDto extends PartialType(RegisterPetDto) { }

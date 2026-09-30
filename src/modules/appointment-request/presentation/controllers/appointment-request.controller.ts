@@ -10,7 +10,7 @@ import {
 import { Roles } from "@user/presentation";
 import { CurrentUser } from "../decorators";
 import { ResponseDto } from "@/common/domain/dto";
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { AppointmentRequestEntity } from "../../domain/entities";
 import { CriteriaFindAllDto } from "../dtos/criteria-findall.dto";
@@ -51,6 +51,9 @@ export class AppointmentRequestController {
     @Roles("VETERINARIAN")
     @ApiOperation({ summary: "Approve an appointment request (Veterinarian only)" })
     @ApiParam({ name: "id", description: "Appointment request ID" })
+    @ApiQuery({ name: "userVeterinarianId", description: "ID of veterinarian" })
+    @ApiQuery({ name: "clinicId", description: "ID of clinic" })
+    @ApiQuery({ name: "notes", required: false, description: "Notes for approval" })
     @ApiResponse({ status: 200, description: "Appointment request approved and appointment created", type: ResponseDto })
     @ApiResponse({ status: 403, description: "Forbidden - veterinarian cannot approve this request" })
     @ApiResponse({ status: 404, description: "Appointment request or clinic not found" })
@@ -73,6 +76,7 @@ export class AppointmentRequestController {
     @Roles("VETERINARIAN")
     @ApiOperation({ summary: "Reject an appointment request (Veterinarian only)" })
     @ApiParam({ name: "id", description: "Appointment request ID" })
+    @ApiQuery({ name: "userVeterinarianId", description: "ID of veterinarian" })
     @ApiResponse({ status: 200, description: "Appointment request rejected successfully", type: ResponseDto })
     @ApiResponse({ status: 403, description: "Forbidden - veterinarian cannot reject this request" })
     @ApiResponse({ status: 404, description: "Appointment request not found" })
@@ -96,6 +100,7 @@ export class AppointmentRequestController {
     @Roles("OWNER")
     @ApiOperation({ summary: "Cancel an appointment request (Owner only)" })
     @ApiParam({ name: "id", description: "Appointment request ID" })
+    @ApiQuery({ name: "ownerUserId", required: false, description: "ID of owner (optional if inferred from token)" })
     @ApiResponse({ status: 200, description: "Appointment request cancelled successfully", type: ResponseDto })
     @ApiResponse({ status: 400, description: "User ID not found or invalid" })
     @ApiResponse({ status: 403, description: "Forbidden - owner cannot cancel this request or request is not pending" })

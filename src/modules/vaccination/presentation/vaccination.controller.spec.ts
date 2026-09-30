@@ -47,9 +47,11 @@ describe('VaccinationController', () => {
     describe('findVaccinationsByUserId', () => {
         it('should call findVaccinationsByUserIdUseCase.execute with parsed pagination parameters', async () => {
             const userId = 'user-123';
-            const page = '2';
-            const limit = '5';
-            const medicalRecordId = 'mr-999';
+            const criteria = {
+                page: 2,
+                limit: 5,
+                medicalRecordId: 'mr-999',
+            };
 
             const mockResult = {
                 statusCode: HttpStatus.OK,
@@ -58,17 +60,13 @@ describe('VaccinationController', () => {
             };
             mockFindVaccinationsByUserIdUseCase.execute.mockResolvedValue(mockResult);
 
-            const result = await controller.findVaccinationsByUserId(userId, page, limit, medicalRecordId);
+            const result = await controller.findVaccinationsByUserId(userId, criteria as any);
 
-            expect(mockFindVaccinationsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, {
-                page: 2,
-                limit: 5,
-                medicalRecordId: 'mr-999',
-            });
+            expect(mockFindVaccinationsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, criteria);
             expect(result).toEqual(mockResult);
         });
 
-        it('should pass undefined for page and limit if not provided', async () => {
+        it('should pass empty/undefined criteria if not provided', async () => {
             const userId = 'user-123';
             const mockResult = {
                 statusCode: HttpStatus.OK,
@@ -77,13 +75,9 @@ describe('VaccinationController', () => {
             };
             mockFindVaccinationsByUserIdUseCase.execute.mockResolvedValue(mockResult);
 
-            const result = await controller.findVaccinationsByUserId(userId, undefined, undefined, undefined);
+            const result = await controller.findVaccinationsByUserId(userId, {} as any);
 
-            expect(mockFindVaccinationsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, {
-                page: undefined,
-                limit: undefined,
-                medicalRecordId: undefined,
-            });
+            expect(mockFindVaccinationsByUserIdUseCase.execute).toHaveBeenCalledWith(userId, {});
             expect(result).toEqual(mockResult);
         });
     });

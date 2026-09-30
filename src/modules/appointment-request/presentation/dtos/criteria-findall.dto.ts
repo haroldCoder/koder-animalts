@@ -1,9 +1,11 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsEnum, Min, IsString } from 'class-validator';
 import type { CriteriaAppointmentRequest } from '../../domain/ports';
 import { RequestStatus } from '../../domain/enums';
 import { Transform, Type } from 'class-transformer';
 
 export class CriteriaFindAllDto implements CriteriaAppointmentRequest {
+    @ApiPropertyOptional({ description: 'Estados de la solicitud a filtrar', enum: RequestStatus, isArray: true })
     @IsOptional()
     @Transform(({ value }) => {
         if (value === undefined) return value;
@@ -13,19 +15,23 @@ export class CriteriaFindAllDto implements CriteriaAppointmentRequest {
     @IsEnum(RequestStatus, { each: true, message: 'Every status must be a valid RequestStatus enum value' })
     status?: RequestStatus[];
 
+    @ApiPropertyOptional({ description: 'Número de página', example: 1, default: 1 })
     @IsOptional()
     @Type(() => Number)
     @Min(1, { message: 'Page must be at least 1' })
     page?: number;
 
+    @ApiPropertyOptional({ description: 'Cantidad de elementos por página', example: 10, default: 10 })
     @IsOptional()
     @Min(1, { message: 'Limit must be at least 1' })
     limit?: number;
 
+    @ApiPropertyOptional({ description: 'Campo por el cual ordenar', example: 'createdAt' })
     @IsOptional()
     @IsString({ message: 'Sort field must be a string' })
     sortField?: string;
 
+    @ApiPropertyOptional({ description: 'Orden ascendente o descendente', enum: ['asc', 'desc'], example: 'desc' })
     @IsOptional()
     @IsEnum(['asc', 'desc'], { message: 'Sort order must be asc or desc' })
     sortOrder?: 'asc' | 'desc';
