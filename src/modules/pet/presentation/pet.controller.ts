@@ -67,15 +67,15 @@ export class PetController {
 
         if (!files?.mainImage?.[0]) throw new Error("Main image is required");
 
-        mainImage = (await new UploadFileCommand(files.mainImage[0], UploadPlatformEnum.CLOUDINARY, FolderUploadTypes.PETS).execute()).fileUrl;
+        mainImage = (await new UploadFileCommand(files.mainImage[0], UploadPlatformEnum.SUPABASE, FolderUploadTypes.PETS).execute(pet.userId)).fileUrl;
 
         if (files?.iaImage?.[0]) {
-            iaImage = (await new UploadFileCommand(files.iaImage[0], UploadPlatformEnum.CLOUDINARY, FolderUploadTypes.PETS).execute()).fileUrl;
+            iaImage = (await new UploadFileCommand(files.iaImage[0], UploadPlatformEnum.SUPABASE, FolderUploadTypes.PETS).execute(pet.userId)).fileUrl;
         }
 
         if (files?.images?.length) {
             for (const file of files.images) {
-                const { fileUrl } = await new UploadFileCommand(file, UploadPlatformEnum.CLOUDINARY, FolderUploadTypes.PETS).execute();
+                const { fileUrl } = await new UploadFileCommand(file, UploadPlatformEnum.SUPABASE, FolderUploadTypes.PETS).execute(pet.userId);
                 images.push(fileUrl);
             }
         }

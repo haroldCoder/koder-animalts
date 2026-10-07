@@ -44,7 +44,7 @@ export class DocumentController {
     @Post("register")
     @UseInterceptors(FileInterceptor('file'))
     async registerDocument(@Body() document: RegisterDocumentRequestDto, @UploadedFile() file: Express.Multer.File) {
-        const { fileUrl, fileKey, fileSize, fileType } = await new UploadFileCommand(file, UploadPlatformEnum.CLOUDINARY, FolderUploadTypes.DOCS).execute();
+        const { fileUrl, fileKey, fileSize, fileType } = await new UploadFileCommand(file, UploadPlatformEnum.SUPABASE, FolderUploadTypes.DOCS).execute(document.petId);
 
         return this.registerDocumentUseCase.execute({
             ...document,

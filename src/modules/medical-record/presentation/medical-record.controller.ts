@@ -59,7 +59,7 @@ export class MedicalRecordController {
 
         if (files.files) {
             for (const file of files.files) {
-                const { fileUrl, fileKey, fileSize } = await new UploadFileCommand(file, UploadPlatformEnum.CLOUDINARY, FolderUploadTypes.MEDICAL_RECORDS).execute();
+                const { fileUrl, fileKey, fileSize } = await new UploadFileCommand(file, UploadPlatformEnum.SUPABASE, FolderUploadTypes.MEDICAL_RECORDS).execute(id);
                 documents.push({
                     title: file.originalname,
                     fileUrl,

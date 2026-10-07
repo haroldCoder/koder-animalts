@@ -50,9 +50,9 @@ export class AuthController {
         if (file) {
             const { fileUrl } = await new UploadFileCommand(
                 file,
-                UploadPlatformEnum.CLOUDINARY,
+                UploadPlatformEnum.SUPABASE,
                 FolderUploadTypes.USERS
-            ).execute();
+            ).execute(body.email);
             imageUrl = fileUrl;
         }
 
