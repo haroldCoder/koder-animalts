@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseDto } from "@/common/domain/dto";
 import { Body, Controller, Get, HttpStatus, Param, Post } from "@nestjs/common";
 import {
@@ -9,8 +9,10 @@ import {
 import { GetAllVeterinarianOfClinicUseCase } from "@veterinary-clinics/application/use-cases/get-all-veterinarian-of-clinic.use-case";
 import { ResponseFindVeterinariansDto } from "@veterinary-clinics/domain/dtos";
 import { RegisterVeterinaryClinicDto } from "@veterinary-clinics/presentation/dtos";
+import { Public } from "@/common/presentation/decorators";
 
 @ApiTags('Veterinary Clinics')
+@ApiBearerAuth('bearer')
 @Controller('veterinary-clinics')
 export class VeterinaryClinicsController {
     constructor(
@@ -28,6 +30,7 @@ export class VeterinaryClinicsController {
         return this.createVeterinaryClinicUseCase.execute(data);
     }
 
+    @Public()
     @ApiOperation({ summary: 'Obtener todas las clínicas veterinarias' })
     @ApiResponse({ status: 200, description: 'Lista de todas las clínicas veterinarias.' })
     @Get("all")

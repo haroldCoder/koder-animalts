@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { RegisterDocumentRequestDto, UpdateDocumentDto } from "@document/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
@@ -13,6 +13,7 @@ import {
 } from "@document/application/use-cases";
 
 @ApiTags('Document')
+@ApiBearerAuth('bearer')
 @Controller("document")
 export class DocumentController {
     constructor(

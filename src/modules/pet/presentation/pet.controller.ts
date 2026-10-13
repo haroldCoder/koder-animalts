@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase } from "@pet/application/use-cases";
 import { RegisterPetDto, UpdatePetDto, UpdatePetClinicDto } from "@pet/presentation/dtos";
@@ -11,6 +11,7 @@ import { ClinicChangeNotAllowedByAppointmentException, PetIdNotExistException, P
 import { ResponseDto } from "@/common/domain/dto";
 
 @ApiTags('Pets')
+@ApiBearerAuth('bearer')
 @Controller('pet')
 export class PetController {
     constructor(

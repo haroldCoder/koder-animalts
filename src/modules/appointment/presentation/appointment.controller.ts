@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, BadRequestException, HttpException, HttpStatus, Query } from "@nestjs/common";
 import { RegisterAppointmentDto, UpdateAppointmentStatusDto } from "./dtos";
 import {
@@ -11,6 +11,7 @@ import { ResponseDto } from "@/common/domain/dto/response.dto";
 import { FindAppointmentsCriteriaDto } from "./dtos/find-appointment-criteria.dto";
 
 @ApiTags('Appointment')
+@ApiBearerAuth('bearer')
 @Controller('appointment')
 export class AppointmentController {
     constructor(

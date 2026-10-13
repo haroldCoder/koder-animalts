@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 import {
     RegisterVaccinationUseCase,
@@ -12,6 +12,7 @@ import { RegisterVaccinationDto, UpdateStatusVaccinationDto } from "@vaccination
 import { FindVaccinationsCriteriaDto } from "./dtos/find-vaccination-criteria.dto";
 
 @ApiTags('Vaccination')
+@ApiBearerAuth('bearer')
 @Controller('vaccination')
 export class VaccinationController {
     constructor(

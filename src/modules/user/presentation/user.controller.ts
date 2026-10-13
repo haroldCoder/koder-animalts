@@ -1,10 +1,11 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ResponseDto } from "@/common/domain/dto";
 import { Controller, Get, Param } from "@nestjs/common";
 import { GetUserRoleUseCase } from "@user/application/use-cases";
 import { UserMetadata } from "@user/domain/ports";
 
 @ApiTags('User')
+@ApiBearerAuth('bearer')
 @Controller('users')
 export class UserController {
     constructor(private readonly getUserRoleUseCase: GetUserRoleUseCase) { }

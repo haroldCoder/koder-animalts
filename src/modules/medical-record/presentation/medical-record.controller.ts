@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { RegisterMedicalRecordDto } from "@medical-record/presentation/dtos";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -8,6 +8,7 @@ import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { CreateMedicalRecordUseCase, UploadDocumentToMedicalRecordUseCase, GetMedicalRecordByIdUseCase, GetMedicalRecordByVeterinarianIdUseCase, GetMedicalRecordByPetIdUseCase, GetMedicalRecordByUserIdUseCase } from "@medical-record/application/use-cases";
 
 @ApiTags('Medical-record')
+@ApiBearerAuth('bearer')
 @Controller('medical-record')
 export class MedicalRecordController {
     constructor(private readonly createMedicalRecordUseCase: CreateMedicalRecordUseCase,

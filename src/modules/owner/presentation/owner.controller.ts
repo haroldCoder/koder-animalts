@@ -1,9 +1,10 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Param } from "@nestjs/common";
 import { CreateOwnerUseCase, FindOwnerByUserIdUseCase } from "@owner/application/use-cases";
 import { CreateOwnerDto } from "@owner/presentation/dtos";
 
 @ApiTags('Owner')
+@ApiBearerAuth('bearer')
 @Controller('owner')
 export class OwnerController {
     constructor(

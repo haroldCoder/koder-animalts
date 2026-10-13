@@ -22,9 +22,20 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('API')
-    .setDescription('The API description')
+    .setTitle('Koder Animalts API')
+    .setDescription('API del backend de Koder Animalts protegida con JWT (Access & Refresh tokens) y RBAC (VETERINARIAN / OWNER)')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Ingrese el Access Token JWT',
+        in: 'header',
+      },
+      'bearer',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
