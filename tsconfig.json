@@ -22,6 +22,9 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@/*": [
+        "./src/*"
+      ],
       "@/common/*": [
         "./src/common/*"
       ],
