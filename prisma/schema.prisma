@@ -118,6 +118,7 @@ model Veterinarian {
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
   vaccinations   Vaccination[]
+  documents      Document[]
   clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
   user           User             @relation(fields: [userId], references: [id])
   assignedRequests AppointmentRequest[] @relation("AssignedRequests")
@@ -217,14 +218,17 @@ model Document {
   fileSize        Int?
   fileType        String?
   category        String?
+  ownerReadable   Boolean           @default(true)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   petId           String?
   medicalRecordId String?
   clinicId        String?
+  veterinarianId  String?
   clinic          VeterinaryClinic? @relation(fields: [clinicId], references: [id])
   medicalRecord   MedicalRecord?    @relation(fields: [medicalRecordId], references: [id])
   pet             Pet?              @relation(fields: [petId], references: [id])
+  veterinarian    Veterinarian?     @relation(fields: [veterinarianId], references: [id])
 }
 
 enum MedicalRecordType {
