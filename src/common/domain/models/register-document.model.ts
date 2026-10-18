@@ -8,4 +8,6 @@ export class RegisterDocumentModel {
     petId?: string;
     medicalRecordId?: string;
     clinicId?: string;
+    veterinarianId?: string;
+    ownerReadable?: boolean;
 }

@@ -15,6 +15,8 @@ export class DocumentEntity {
     private readonly petId: string | null;
     private readonly clinicId: string | null;
     private readonly medicalRecordId: string | null;
+    private readonly veterinarianId: string | null;
+    private readonly ownerReadable: boolean;
     private readonly createdAt: Date;
     private readonly updatedAt: Date;
 
@@ -29,6 +31,8 @@ export class DocumentEntity {
         petId?: string | null;
         clinicId?: string | null;
         medicalRecordId?: string | null;
+        veterinarianId?: string | null;
+        ownerReadable?: boolean;
         createdAt: Date;
         updatedAt: Date;
     }) {
@@ -52,6 +56,8 @@ export class DocumentEntity {
         this.petId = properties.petId ?? null;
         this.clinicId = properties.clinicId ?? null;
         this.medicalRecordId = properties.medicalRecordId ?? null;
+        this.veterinarianId = properties.veterinarianId ?? null;
+        this.ownerReadable = properties.ownerReadable ?? false;
         this.createdAt = properties.createdAt;
         this.updatedAt = properties.updatedAt;
     }
@@ -67,6 +73,8 @@ export class DocumentEntity {
         petId?: string | null;
         clinicId?: string | null;
         medicalRecordId?: string | null;
+        veterinarianId?: string | null;
+        ownerReadable?: boolean;
         createdAt?: Date;
         updatedAt?: Date;
     }): DocumentEntity {
@@ -82,6 +90,8 @@ export class DocumentEntity {
             petId: properties.petId,
             clinicId: properties.clinicId,
             medicalRecordId: properties.medicalRecordId,
+            veterinarianId: properties.veterinarianId,
+            ownerReadable: properties.ownerReadable,
             createdAt: properties.createdAt ?? now,
             updatedAt: properties.updatedAt ?? now,
         });
@@ -98,6 +108,8 @@ export class DocumentEntity {
     public getPetId(): string | null { return this.petId; }
     public getClinicId(): string | null { return this.clinicId; }
     public getMedicalRecordId(): string | null { return this.medicalRecordId; }
+    public getVeterinarianId(): string | null { return this.veterinarianId; }
+    public getOwnerReadable(): boolean { return this.ownerReadable; }
     public getCreatedAt(): Date { return this.createdAt; }
     public getUpdatedAt(): Date { return this.updatedAt; }
 }
