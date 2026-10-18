@@ -1,12 +1,13 @@
 import { Module } from "@nestjs/common";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
+import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { VeterinaryClinicsController } from "@veterinary-clinics/presentation";
 import {
     CreateVeterinaryClinicUseCase,
     FindAllVeterinaryClinicsUseCase,
     GetVeterinaryClinicSummaryUseCase,
 } from "@veterinary-clinics/application/use-cases";
-import { PrismaVeterinaryClinicService } from "@veterinary-clinics/infrastructure/persistence";
+import { PrismaVeterinaryClinicService, LocalVeterinaryClinicService } from "@veterinary-clinics/infrastructure/persistence";
 import { randomUUID } from "crypto";
 import { GetAllVeterinarianOfClinicUseCase } from "./application/use-cases/get-all-veterinarian-of-clinic.use-case";
 
@@ -20,7 +21,11 @@ import { GetAllVeterinarianOfClinicUseCase } from "./application/use-cases/get-a
         GetAllVeterinarianOfClinicUseCase,
         {
             provide: "IVeterinaryClinicRepository",
-            useClass: PrismaVeterinaryClinicService,
+            useFactory: (prismaService: PrismaService) => {
+                const isLocal = process.env.AUTH_REPO === "local" || process.env.STORAGE_DRIVER === "local";
+                return isLocal ? new LocalVeterinaryClinicService() : new PrismaVeterinaryClinicService(prismaService);
+            },
+            inject: [PrismaService],
         },
         {
             provide: "IIdGenerator",

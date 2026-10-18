@@ -14,8 +14,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     async onModuleInit() {
-        await this.$connect();
-        console.log("db connected");
+        try {
+            await this.$connect();
+            console.log("db connected");
+        } catch (error) {
+            if (process.env.AUTH_REPO === "local" || process.env.NODE_ENV === "test") {
+                console.warn("⚠️ [PrismaService] Conexión a BD no disponible en modo TEST/LOCAL (continuando con repositorios locales):", (error as Error).message);
+            } else {
+                throw error;
+            }
+        }
     }
 
     async onModuleDestroy() {

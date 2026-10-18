@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { PrismaModule } from "@/common/infrastructure/prisma.module";
+import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { AuthController } from "@auth/presentation";
 import {
     AuthenticateUseCase,
@@ -9,8 +10,9 @@ import {
     LogoutUseCase,
     RefreshTokenUseCase,
     SignUpUseCase,
+    CompleteRegistrationUseCase,
 } from "@auth/application/use-cases";
-import { PrismaAuthService } from "@auth/infrastructure/persistence";
+import { PrismaAuthService, LocalStorageAuthService } from "@auth/infrastructure/persistence";
 import { JwtTokenService } from "@auth/infrastructure/services";
 import { JwtAuthGuard } from "@auth/infrastructure/guards";
 
@@ -28,13 +30,23 @@ import { JwtAuthGuard } from "@auth/infrastructure/guards";
         AuthenticateUseCase,
         LoginUseCase,
         SignUpUseCase,
+        CompleteRegistrationUseCase,
         RefreshTokenUseCase,
         LogoutUseCase,
         GetProfileUseCase,
         JwtAuthGuard,
+        LocalStorageAuthService,
+        PrismaAuthService,
         {
             provide: "IAuthRepository",
-            useClass: PrismaAuthService,
+            useFactory: (prismaService: PrismaService) => {
+                const isLocal = process.env.AUTH_REPO === "local" || process.env.STORAGE_DRIVER === "local";
+                if (isLocal) {
+                    return new LocalStorageAuthService();
+                }
+                return new PrismaAuthService(prismaService);
+            },
+            inject: [PrismaService],
         },
         {
             provide: "ITokenService",
@@ -45,10 +57,12 @@ import { JwtAuthGuard } from "@auth/infrastructure/guards";
         AuthenticateUseCase,
         LoginUseCase,
         SignUpUseCase,
+        CompleteRegistrationUseCase,
         RefreshTokenUseCase,
         LogoutUseCase,
         GetProfileUseCase,
         JwtAuthGuard,
+        LocalStorageAuthService,
         "ITokenService",
         "IAuthRepository",
         JwtModule,
