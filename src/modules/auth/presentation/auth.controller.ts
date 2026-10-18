@@ -8,8 +8,9 @@ import {
     LogoutUseCase,
     RefreshTokenUseCase,
     SignUpUseCase,
+    CompleteRegistrationUseCase,
 } from "@auth/application/use-cases";
-import { AuthenticateParamsDto, LoginDto, RefreshTokenDto, SignUpDto, AuthResponseDataDto, UserAuthProfileDto } from "@auth/presentation/dtos";
+import { AuthenticateParamsDto, LoginDto, RefreshTokenDto, SignUpDto, CompleteRegistrationDto, AuthResponseDataDto, UserAuthProfileDto } from "@auth/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 import { Public, CurrentUser } from "@/common/presentation/decorators";
@@ -22,6 +23,7 @@ export class AuthController {
         private readonly authenticateUseCase: AuthenticateUseCase,
         private readonly loginUseCase: LoginUseCase,
         private readonly signUpUseCase: SignUpUseCase,
+        private readonly completeRegistrationUseCase: CompleteRegistrationUseCase,
         private readonly refreshTokenUseCase: RefreshTokenUseCase,
         private readonly logoutUseCase: LogoutUseCase,
         private readonly getProfileUseCase: GetProfileUseCase,
@@ -91,6 +93,32 @@ export class AuthController {
             name: body.name,
             password: body.password,
             image: imageUrl,
+            role: body.role,
+            phone: body.phone,
+            address: body.address,
+            clinicId: body.clinicId,
+            specialty: body.specialty,
+            ipAddress,
+            userAgent,
+        });
+    }
+
+    @Public()
+    @ApiOperation({ summary: "Completar registro de usuario asignando rol (VETERINARIAN u OWNER) y perfil" })
+    @ApiResponse({ status: 200, description: "Registro completado exitosamente con nuevos tokens.", type: AuthResponseDataDto })
+    @ApiResponse({ status: 400, description: "Datos inválidos o incompletos." })
+    @Post("complete-registration")
+    async completeRegistration(
+        @Body() body: CompleteRegistrationDto,
+        @CurrentUser() user?: any,
+        @Req() req?: Request,
+    ) {
+        const userId = body.userId || user?.id || user?.userId;
+        const ipAddress = req?.ip;
+        const userAgent = req?.headers?.["user-agent"];
+
+        return this.completeRegistrationUseCase.execute({
+            userId,
             role: body.role,
             phone: body.phone,
             address: body.address,

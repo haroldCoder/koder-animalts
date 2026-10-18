@@ -3,3 +3,4 @@ export * from "./sign-up.dto";
 export * from "./authenticate-params.dto";
 export * from "./refresh-token.dto";
 export * from "./auth-response.dto";
+export * from "./complete-registration.dto";
