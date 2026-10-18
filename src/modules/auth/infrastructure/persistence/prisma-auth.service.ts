@@ -166,6 +166,7 @@ export class PrismaAuthService implements IAuthRepository {
 
         return {
             id: user.id,
+            userId: user.id,
             email: user.email,
             name: user.name,
             image: user.image,

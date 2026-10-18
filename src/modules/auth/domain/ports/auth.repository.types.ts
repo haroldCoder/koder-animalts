@@ -25,6 +25,7 @@ export interface CreateSessionParams {
 
 export interface UserRoleInfo {
     id: string;
+    userId: string;
     email: string;
     name: string | null;
     image: string | null;
