@@ -117,6 +117,7 @@ describe("SignUpUseCase", () => {
         }));
         expect(result.data?.user.role).toBe(UserRole.OWNER);
         expect(result.data?.user.ownerId).toBe("owner-profile-1");
+        expect(result.data?.user.userId).toBe("owner-user-1");
     });
 
     it("should throw EmailAlreadyExistsException if email is already registered", async () => {

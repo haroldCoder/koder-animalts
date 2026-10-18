@@ -70,6 +70,7 @@ describe("LoginUseCase", () => {
         );
         mockAuthRepository.findUserRoleInfo.mockResolvedValue({
             id: "user-123",
+            userId: "user-123",
             email: params.email,
             name: "Test",
             image: null,
@@ -93,6 +94,7 @@ describe("LoginUseCase", () => {
         expect(result.statusCode).toBe(200);
         expect(result.data?.accessToken).toBe("mock-access-token");
         expect(result.data?.refreshToken).toBe("mock-refresh-token");
+        expect(result.data?.user.userId).toBe("user-123");
         expect(result.data?.user.role).toBe(UserRole.OWNER);
     });
 

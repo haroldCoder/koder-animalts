@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaAuthService } from "./prisma-auth.service";
 import { AccountEntity, SessionEntity, UserEntity } from "@auth/domain/entities";
+import { UserRole } from "@user/domain/enums";
 
 describe("PrismaAuthService", () => {
     let service: PrismaAuthService;
@@ -209,6 +210,33 @@ describe("PrismaAuthService", () => {
             expect(result.getUserId()).toBe(mockSession.userId);
             expect(result.getToken()).toBe(mockSession.token);
             expect(result.getExpiresAt()).toEqual(mockSession.expiresAt);
+        });
+    });
+
+    describe("findUserRoleInfo", () => {
+        it("should return UserRoleInfo with userId", async () => {
+            const mockDbUser = {
+                id: "user-123",
+                email: "test@example.com",
+                name: "Test User",
+                image: null,
+                veterinarian: null,
+                owner: { id: "owner-123" },
+            };
+
+            mockPrismaService.user.findUnique.mockResolvedValue(mockDbUser);
+
+            const result = await service.findUserRoleInfo("user-123");
+
+            expect(prisma.user.findUnique).toHaveBeenCalledWith({
+                where: { id: "user-123" },
+                include: { owner: true, veterinarian: true },
+            });
+            expect(result).not.toBeNull();
+            expect(result?.id).toBe("user-123");
+            expect(result?.userId).toBe("user-123");
+            expect(result?.role).toBe(UserRole.OWNER);
+            expect(result?.ownerId).toBe("owner-123");
         });
     });
 });
