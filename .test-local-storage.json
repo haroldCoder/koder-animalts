@@ -1,0 +1,23 @@
+{
+  "users": [],
+  "accounts": [],
+  "sessions": [],
+  "owners": [],
+  "veterinarians": [],
+  "clinics": [
+    {
+      "id": "clinic-001",
+      "name": "Clínica Veterinaria San Roque",
+      "email": "sanroque@vet.com",
+      "phone": "3009876543",
+      "address": "Av Central 123"
+    },
+    {
+      "id": "clinic-002",
+      "name": "Hospital Veterinario Animal Care",
+      "email": "contacto@animalcare.com",
+      "phone": "3111234567",
+      "address": "Calle 45 # 12-34"
+    }
+  ]
+}
