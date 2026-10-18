@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterDocumentRequestDto {
     @ApiProperty({ description: 'Propiedad title', example: 'Ejemplo' })
@@ -26,4 +26,14 @@ export class RegisterDocumentRequestDto {
     @IsString()
     @IsOptional()
     clinicId?: string;
+
+    @ApiProperty({ description: 'ID del veterinario asociado', example: '123e4567-e89b-12d3-a456-426614174000', required: false })
+    @IsUUID()
+    @IsOptional()
+    veterinarianId?: string;
+
+    @ApiProperty({ description: 'Propiedad ownerReadable', example: 'true' })
+    @IsBoolean()
+    @IsOptional()
+    ownerReadable?: boolean = false;
 }

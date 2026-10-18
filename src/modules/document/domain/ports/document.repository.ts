@@ -7,6 +7,7 @@ export interface FindDocumentsCriteria {
     veterinarianName?: string;
     documentName?: string;
     medicalRecordId?: string;
+    veterinarianId?: string;
 }
 
 export interface UpdateDocumentFields {
@@ -19,6 +20,8 @@ export interface UpdateDocumentFields {
     petId?: string;
     clinicId?: string;
     medicalRecordId?: string;
+    veterinarianId?: string;
+    ownerReadable?: boolean;
 }
 
 export interface IDocumentRepository {

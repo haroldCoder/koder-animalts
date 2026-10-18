@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class RegisterDocumentDto {
     @IsString()
@@ -36,4 +36,12 @@ export class RegisterDocumentDto {
     @IsOptional()
     @IsUUID()
     clinicId?: string;
+
+    @IsOptional()
+    @IsUUID()
+    veterinarianId?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    ownerReadable?: boolean;
 }

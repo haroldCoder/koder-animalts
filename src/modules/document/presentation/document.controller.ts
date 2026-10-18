@@ -36,6 +36,8 @@ export class DocumentController {
                 petId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
                 medicalRecordId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
                 clinicId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+                veterinarianId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+                ownerReadable: { type: 'boolean', example: true },
                 file: { type: 'string', format: 'binary', description: 'Archivo del documento a subir' },
             }
         }
@@ -91,6 +93,7 @@ export class DocumentController {
     @ApiQuery({ name: 'veterinarianName', required: false, description: 'Nombre del veterinario' })
     @ApiQuery({ name: 'documentName', required: false, description: 'Nombre o título del documento' })
     @ApiQuery({ name: 'medicalRecordId', required: false, description: 'ID del historial médico asociado' })
+    @ApiQuery({ name: 'veterinarianId', required: false, description: 'ID del veterinario asociado al documento' })
     @ApiResponse({ status: 200, description: 'Documentos encontrados exitosamente.' })
     @ApiResponse({ status: 400, description: 'Solicitud inválida.' })
     @Get("user/:userId")
@@ -101,6 +104,7 @@ export class DocumentController {
         @Query("veterinarianName") veterinarianName?: string,
         @Query("documentName") documentName?: string,
         @Query("medicalRecordId") medicalRecordId?: string,
+        @Query("veterinarianId") veterinarianId?: string,
     ) {
         return this.findDocumentsByUserIdUseCase.execute(userId, {
             startDate: startDate ? new Date(startDate) : undefined,
@@ -108,6 +112,7 @@ export class DocumentController {
             veterinarianName: veterinarianName,
             documentName: documentName,
             medicalRecordId,
+            veterinarianId,
         });
     }
 }
