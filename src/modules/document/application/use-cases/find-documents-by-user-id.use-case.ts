@@ -15,15 +15,16 @@ export class FindDocumentsByUserIdUseCase {
         userId: string,
         queries: FindDocumentsCriteria
     ): Promise<ResponseDto<DocumentEntity[]>> {
-        const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = queries;
+        const { startDate, endDate, veterinarianName, documentName, medicalRecordId, veterinarianId } = queries;
 
         const hasStartDate = !!startDate;
         const hasEndDate = !!endDate;
         const hasVetName = !!veterinarianName;
         const hasDocName = !!documentName;
         const hasMedicalRecordId = !!medicalRecordId;
+        const hasVeterinarianId = !!veterinarianId;
 
-        if (!userId || (!hasStartDate && !hasEndDate && !hasVetName && !hasDocName && !hasMedicalRecordId)) {
+        if (!userId || (!hasStartDate && !hasEndDate && !hasVetName && !hasDocName && !hasMedicalRecordId && !hasVeterinarianId)) {
             return {
                 statusCode: HttpStatus.OK,
                 message: "Documents retrieved successfully",
@@ -37,7 +38,7 @@ export class FindDocumentsByUserIdUseCase {
         if (hasStartDate) {
             start = new Date(startDate!);
             if (isNaN(start.getTime())) {
-                if (!hasEndDate && !hasVetName && !hasDocName) {
+                if (!hasEndDate && !hasVetName && !hasDocName && !hasMedicalRecordId && !hasVeterinarianId) {
                     return {
                         statusCode: HttpStatus.OK,
                         message: "Documents retrieved successfully",
@@ -51,7 +52,7 @@ export class FindDocumentsByUserIdUseCase {
         if (hasEndDate) {
             end = new Date(endDate!);
             if (isNaN(end.getTime())) {
-                if (!start && !hasVetName && !hasDocName) {
+                if (!start && !hasVetName && !hasDocName && !hasMedicalRecordId && !hasVeterinarianId) {
                     return {
                         statusCode: HttpStatus.OK,
                         message: "Documents retrieved successfully",
@@ -69,6 +70,7 @@ export class FindDocumentsByUserIdUseCase {
                 veterinarianName: hasVetName ? veterinarianName : undefined,
                 documentName: hasDocName ? documentName : undefined,
                 medicalRecordId: hasMedicalRecordId ? medicalRecordId?.trim() : undefined,
+                veterinarianId: hasVeterinarianId ? veterinarianId?.trim() : undefined,
             });
 
             return {
