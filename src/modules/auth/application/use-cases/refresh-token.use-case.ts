@@ -56,6 +56,7 @@ export class RefreshTokenUseCase {
 
             const userResponse: UserRoleInfo = {
                 id: userInfo.id,
+                userId: userInfo.userId || userInfo.id,
                 email: userInfo.email,
                 name: userInfo.name,
                 image: userInfo.image,

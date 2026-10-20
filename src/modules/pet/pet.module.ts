@@ -11,7 +11,9 @@ import {
     GetPetByOwnerIdUseCase,
     GetPetByUserOwnerUseCase,
     GetPetByVeterinarianUserIdUseCase,
-    UpdateClinicUseCase
+    UpdateClinicUseCase,
+    GetPetBackgroundUseCase,
+    UpsertPetBackgroundUseCase
 } from "@pet/application/use-cases";
 import { PrismaPetService } from "@pet/infrastructure/persistence";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence";
@@ -31,6 +33,8 @@ import { PrismaAppointmentService } from "@appointment/infrastructure";
         GetPetByVeterinarianUserIdUseCase,
         PrismaVeterinarianService,
         UpdateClinicUseCase,
+        GetPetBackgroundUseCase,
+        UpsertPetBackgroundUseCase,
         {
             provide: "IPetRepository",
             useClass: PrismaPetService
@@ -53,7 +57,9 @@ import { PrismaAppointmentService } from "@appointment/infrastructure";
         GetPetByOwnerIdUseCase,
         GetPetByUserOwnerUseCase,
         GetPetByVeterinarianUserIdUseCase,
-        UpdateClinicUseCase
+        UpdateClinicUseCase,
+        GetPetBackgroundUseCase,
+        UpsertPetBackgroundUseCase
     ]
 })
 export class PetModule { }

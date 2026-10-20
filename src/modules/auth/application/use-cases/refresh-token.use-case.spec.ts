@@ -66,6 +66,7 @@ describe("RefreshTokenUseCase", () => {
         mockAuthRepository.findSessionByToken.mockResolvedValue(session);
         mockAuthRepository.findUserRoleInfo.mockResolvedValue({
             id: "user-1",
+            userId: "user-1",
             email: "test@example.com",
             name: "Test",
             image: null,
@@ -91,6 +92,7 @@ describe("RefreshTokenUseCase", () => {
         expect(result.statusCode).toBe(200);
         expect(result.data?.accessToken).toBe("new-access-token");
         expect(result.data?.refreshToken).toBe("new-refresh-token");
+        expect(result.data?.user.userId).toBe("user-1");
         expect(result.data?.user.role).toBe(UserRole.VETERINARIAN);
     });
 });

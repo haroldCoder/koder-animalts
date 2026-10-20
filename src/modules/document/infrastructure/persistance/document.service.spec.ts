@@ -18,6 +18,9 @@ describe('PrismaDocumentService', () => {
             findUnique: jest.fn(),
             findMany: jest.fn(),
         },
+        owner: {
+            findUnique: jest.fn(),
+        },
     };
 
     beforeEach(async () => {
@@ -144,18 +147,48 @@ describe('PrismaDocumentService', () => {
             endDate: new Date('2026-12-31'),
             veterinarianName: 'John',
             documentName: 'Report',
+            veterinarianId: 'vet-456',
         };
 
-        it('should find documents by user id and criteria', async () => {
+        it('should find documents by user id and criteria when user is an owner', async () => {
             const mockDocs = [
-                { id: 'doc-1', title: 'Report 1', fileUrl: 'http://example.com/1.pdf' },
+                { id: 'doc-1', title: 'Report 1', fileUrl: 'http://example.com/1.pdf', veterinarianId: 'vet-456', ownerReadable: true },
             ];
+            mockPrismaService.owner.findUnique.mockResolvedValue({ id: 'owner-1', userId });
             mockPrismaService.document.findMany.mockResolvedValue(mockDocs);
 
             const result = await service.findDocumentsByUserId(userId, criteria);
 
+            expect(mockPrismaService.owner.findUnique).toHaveBeenCalledWith({ where: { userId } });
             expect(prisma.document.findMany).toHaveBeenCalledWith({
                 where: {
+                    ownerReadable: true,
+                    veterinarianId: 'vet-456',
+                    OR: [
+                        {
+                            veterinarian: {
+                                userId: userId,
+                            },
+                        },
+                        {
+                            medicalRecord: {
+                                OR: [
+                                    {
+                                        pet: {
+                                            owner: {
+                                                userId: userId,
+                                            },
+                                        },
+                                    },
+                                    {
+                                        veterinarian: {
+                                            userId: userId,
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
                     createdAt: {
                         gte: criteria.startDate,
                         lte: new Date('2026-12-31T23:59:59.999Z'),
@@ -164,30 +197,20 @@ describe('PrismaDocumentService', () => {
                         contains: criteria.documentName,
                         mode: 'insensitive',
                     },
-                    medicalRecord: {
-                        veterinarian: {
-                            user: {
-                                name: {
-                                    contains: criteria.veterinarianName,
-                                    mode: 'insensitive',
-                                },
-                            },
-                        },
-                        OR: [
-                            {
-                                pet: {
-                                    owner: {
-                                        userId: userId,
+                    AND: [
+                        {
+                            medicalRecord: {
+                                veterinarian: {
+                                    user: {
+                                        name: {
+                                            contains: criteria.veterinarianName,
+                                            mode: 'insensitive',
+                                        },
                                     },
                                 },
                             },
-                            {
-                                veterinarian: {
-                                    userId: userId,
-                                }
-                            },
-                        ],
-                    },
+                        },
+                    ],
                 },
                 include: {
                     medicalRecord: {
@@ -212,6 +235,23 @@ describe('PrismaDocumentService', () => {
             });
             expect(result.length).toBe(1);
             expect(result[0].getId()).toEqual(mockDocs[0].id);
+            expect(result[0].getVeterinarianId()).toEqual('vet-456');
+            expect(result[0].getOwnerReadable()).toBe(true);
+        });
+
+        it('should not filter by ownerReadable when user is not an owner', async () => {
+            const mockDocs = [
+                { id: 'doc-2', title: 'Report 2', fileUrl: 'http://example.com/2.pdf' },
+            ];
+            mockPrismaService.owner.findUnique.mockResolvedValue(null);
+            mockPrismaService.document.findMany.mockResolvedValue(mockDocs);
+
+            const result = await service.findDocumentsByUserId(userId, { documentName: 'Report' });
+
+            expect(prisma.document.findMany).toHaveBeenCalledWith(expect.objectContaining({
+                where: expect.not.objectContaining({ ownerReadable: true }),
+            }));
+            expect(result.length).toBe(1);
         });
     });
 });

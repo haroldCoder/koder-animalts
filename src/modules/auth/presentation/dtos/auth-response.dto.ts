@@ -25,6 +25,9 @@ export class UserAuthProfileDto {
 
     @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174003", required: false, nullable: true })
     clinicId?: string | null;
+
+    @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174004", required: false, nullable: true })
+    userId: string;
 }
 
 export class AuthResponseDataDto {

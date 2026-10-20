@@ -137,4 +137,27 @@ describe("FindDocumentsByUserIdUseCase", () => {
             data: mockDocs,
         });
     });
+
+    it("should call repository if only veterinarianId is passed", async () => {
+        const mockDocs = [{ id: "doc-3", title: "Doc 3", fileUrl: "http://example.com/3.pdf" }];
+        mockDocumentRepository.findDocumentsByUserId.mockResolvedValue(mockDocs);
+
+        const result = await useCase.execute("user-123", {
+            veterinarianId: "vet-789",
+        });
+
+        expect(mockDocumentRepository.findDocumentsByUserId).toHaveBeenCalledWith("user-123", {
+            startDate: undefined,
+            endDate: undefined,
+            veterinarianName: undefined,
+            documentName: undefined,
+            medicalRecordId: undefined,
+            veterinarianId: "vet-789",
+        });
+        expect(result).toEqual({
+            statusCode: HttpStatus.OK,
+            message: "Documents retrieved successfully",
+            data: mockDocs,
+        });
+    });
 });

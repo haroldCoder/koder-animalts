@@ -1,4 +1,4 @@
-import { PetEntity } from "@pet/domain/entities";
+import { PetEntity, PetBackgroundEntity } from "@pet/domain/entities";
 
 export interface IPetRepository {
     create(pet: PetEntity): Promise<string>;
@@ -11,4 +11,7 @@ export interface IPetRepository {
     findByVeterinarianUserId(userId: string, petName?: string, ownerName?: string): Promise<PetEntity[] | null>;
     findOwnerIdByUserId(userId: string): Promise<string | null>;
     updateClinic(petId: string, clinicId: string): Promise<void>;
+    findBackgroundByPetId(petId: string): Promise<PetBackgroundEntity | null>;
+    upsertBackground(background: PetBackgroundEntity): Promise<PetBackgroundEntity>;
+    validateUserAccessToPet(userId: string, petId: string): Promise<boolean>;
 }

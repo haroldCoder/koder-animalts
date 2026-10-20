@@ -107,6 +107,31 @@ model Pet {
   clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
   owner          Owner            @relation(fields: [ownerId], references: [id])
   appointmentRequests AppointmentRequest[]
+  background     PetBackground?
+}
+
+model PetBackground {
+  id                    String    @id @default(uuid())
+  petId                 String    @unique @map("pet_id")
+  provenance            String?   @db.VarChar(150)
+  dietType              String?   @map("diet_type") @db.VarChar(100)
+  dietDetails           String?   @map("diet_details") @db.Text
+  isNeutered            Boolean   @default(false) @map("is_neutered")
+  neuteredDate          DateTime? @map("neutered_date") @db.Date
+  previousIllnesses     String?   @map("previous_illnesses") @db.Text
+  hasAllergies          Boolean   @default(false) @map("has_allergies")
+  allergiesDescription String?   @map("allergies_description") @db.Text
+  lastVaccinationDate   DateTime? @map("last_vaccination_date") @db.Date
+  coreVaccines          Json?     @map("core_vaccines")
+  lastDewormingInternal DateTime? @map("last_deworming_internal") @db.Date
+  lastDewormingExternal DateTime? @map("last_deworming_external") @db.Date
+  otherPreventiveNotes  String?   @map("other_preventive_notes") @db.Text
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("pet_backgrounds")
 }
 
 model Veterinarian {
@@ -118,6 +143,7 @@ model Veterinarian {
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
   vaccinations   Vaccination[]
+  documents      Document[]
   clinic         VeterinaryClinic @relation(fields: [clinicId], references: [id])
   user           User             @relation(fields: [userId], references: [id])
   assignedRequests AppointmentRequest[] @relation("AssignedRequests")
@@ -217,14 +243,17 @@ model Document {
   fileSize        Int?
   fileType        String?
   category        String?
+  ownerReadable   Boolean           @default(true)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   petId           String?
   medicalRecordId String?
   clinicId        String?
+  veterinarianId  String?
   clinic          VeterinaryClinic? @relation(fields: [clinicId], references: [id])
   medicalRecord   MedicalRecord?    @relation(fields: [medicalRecordId], references: [id])
   pet             Pet?              @relation(fields: [petId], references: [id])
+  veterinarian    Veterinarian?     @relation(fields: [veterinarianId], references: [id])
 }
 
 enum MedicalRecordType {

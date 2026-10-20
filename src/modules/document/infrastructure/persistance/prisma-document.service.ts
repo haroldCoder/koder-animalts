@@ -21,6 +21,8 @@ export class PrismaDocumentService implements IDocumentRepository {
             petId: document.petId,
             clinicId: document.clinicId,
             medicalRecordId: document.medicalRecordId,
+            veterinarianId: document.veterinarianId,
+            ownerReadable: document.ownerReadable,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         });
@@ -86,25 +88,41 @@ export class PrismaDocumentService implements IDocumentRepository {
     }
 
     async findDocumentsByUserId(userId: string, criteria: FindDocumentsCriteria): Promise<DocumentEntity[]> {
-        const { startDate, endDate, veterinarianName, documentName, medicalRecordId } = criteria;
+        const { startDate, endDate, veterinarianName, documentName, medicalRecordId, veterinarianId } = criteria;
+
+        const isOwner = await this.prisma.owner.findUnique({
+            where: { userId },
+        });
 
         const whereClause: any = {
-            medicalRecord: medicalRecordId ? { id: medicalRecordId } : {
-                OR: [
-                    {
-                        pet: {
-                            owner: {
-                                userId: userId,
+            ...(isOwner && { ownerReadable: true }),
+            ...(veterinarianId && { veterinarianId }),
+            OR: [
+                {
+                    veterinarian: {
+                        userId: userId,
+                    }
+                },
+                {
+                    medicalRecord: medicalRecordId ? { id: medicalRecordId } : {
+                        OR: [
+                            {
+                                pet: {
+                                    owner: {
+                                        userId: userId,
+                                    },
+                                },
                             },
-                        },
+                            {
+                                veterinarian: {
+                                    userId: userId,
+                                },
+                            },
+                        ],
                     },
-                    {
-                        veterinarian: {
-                            userId: userId,
-                        },
-                    },
-                ],
-            },
+                }
+            ]
+
         };
 
         if (startDate || endDate) {
@@ -133,14 +151,21 @@ export class PrismaDocumentService implements IDocumentRepository {
         }
 
         if (veterinarianName) {
-            whereClause.medicalRecord.veterinarian = {
-                user: {
-                    name: {
-                        contains: veterinarianName,
-                        mode: 'insensitive',
+            whereClause.AND = [
+                ...(whereClause.AND ?? []),
+                {
+                    medicalRecord: {
+                        veterinarian: {
+                            user: {
+                                name: {
+                                    contains: veterinarianName,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
                     },
                 },
-            };
+            ];
         }
 
         const documents = await this.prisma.document.findMany({

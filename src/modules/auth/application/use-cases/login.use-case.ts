@@ -75,6 +75,7 @@ export class LoginUseCase {
 
             const userResponse: UserRoleInfo = {
                 id: user.getId(),
+                userId: user.getId(),
                 email: user.getEmailValue(),
                 name: user.getName(),
                 image: user.getImage(),
