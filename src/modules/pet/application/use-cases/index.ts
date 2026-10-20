@@ -7,3 +7,5 @@ export * from "./get-pet-by-veterinarian-id.use-case";
 export * from "./get-pet-by-user-owner.use-case";
 export * from "./get-pet-by-veterinarian-user-id.use-case";
 export * from "./update-clinic.use-case";
+export * from "./get-pet-background.use-case";
+export * from "./upsert-pet-background.use-case";

@@ -1,14 +1,16 @@
-import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, InternalServerErrorException, Param, Patch, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiParam, ApiQuery, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase } from "@pet/application/use-cases";
-import { RegisterPetDto, UpdatePetDto, UpdatePetClinicDto } from "@pet/presentation/dtos";
+import { RegisterPetUseCase, UpdatePetUseCase, DeletePetUseCase, GetPetByIdUseCase, GetPetByVeterinarianIdUseCase, GetPetByOwnerIdUseCase, GetPetByUserOwnerUseCase, GetPetByVeterinarianUserIdUseCase, UpdateClinicUseCase, GetPetBackgroundUseCase, UpsertPetBackgroundUseCase } from "@pet/application/use-cases";
+import { RegisterPetDto, UpdatePetDto, UpdatePetClinicDto, UpsertPetBackgroundDto } from "@pet/presentation/dtos";
 import { UploadFileCommand } from "@/common/upload/application/use-cases";
 import { FolderUploadTypes, UploadPlatformEnum } from "@/common/upload/domain/enums";
 import { ClinicNotExistException } from "@veterinary-clinics/domain/exceptions";
 import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
 import { ClinicChangeNotAllowedByAppointmentException, PetIdNotExistException, PetIdNotFoundException } from "@/common/domain/exceptions";
 import { ResponseDto } from "@/common/domain/dto";
+import { CurrentUser } from "@/common/presentation/decorators";
+import type { CurrentUserPayload } from "@/common/presentation/decorators";
 
 @ApiTags('Pets')
 @ApiBearerAuth('bearer')
@@ -24,6 +26,8 @@ export class PetController {
         private readonly getPetByOwnerUserIdUseCase: GetPetByUserOwnerUseCase,
         private readonly getPetByVeterinarianUserIdUseCase: GetPetByVeterinarianUserIdUseCase,
         private readonly updateClinicUseCase: UpdateClinicUseCase,
+        private readonly getPetBackgroundUseCase: GetPetBackgroundUseCase,
+        private readonly upsertPetBackgroundUseCase: UpsertPetBackgroundUseCase,
     ) { }
 
     @ApiOperation({ summary: 'Registrar una nueva mascota' })
@@ -181,5 +185,45 @@ export class PetController {
             }
             throw new InternalServerErrorException(error.message);
         }
+    }
+
+    @ApiOperation({ summary: 'Obtener antecedentes basales de una mascota' })
+    @ApiParam({ name: 'petId', required: false, description: 'ID de la mascota (en URL)', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiQuery({ name: 'petId', required: false, description: 'ID de la mascota (como query param)' })
+    @ApiQuery({ name: 'userId', required: false, description: 'ID del usuario (médico o dueño) para validar permisos' })
+    @ApiResponse({ status: 200, description: 'Antecedentes de la mascota obtenidos exitosamente.' })
+    @ApiResponse({ status: 403, description: 'No autorizado para ver antecedentes de esta mascota.' })
+    @ApiResponse({ status: 404, description: 'Mascota no encontrada.' })
+    @Get([":petId/background", "background/:petId", "background"])
+    async getPetBackground(
+        @Param("petId") paramPetId?: string,
+        @Query("petId") queryPetId?: string,
+        @Query("userId") queryUserId?: string,
+        @CurrentUser() currentUser?: CurrentUserPayload
+    ) {
+        const petId = paramPetId || queryPetId || "";
+        const userId = queryUserId || currentUser?.id || currentUser?.userId;
+        return this.getPetBackgroundUseCase.execute(petId, userId);
+    }
+
+    @ApiOperation({ summary: 'Agregar o modificar antecedentes de una mascota' })
+    @ApiParam({ name: 'petId', required: false, description: 'ID de la mascota (en URL)', example: '123e4567-e89b-12d3-a456-426614174000' })
+    @ApiQuery({ name: 'petId', required: false, description: 'ID de la mascota (como query param)' })
+    @ApiQuery({ name: 'userId', required: false, description: 'ID del usuario (médico o dueño) para validar permisos' })
+    @ApiResponse({ status: 200, description: 'Antecedentes agregados o actualizados exitosamente.' })
+    @ApiResponse({ status: 400, description: 'Datos inválidos.' })
+    @ApiResponse({ status: 403, description: 'No autorizado para modificar antecedentes de esta mascota.' })
+    @ApiResponse({ status: 404, description: 'Mascota no encontrada.' })
+    @Put([":petId/background", "background/:petId", "background"])
+    async upsertPetBackground(
+        @Body() body: UpsertPetBackgroundDto,
+        @Param("petId") paramPetId?: string,
+        @Query("petId") queryPetId?: string,
+        @Query("userId") queryUserId?: string,
+        @CurrentUser() currentUser?: CurrentUserPayload
+    ) {
+        const petId = paramPetId || queryPetId || body?.petId || "";
+        const userId = queryUserId || currentUser?.id || currentUser?.userId || body?.userId;
+        return this.upsertPetBackgroundUseCase.execute(petId, body, userId);
     }
 }
