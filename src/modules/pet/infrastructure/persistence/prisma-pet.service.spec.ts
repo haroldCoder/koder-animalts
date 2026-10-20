@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "@/common/infrastructure/db/prisma.service";
 import { PrismaPetService } from "./prisma-pet.service";
 import { GenderPet } from "@pet/domain/enums";
-import { PetEntity } from "@pet/domain/entities";
+import { PetEntity, PetBackgroundEntity } from "@pet/domain/entities";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure";
 import { PetIdNotExistException, PetIdNotFoundException } from "@/common/domain/exceptions";
 import { ClinicIdNotFoundException } from "@veterinarian/domain/exceptions";
@@ -23,6 +23,13 @@ describe("PrismaPetService", () => {
             findFirst: jest.fn(),
         },
         veterinaryClinic: {
+            findUnique: jest.fn(),
+        },
+        petBackground: {
+            findUnique: jest.fn(),
+            upsert: jest.fn(),
+        },
+        user: {
             findUnique: jest.fn(),
         },
     };
@@ -272,6 +279,124 @@ describe("PrismaPetService", () => {
                 where: { id: "pet-123" },
                 data: { clinicId: "clinic-123" }
             });
+        });
+    });
+
+    describe("findBackgroundByPetId", () => {
+        it("should return background when pet and background exist", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({ id: "pet-1" });
+            mockPrismaService.petBackground.findUnique.mockResolvedValue({
+                id: "bg-1",
+                petId: "pet-1",
+                dietType: "croquetas",
+                isNeutered: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            const result = await service.findBackgroundByPetId("pet-1");
+
+            expect(result).not.toBeNull();
+            expect(result?.getId()).toBe("bg-1");
+            expect(result?.getPetId()).toBe("pet-1");
+            expect(result?.getDietType()).toBe("croquetas");
+        });
+
+        it("should return null when pet exists but no background exists", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({ id: "pet-1" });
+            mockPrismaService.petBackground.findUnique.mockResolvedValue(null);
+
+            const result = await service.findBackgroundByPetId("pet-1");
+
+            expect(result).toBeNull();
+        });
+
+        it("should throw PetIdNotExistException when pet does not exist", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue(null);
+
+            await expect(service.findBackgroundByPetId("non-existent")).rejects.toThrow(
+                PetIdNotExistException
+            );
+        });
+    });
+
+    describe("upsertBackground", () => {
+        it("should upsert background and return mapped entity", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({ id: "pet-1" });
+            mockPrismaService.petBackground.upsert.mockResolvedValue({
+                id: "bg-1",
+                petId: "pet-1",
+                dietType: "BARF",
+                isNeutered: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            const entity = PetBackgroundEntity.create({
+                id: "bg-1",
+                petId: "pet-1",
+                dietType: "BARF",
+                isNeutered: true,
+            });
+
+            const result = await service.upsertBackground(entity);
+
+            expect(mockPrismaService.petBackground.upsert).toHaveBeenCalled();
+            expect(result.getId()).toBe("bg-1");
+            expect(result.getDietType()).toBe("BARF");
+        });
+    });
+
+    describe("validateUserAccessToPet", () => {
+        it("should return true when user is the owner of the pet", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({
+                id: "pet-1",
+                ownerId: "owner-1",
+                clinicId: "clinic-1",
+            });
+            mockPrismaService.user.findUnique.mockResolvedValue({
+                id: "user-1",
+                owner: { id: "owner-1" },
+                veterinarian: null,
+            });
+
+            const result = await service.validateUserAccessToPet("user-1", "pet-1");
+
+            expect(result).toBe(true);
+        });
+
+        it("should return true when user is a veterinarian in the pet clinic", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({
+                id: "pet-1",
+                ownerId: "owner-1",
+                clinicId: "clinic-1",
+            });
+            mockPrismaService.user.findUnique.mockResolvedValue({
+                id: "user-vet",
+                owner: null,
+                veterinarian: { clinicId: "clinic-1" },
+            });
+
+            const result = await service.validateUserAccessToPet("user-vet", "pet-1");
+
+            expect(result).toBe(true);
+        });
+
+        it("should return false when user is neither the owner nor the clinic veterinarian", async () => {
+            mockPrismaService.pet.findUnique.mockResolvedValue({
+                id: "pet-1",
+                ownerId: "owner-1",
+                clinicId: "clinic-1",
+            });
+            mockPrismaService.user.findUnique.mockResolvedValue({
+                id: "user-other",
+                owner: { id: "owner-other" },
+                veterinarian: { clinicId: "clinic-other" },
+            });
+
+            const result = await service.validateUserAccessToPet("user-other", "pet-1");
+
+            expect(result).toBe(false);
         });
     });
 });
