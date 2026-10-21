@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { IOwnerRepository } from "@owner/domain/ports";
 import { OwnerEntity } from "@owner/domain/entities";
 import { OwnerAlreadyExistException } from "@owner/domain/exceptions";
-import { LocalStorageStore } from "@auth/infrastructure/persistence";
+import { LocalStorageStore } from "@/common/infrastructure/persistence";
 
 @Injectable()
 export class LocalOwnerService implements IOwnerRepository {

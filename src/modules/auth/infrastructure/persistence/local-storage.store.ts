@@ -1,76 +1,59 @@
 import { randomUUID } from "crypto";
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import { resolve } from "path";
 import { AccountEntity, SessionEntity, UserEntity } from "@auth/domain/entities";
 import { UserRole } from "@user/domain/enums";
 import { UserRoleInfo } from "@auth/domain/ports/auth.repository.types";
+import { hashPassword } from "@auth/infrastructure/utils/hash.utils";
+import {
+    LocalStorageStore as CommonLocalStorageStore,
+    StoredClinic,
+    StoredOwner,
+    StoredVeterinarian,
+} from "@/common/infrastructure/persistence";
 
-export interface StoredOwner {
+export { StoredClinic, StoredOwner, StoredVeterinarian } from "@/common/infrastructure/persistence";
+export { StoredPet, StoredPetBackground } from "@pet/infrastructure/persistence/local-pet.store";
+
+export interface StoredUserSnapshot {
+    id: string;
+    email: string;
+    name?: string | null;
+    image?: string | null;
+}
+
+export interface StoredAccountSnapshot {
     id: string;
     userId: string;
-    phone: string;
-    address: string;
-    createdAt: string;
-    updatedAt: string;
+    providerId: string;
+    accountId: string;
+    password?: string | null;
+    accessToken?: string | null;
+    refreshToken?: string | null;
 }
 
-export interface StoredVeterinarian {
+export interface StoredSessionSnapshot {
     id: string;
     userId: string;
-    clinicId: string;
-    phone: string;
-    specialty?: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface StoredClinic {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-}
-
-export interface LocalStorageSnapshot {
-    users: Array<{ id: string; email: string; name?: string | null; image?: string | null }>;
-    accounts: Array<{
-        id: string;
-        userId: string;
-        providerId: string;
-        accountId: string;
-        password?: string | null;
-        accessToken?: string | null;
-        refreshToken?: string | null;
-    }>;
-    sessions: Array<{
-        id: string;
-        userId: string;
-        token: string;
-        expiresAt: string;
-        ipAddress?: string | null;
-        userAgent?: string | null;
-    }>;
-    owners: StoredOwner[];
-    veterinarians: StoredVeterinarian[];
-    clinics: StoredClinic[];
+    token: string;
+    expiresAt: string;
+    ipAddress?: string | null;
+    userAgent?: string | null;
 }
 
 export class LocalStorageStore {
     private static instance: LocalStorageStore;
 
-    private readonly storageFilePath: string;
+    private readonly commonStore: CommonLocalStorageStore;
     private users = new Map<string, UserEntity>();
     private accounts = new Map<string, AccountEntity>();
     private sessions = new Map<string, SessionEntity>();
-    private owners = new Map<string, StoredOwner>();
-    private veterinarians = new Map<string, StoredVeterinarian>();
-    private clinics = new Map<string, StoredClinic>();
 
     private constructor() {
-        this.storageFilePath = resolve(process.cwd(), ".test-local-storage.json");
-        this.initDefaultClinics();
+        this.commonStore = CommonLocalStorageStore.getInstance();
         this.loadFromFile();
+        if (this.users.size === 0) {
+            this.initDefaultSeedData();
+            this.persist();
+        }
     }
 
     public static getInstance(): LocalStorageStore {
@@ -80,131 +63,152 @@ export class LocalStorageStore {
         return LocalStorageStore.instance;
     }
 
-    private initDefaultClinics(): void {
-        this.clinics.set("clinic-001", {
-            id: "clinic-001",
-            name: "Clínica Veterinaria San Roque",
-            email: "sanroque@vet.com",
-            phone: "3009876543",
-            address: "Av Central 123",
-        });
-        this.clinics.set("clinic-002", {
-            id: "clinic-002",
-            name: "Hospital Veterinario Animal Care",
-            email: "contacto@animalcare.com",
-            phone: "3111234567",
-            address: "Calle 45 # 12-34",
-        });
+    private initDefaultSeedData(): void {
+        const defaultPasswordHash = hashPassword("Password123!");
+
+        // Veterinario por defecto
+        const vetUserId = "99999999-9999-4999-a999-999999999999";
+        this.users.set(vetUserId, UserEntity.create({
+            id: vetUserId,
+            email: "vet@koder.com",
+            name: "Dra. Gomez",
+            image: null,
+        }));
+        this.users.set("user-vet-001", UserEntity.create({
+            id: "user-vet-001",
+            email: "vet@koder.com",
+            name: "Dra. Gomez",
+            image: null,
+        }));
+
+        this.accounts.set(`acc-${vetUserId}`, AccountEntity.create({
+            id: `acc-${vetUserId}`,
+            userId: vetUserId,
+            providerId: "credentials",
+            accountId: "vet@koder.com",
+            password: defaultPasswordHash,
+            accessToken: null,
+            refreshToken: null,
+        }));
+        this.accounts.set("acc-user-vet-001", AccountEntity.create({
+            id: "acc-user-vet-001",
+            userId: "user-vet-001",
+            providerId: "credentials",
+            accountId: "vet@koder.com",
+            password: defaultPasswordHash,
+            accessToken: null,
+            refreshToken: null,
+        }));
+
+        // Dueño por defecto
+        const ownerUserId = "77777777-7777-4777-a777-777777777777";
+        this.users.set(ownerUserId, UserEntity.create({
+            id: ownerUserId,
+            email: "owner@koder.com",
+            name: "Carlos Dueño",
+            image: null,
+        }));
+        this.users.set("user-owner-001", UserEntity.create({
+            id: "user-owner-001",
+            email: "owner@koder.com",
+            name: "Carlos Dueño",
+            image: null,
+        }));
+
+        this.accounts.set(`acc-${ownerUserId}`, AccountEntity.create({
+            id: `acc-${ownerUserId}`,
+            userId: ownerUserId,
+            providerId: "credentials",
+            accountId: "owner@koder.com",
+            password: defaultPasswordHash,
+            accessToken: null,
+            refreshToken: null,
+        }));
+        this.accounts.set("acc-user-owner-001", AccountEntity.create({
+            id: "acc-user-owner-001",
+            userId: "user-owner-001",
+            providerId: "credentials",
+            accountId: "owner@koder.com",
+            password: defaultPasswordHash,
+            accessToken: null,
+            refreshToken: null,
+        }));
     }
 
     public persist(): void {
-        try {
-            const snapshot: LocalStorageSnapshot = {
-                users: Array.from(this.users.values()).map(u => ({
-                    id: u.getId(),
-                    email: u.getEmailValue(),
-                    name: u.getName(),
-                    image: u.getImage(),
-                })),
-                accounts: Array.from(this.accounts.values()).map(a => ({
-                    id: a.getId(),
-                    userId: a.getUserId(),
-                    providerId: a.getProviderId(),
-                    accountId: a.getAccountId(),
-                    password: a.getPassword(),
-                    accessToken: a.getAccessToken(),
-                    refreshToken: a.getRefreshToken(),
-                })),
-                sessions: Array.from(this.sessions.values()).map(s => ({
-                    id: s.getId(),
-                    userId: s.getUserId(),
-                    token: s.getToken(),
-                    expiresAt: s.getExpiresAt().toISOString(),
-                    ipAddress: s.getIpAddress(),
-                    userAgent: s.getUserAgent(),
-                })),
-                owners: Array.from(this.owners.values()),
-                veterinarians: Array.from(this.veterinarians.values()),
-                clinics: Array.from(this.clinics.values()),
-            };
+        const usersSnapshot: StoredUserSnapshot[] = Array.from(this.users.values()).map(u => ({
+            id: u.getId(),
+            email: u.getEmailValue(),
+            name: u.getName(),
+            image: u.getImage(),
+        }));
 
-            writeFileSync(this.storageFilePath, JSON.stringify(snapshot, null, 2), "utf-8");
-        } catch (error) {
-            console.warn("⚠️ [LocalStorageStore] Error al persistir archivo local:", (error as Error).message);
-        }
+        const accountsSnapshot: StoredAccountSnapshot[] = Array.from(this.accounts.values()).map(a => ({
+            id: a.getId(),
+            userId: a.getUserId(),
+            providerId: a.getProviderId(),
+            accountId: a.getAccountId(),
+            password: a.getPassword(),
+            accessToken: a.getAccessToken(),
+            refreshToken: a.getRefreshToken(),
+        }));
+
+        const sessionsSnapshot: StoredSessionSnapshot[] = Array.from(this.sessions.values()).map(s => ({
+            id: s.getId(),
+            userId: s.getUserId(),
+            token: s.getToken(),
+            expiresAt: s.getExpiresAt().toISOString(),
+            ipAddress: s.getIpAddress(),
+            userAgent: s.getUserAgent(),
+        }));
+
+        this.commonStore.setSlice("users", usersSnapshot);
+        this.commonStore.setSlice("accounts", accountsSnapshot);
+        this.commonStore.setSlice("sessions", sessionsSnapshot);
     }
 
     public loadFromFile(): void {
-        try {
-            if (!existsSync(this.storageFilePath)) {
-                return;
-            }
+        const users = this.commonStore.getSlice<StoredUserSnapshot>("users");
+        users.forEach(u => {
+            this.users.set(u.id, UserEntity.create({
+                id: u.id,
+                email: u.email,
+                name: u.name ?? null,
+                image: u.image ?? null,
+            }));
+        });
 
-            const raw = readFileSync(this.storageFilePath, "utf-8");
-            const data: LocalStorageSnapshot = JSON.parse(raw);
+        const accounts = this.commonStore.getSlice<StoredAccountSnapshot>("accounts");
+        accounts.forEach(a => {
+            this.accounts.set(a.id, AccountEntity.create({
+                id: a.id,
+                userId: a.userId,
+                providerId: a.providerId,
+                accountId: a.accountId,
+                password: a.password ?? null,
+                accessToken: a.accessToken ?? null,
+                refreshToken: a.refreshToken ?? null,
+            }));
+        });
 
-            if (Array.isArray(data.users)) {
-                data.users.forEach(u => {
-                    this.users.set(u.id, UserEntity.create({
-                        id: u.id,
-                        email: u.email,
-                        name: u.name ?? null,
-                        image: u.image ?? null,
-                    }));
-                });
-            }
-
-            if (Array.isArray(data.accounts)) {
-                data.accounts.forEach(a => {
-                    this.accounts.set(a.id, AccountEntity.create({
-                        id: a.id,
-                        userId: a.userId,
-                        providerId: a.providerId,
-                        accountId: a.accountId,
-                        password: a.password ?? null,
-                        accessToken: a.accessToken ?? null,
-                        refreshToken: a.refreshToken ?? null,
-                    }));
-                });
-            }
-
-            if (Array.isArray(data.sessions)) {
-                data.sessions.forEach(s => {
-                    this.sessions.set(s.id, SessionEntity.create({
-                        id: s.id,
-                        userId: s.userId,
-                        token: s.token,
-                        expiresAt: new Date(s.expiresAt),
-                        ipAddress: s.ipAddress ?? null,
-                        userAgent: s.userAgent ?? null,
-                    }));
-                });
-            }
-
-            if (Array.isArray(data.owners)) {
-                data.owners.forEach(o => this.owners.set(o.id, o));
-            }
-
-            if (Array.isArray(data.veterinarians)) {
-                data.veterinarians.forEach(v => this.veterinarians.set(v.id, v));
-            }
-
-            if (Array.isArray(data.clinics)) {
-                data.clinics.forEach(c => this.clinics.set(c.id, c));
-            }
-        } catch (error) {
-            console.warn("⚠️ [LocalStorageStore] Error al cargar archivo local:", (error as Error).message);
-        }
+        const sessions = this.commonStore.getSlice<StoredSessionSnapshot>("sessions");
+        sessions.forEach(s => {
+            this.sessions.set(s.id, SessionEntity.create({
+                id: s.id,
+                userId: s.userId,
+                token: s.token,
+                expiresAt: new Date(s.expiresAt),
+                ipAddress: s.ipAddress ?? null,
+                userAgent: s.userAgent ?? null,
+            }));
+        });
     }
 
     public clear(): void {
         this.users.clear();
         this.accounts.clear();
         this.sessions.clear();
-        this.owners.clear();
-        this.veterinarians.clear();
-        this.clinics.clear();
-        this.initDefaultClinics();
+        this.initDefaultSeedData();
         this.persist();
     }
 
@@ -381,88 +385,16 @@ export class LocalStorageStore {
         this.persist();
     }
 
-    // --- Profiles (Owner & Veterinarian) ---
-    public createOwnerProfile(userId: string, data: { phone: string; address: string }): string {
-        // Chequear si ya existe un perfil de dueño para este usuario
-        for (const owner of this.owners.values()) {
-            if (owner.userId === userId) {
-                owner.phone = data.phone;
-                owner.address = data.address;
-                owner.updatedAt = new Date().toISOString();
-                this.persist();
-                return owner.id;
-            }
-        }
-
-        const ownerId = randomUUID();
-        const now = new Date().toISOString();
-        const owner: StoredOwner = {
-            id: ownerId,
-            userId,
-            phone: data.phone,
-            address: data.address,
-            createdAt: now,
-            updatedAt: now,
-        };
-        this.owners.set(ownerId, owner);
-        this.persist();
-        return ownerId;
-    }
-
-    public createVeterinarianProfile(userId: string, data: {
-        clinicId: string;
-        phone: string;
-        specialty?: string | null;
-    }): string {
-        for (const vet of this.veterinarians.values()) {
-            if (vet.userId === userId) {
-                vet.clinicId = data.clinicId;
-                vet.phone = data.phone;
-                vet.specialty = data.specialty ?? null;
-                vet.updatedAt = new Date().toISOString();
-                this.persist();
-                return vet.id;
-            }
-        }
-
-        const vetId = randomUUID();
-        const now = new Date().toISOString();
-        const vet: StoredVeterinarian = {
-            id: vetId,
-            userId,
-            clinicId: data.clinicId,
-            phone: data.phone,
-            specialty: data.specialty ?? null,
-            createdAt: now,
-            updatedAt: now,
-        };
-        this.veterinarians.set(vetId, vet);
-        this.persist();
-        return vetId;
-    }
-
-    public findOwnerByUserId(userId: string): StoredOwner | null {
-        for (const owner of this.owners.values()) {
-            if (owner.userId === userId) return owner;
-        }
-        return null;
-    }
-
-    public findVeterinarianByUserId(userId: string): StoredVeterinarian | null {
-        for (const vet of this.veterinarians.values()) {
-            if (vet.userId === userId) return vet;
-        }
-        return null;
-    }
-
+    // --- Role & Profile Delegations ---
     public findUserRoleInfo(userId: string): UserRoleInfo | null {
         const user = this.findUserById(userId);
         if (!user) return null;
 
-        const vet = this.findVeterinarianByUserId(userId);
+        const vet = this.commonStore.findVeterinarianByUserId(userId);
         if (vet) {
             return {
                 id: user.getId(),
+                userId: user.getId(),
                 email: user.getEmailValue(),
                 name: user.getName(),
                 image: user.getImage(),
@@ -473,10 +405,11 @@ export class LocalStorageStore {
             };
         }
 
-        const owner = this.findOwnerByUserId(userId);
+        const owner = this.commonStore.findOwnerByUserId(userId);
         if (owner) {
             return {
                 id: user.getId(),
+                userId: user.getId(),
                 email: user.getEmailValue(),
                 name: user.getName(),
                 image: user.getImage(),
@@ -489,6 +422,7 @@ export class LocalStorageStore {
 
         return {
             id: user.getId(),
+            userId: user.getId(),
             email: user.getEmailValue(),
             name: user.getName(),
             image: user.getImage(),
@@ -499,7 +433,39 @@ export class LocalStorageStore {
         };
     }
 
+    public createOwnerProfile(userId: string, data: { phone: string; address: string }): string {
+        return this.commonStore.createOwnerProfile(userId, data);
+    }
+
+    public createVeterinarianProfile(userId: string, data: {
+        clinicId: string;
+        phone: string;
+        specialty?: string | null;
+    }): string {
+        return this.commonStore.createVeterinarianProfile(userId, data);
+    }
+
+    public findOwnerByUserId(userId: string): StoredOwner | null {
+        return this.commonStore.findOwnerByUserId(userId);
+    }
+
+    public findVeterinarianByUserId(userId: string): StoredVeterinarian | null {
+        return this.commonStore.findVeterinarianByUserId(userId);
+    }
+
     public getAllClinics(): StoredClinic[] {
-        return Array.from(this.clinics.values());
+        return this.commonStore.getAllClinics();
+    }
+
+    public findClinicById(id: string): StoredClinic | null {
+        return this.commonStore.findClinicById(id);
+    }
+
+    public findOwnerById(id: string): StoredOwner | null {
+        return this.commonStore.findOwnerById(id);
+    }
+
+    public findVeterinarianById(id: string): StoredVeterinarian | null {
+        return this.commonStore.findVeterinarianById(id);
     }
 }

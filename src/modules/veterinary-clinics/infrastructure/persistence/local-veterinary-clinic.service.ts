@@ -3,7 +3,7 @@ import { IVeterinaryClinicRepository } from "@veterinary-clinics/domain/ports";
 import { VeterinaryClinicEntity } from "@veterinary-clinics/domain/entities";
 import { ResponseFindVeterinariansDto } from "@veterinary-clinics/domain/dtos";
 import { VeterinaryClinicSummaryModel } from "@veterinary-clinics/domain/models";
-import { LocalStorageStore } from "@auth/infrastructure/persistence";
+import { LocalStorageStore } from "@/common/infrastructure/persistence";
 
 @Injectable()
 export class LocalVeterinaryClinicService implements IVeterinaryClinicRepository {

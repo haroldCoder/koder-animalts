@@ -1,15 +1,18 @@
 import { LocalStorageAuthService } from "./local-storage-auth.service";
 import { UserRole } from "@user/domain/enums";
+import { LocalStorageStore as CommonLocalStorageStore } from "@/common/infrastructure/persistence";
 
 describe("LocalStorageAuthService", () => {
     let service: LocalStorageAuthService;
 
     beforeEach(() => {
         service = new LocalStorageAuthService();
+        CommonLocalStorageStore.getInstance().clear();
         service.getStore().clear();
     });
 
     afterAll(() => {
+        CommonLocalStorageStore.getInstance().clear();
         service.getStore().clear();
     });
 
@@ -69,7 +72,7 @@ describe("LocalStorageAuthService", () => {
     });
 
     it("should create owner profile and update user role info", async () => {
-        const user = await service.upsertUser("owner@koder.com", "Dueño Test");
+        const user = await service.upsertUser("new-owner@koder.com", "Dueño Test");
         const initialRoleInfo = await service.findUserRoleInfo(user.getId());
         expect(initialRoleInfo?.role).toBe(UserRole.UNKNOWN);
 

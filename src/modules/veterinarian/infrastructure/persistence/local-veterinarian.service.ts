@@ -3,7 +3,7 @@ import { IVeterinarianRepository } from "@veterinarian/domain/ports";
 import { VeterinarianEntity } from "@veterinarian/domain/entities";
 import { VeterinarianAlreadyExistsException } from "@veterinarian/domain/exceptions";
 import { UserIdNotFoundException, VeterinarianIdNotFoundException, VeterinarianIdNotExistException } from "@/common/domain/exceptions";
-import { LocalStorageStore } from "@auth/infrastructure/persistence";
+import { LocalStorageStore } from "@/common/infrastructure/persistence";
 
 @Injectable()
 export class LocalVeterinarianService implements IVeterinarianRepository {
