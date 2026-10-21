@@ -15,7 +15,8 @@ import {
     GetPetBackgroundUseCase,
     UpsertPetBackgroundUseCase
 } from "@pet/application/use-cases";
-import { PrismaPetService } from "@pet/infrastructure/persistence";
+import { PrismaService } from "@/common/infrastructure/db/prisma.service";
+import { PrismaPetService, LocalPetService } from "@pet/infrastructure/persistence";
 import { PrismaVeterinarianService } from "@veterinarian/infrastructure/persistence";
 import { PrismaAppointmentService } from "@appointment/infrastructure";
 
@@ -35,9 +36,15 @@ import { PrismaAppointmentService } from "@appointment/infrastructure";
         UpdateClinicUseCase,
         GetPetBackgroundUseCase,
         UpsertPetBackgroundUseCase,
+        LocalPetService,
+        PrismaPetService,
         {
             provide: "IPetRepository",
-            useClass: PrismaPetService
+            useFactory: (prismaService: PrismaService, veterinarianService: PrismaVeterinarianService) => {
+                const isLocal = process.env.AUTH_REPO === "local" || process.env.STORAGE_DRIVER === "local" || process.env.PET_REPO === "local";
+                return isLocal ? new LocalPetService() : new PrismaPetService(prismaService, veterinarianService);
+            },
+            inject: [PrismaService, PrismaVeterinarianService],
         },
         {
             provide: "IAppointmentRepository",
