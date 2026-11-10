@@ -148,12 +148,21 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
 
         const requests = await this.prisma.appointmentRequest.findMany({
             where: {
-                OR: [
-                    { owner: { userId } },
-                    { clinic: { veterinarians: { some: { id: veterinarian?.id } } } },
-                    { OR: [{ veterinarian: { userId } }, { reviewedById: veterinarian?.id }] }
+                AND: [
+                    {
+                        OR: [
+                            { owner: { userId } },
+                            ...(veterinarian
+                                ? [
+                                    { clinicId: veterinarian.clinicId },
+                                    { veterinarianId: veterinarian.id },
+                                    { reviewedById: veterinarian.id },
+                                ]
+                                : []),
+                        ],
+                    },
+                    ...(status?.length ? [{ status: { in: status } }] : []),
                 ],
-                ...(status && { status: { in: status } })
             },
             include: {
                 owner: {
@@ -197,7 +206,7 @@ export class PrismaAppointmentRequestRepository implements IAppointmentRequestRe
 
         return requests.map(r => this.mapToResponseDto({
             ...r,
-            currentVeterinarian: r.veterinarianId === veterinarian?.id
+            currentVeterinarian: Boolean(veterinarian && r.veterinarianId === veterinarian.id)
         }));
     }
 }
